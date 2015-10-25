@@ -21,3 +21,18 @@ main {
   right: 0;
   bottom: 0;
 }
+
+#viewport {
+  display: block;
+  margin: auto;
+  padding: 0;
+  background-color: #fcfcfc;
+  width: 50%;
+  height: 50%;
+  border: 1px solid #c0c0c0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
