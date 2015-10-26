@@ -5,8 +5,8 @@
   "main": "bundle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserify fileLoader.js -d -o bundle.js",
-    "watch": "watchify fileLoader.js -d -o bundle.js",
+    "build": "browserify fileLoader.js -t babelify -d -o bundle.js",
+    "watch": "watchify fileLoader.js -t babelify -d -o bundle.js",
     "start": "http-server --cors --port ${PORT:-8080}"
   },
   "dependencies": {
@@ -21,6 +21,7 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/strahlr/dicom#readme",
   "devDependencies": {
+    "babelify": "^6.4.0",
     "watchify": "^3.4.0"
   }
 }
