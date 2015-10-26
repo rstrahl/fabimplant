@@ -5,11 +5,12 @@
   "main": "bundle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserify fileLoader.js -d -o bundle.js",
-    "watch": "watchify fileLoader.js -d -o bundle.js",
+    "build": "browserify fileLoader.js -t babelify -d -o bundle.js",
+    "watch": "watchify fileLoader.js -t babelify -d -o bundle.js",
     "start": "http-server --cors --port ${PORT:-8080}"
   },
   "dependencies": {
+    "dicom-parser": "^1.1.7",
     "dicomjs": "^0.0.8",
     "http-server": "^0.8.5"
   },
@@ -21,6 +22,8 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/strahlr/dicom#readme",
   "devDependencies": {
-    "watchify": "^3.4.0"
+    "babelify": "^6.4.0",
+    "browserify": "^11.2.0",
+    "watchify": "^3.5.0"
   }
 }
