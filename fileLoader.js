@@ -1,4 +1,4 @@
-var dicomjs = require('dicomjs');
+var dicomParser = require('dicom-parser');
 
 document.body.addEventListener('load', initDropZone(document.getElementById('dropZone')));
 
@@ -16,7 +16,6 @@ function initDropZone(element) {
 function handleFileSelect(event) {
 	event.stopPropagation();
 	event.preventDefault();
-	console.log("Loaded files: " + event.dataTransfer.files.length);
 	var files = event.dataTransfer.files;
 	loadFile(files[0]);
 }
@@ -33,25 +32,15 @@ function loadFile(file) {
 	reader.onload = function(file) {
 		console.log("onload called");
 		var arrayBuffer = reader.result;
-		var buffer = toBuffer(arrayBuffer);
-		dicomjs.parse(buffer, function (err, dcmData) {
-			if (!err) {
-				console.log(dcmData);
-					/// Reading patient name
-					var patientName = dcmData.dataset['00100010'].value;
-					var photometricInterpolation = dcmData.dataset['00280004'].value;
-					// var numberOfFrames = dcmData.dataset['00280008'].value;
-					var rows = dcmData.dataset['00280010'].value;
-					var columns = dcmData.dataset['00280011'].value;
-					console.log("Read patient record: "+patientName);
-					console.log("Read photometricInterpolation: "+photometricInterpolation);
-					// console.log("Read numberOfFrames: "+numberOfFrames);
-					console.log("Read rows: "+rows);
-					console.log("Read columns: "+columns);
-			} else {
-					console.log(err);
-			}
-		});
+		var byteArray = new Uint8Array(arrayBuffer);
+		var dataSet = dicomParser.parseDicom(byteArray);
+
+    // get the pixel data element (contains the offset and length of the data)
+    var pixelDataElement = dataSet.elements.x7fe00010;
+		console.log("pixelDataElement: "+ JSON.stringify(pixelDataElement, null, '  '));
+    // create a typed array on the pixel data (this example assumes 16 bit unsigned data)
+    var pixelData = new Uint8Array(dataSet.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length);
+		console.log(pixelData.slice(0,100));
 	};
 	reader.readAsArrayBuffer(file);
 }
