@@ -36,6 +36,7 @@ function loadFile(file) {
 		var buffer = toBuffer(arrayBuffer);
 		dicomjs.parse(buffer, function (err, dcmData) {
 			if (!err) {
+				console.log(dcmData);
 					/// Reading patient name
 					var patientName = dcmData.dataset['00100010'].value;
 					var photometricInterpolation = dcmData.dataset['00280004'].value;

@@ -1,0 +1,26 @@
+{
+  "name": "dicom",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bundle.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify fileLoader.js -d -o bundle.js",
+    "watch": "watchify fileLoader.js -d -o bundle.js",
+    "start": "http-server --cors --port ${PORT:-8080}"
+  },
+  "dependencies": {
+    "dicomjs": "^0.0.8",
+    "http-server": "^0.8.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/strahlr/dicom.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/strahlr/dicom#readme",
+  "devDependencies": {
+    "watchify": "^3.4.0"
+  }
+}
