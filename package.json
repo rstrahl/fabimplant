@@ -10,6 +10,7 @@
     "start": "http-server --cors --port ${PORT:-8080}"
   },
   "dependencies": {
+    "dicom-parser": "^1.1.7",
     "dicomjs": "^0.0.8",
     "http-server": "^0.8.5"
   },
@@ -22,6 +23,7 @@
   "homepage": "https://bitbucket.org/strahlr/dicom#readme",
   "devDependencies": {
     "babelify": "^6.4.0",
-    "watchify": "^3.4.0"
+    "browserify": "^11.2.0",
+    "watchify": "^3.5.0"
   }
 }
