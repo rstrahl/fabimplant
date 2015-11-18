@@ -8,13 +8,20 @@
 <body>
 
 	<header>
-		DICOM Project
+		<span id="header-title-container">
+	    DICOM Project
+    </span>
+    <span id="header-button-container">
+			<span class="header-button">
+				<span id="header-button-debug">Debug</span>
+			</span>
+    </span>
 	</header>
 
-	<main id="dropZone">
-		<canvas id="viewport"></canvas>
+	<main>
 	</main>
 
+	<!-- Include browserify'd artifacts -->
 	<script type="text/javascript" src="bundle.js"></script>
 </body>
 </html>
