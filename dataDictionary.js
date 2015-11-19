@@ -1,4 +1,9 @@
-
+/**
+ * A data dictionary of all DICOM Standard Elements.
+ *
+ * @type {Object}
+ * @see http://dicom.nema.org/medical/dicom/current/output/html/part06.html
+ */
 module.exports = {
     'x00000000': {'tag': '(0000,0000)', 'vr': 'UL', 'vm': '1', 'name': 'CommandGroupLength'},
     'x00000001': {'tag': '(0000,0001)', 'vr': 'UL', 'vm': '1', 'name': 'CommandLengthToEnd'},
