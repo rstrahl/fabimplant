@@ -2,7 +2,7 @@
 //
 // Manages rendering of a DICOM image set into an HTML canvas.
 
-import Decoder from 'JPEGLosslessDecoderJS';
+import jpeg from 'JPEGLosslessDecoderJS';
 
 /**
  * Attempts to render the image contained in the provided DataSet object into
@@ -37,7 +37,7 @@ export function render(canvas, dataSet) {
  * @return {TypedArray} a TypedArray of pixel data, may be either 16 or 8 bit.
  */
 function processPixelData(dataSet, imageMetadata) {
-  var decoder = new Decoder();
+  let decoder = new jpeg.lossless.Decoder();
   // TODO: Note this only handles one fragment
   // TODO: Can we pass in the bytearray buffer from the imageMetadata.pixelData
   var decompressedData = decoder.decompress(dataSet.byteArray.buffer,
