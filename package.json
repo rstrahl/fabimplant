@@ -11,14 +11,17 @@
   },
   "dependencies": {
     "dicom-parser": "^1.1.7",
-    "http-server": "^0.8.5"
+    "http-server": "^0.8.5",
+    "promise": "^7.0.4",
+    "JPEGLosslessDecoderJS": "https://github.com/rstrahl/JPEGLosslessDecoderJS#master"
   },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@bitbucket.org/strahlr/dicom.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Rudi Strahl",
+  "private": "true",
+  "license": "Copyright",
   "homepage": "https://bitbucket.org/strahlr/dicom#readme",
   "devDependencies": {
     "babelify": "^6.4.0",
