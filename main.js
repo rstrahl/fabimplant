@@ -6,8 +6,10 @@
 import * as fileLoader from './fileLoader';
 import * as sidebar from './sidebar';
 import * as renderer from './renderer';
+import * as processor from './processor';
 
 const mainElement = 'main';
+const debug = true;
 
 window.addEventListener('load', () => {
 	let element = document.querySelector(mainElement);
@@ -34,21 +36,29 @@ function handleFileSelect(event) {
 	event.stopPropagation();
 	event.preventDefault();
 	let files = event.dataTransfer.files;
-	fileLoader.loadFile(files[0])
-    .then( dataSet => {
-			let container = document.querySelector(mainElement);
+	if (files.length > 0) {
+		attachDebugSidebar();
+		fileLoader.loadFile(files[0])
+    	.then( dataSet => {
+    		let imageData = processor.processDataSet(dataSet);
+			let canvas = document.getElementById('dicom-canvas');
+			renderer.render(canvas, imageData);
 
-			let div = document.createElement('div');
-			div.setAttribute('id', 'canvas-container');
-			let canvas = configureCanvas();
-			div.appendChild(canvas);
-			container.appendChild(div);
-			renderer.render(canvas, dataSet);
-
-			let sidebarDiv = sidebar.populateSidebar(dataSet);
-			container.appendChild(sidebarDiv);
+			let sidebarDiv = document.getElementById('sidebar-metadata');
+			sidebar.populateSidebar(sidebarDiv, dataSet);
 		})
-    .catch( err => console.error(error) );
+    	.catch( err => console.error(error) );
+	}
+		
+	/*
+		Load, parse, and render all files into their respective canvas ImageData objects.
+		On completion, fire callback with ImageData array.
+		Main stores the ImageData array and passes a default index object into the canvas.
+		Controls cycle through each of the array elements.
+	*/
+	// for (let file of files) {
+		
+	// }
 }
 
 function handleDragOver(event) {
@@ -57,8 +67,15 @@ function handleDragOver(event) {
 	event.dataTransfer.dropEffect = 'copy';
 }
 
-function configureCanvas() {
-	let canvas = document.createElement('canvas');
-	canvas.setAttribute('id', 'dicom-canvas');
-	return canvas;
+function attachDebugSidebar() {
+	if (debug === true) {
+		let sidebarDiv = document.getElementById('sidebar-metadata');
+		if (sidebarDiv == undefined) {
+			sidebarDiv = document.createElement('div');
+			sidebarDiv.setAttribute('class', 'sidebar');
+			sidebarDiv.setAttribute('id', 'sidebar-metadata');
+			sidebarDiv.style.display = 'none';
+			document.querySelector('main').appendChild(sidebarDiv);
+		}
+	}
 }

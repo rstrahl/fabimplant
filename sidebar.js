@@ -8,26 +8,27 @@ import dictionary from './dataDictionary';
 import uids from './uids';
 
 /**
- * Generates the sidebar within a DOM node and populates it with the metadata
- * extracted from the DICOM DataSet object provided.
- *
- * @param  {DataSet} dataSet a dicom-parser DataSet object
- * @return {Node} a DOM node
+ * Inspects a DataSet object and displays the extracted metadata in a table
+ * in the given container DOM Node.
+ * 
+ * @param  {Node} node a DOM Node that will contain the sidebar table
+ * @param  {DataSet} dataSet the DataSet object being inspected
  */
-export function populateSidebar(dataSet) {
-  let div = document.createElement('div');
-  div.setAttribute('class', 'sidebar');
-  div.setAttribute('id', 'sidebar-metadata');
+export function populateSidebar(node, dataSet) {
+  let oldSidebar = document.getElementById('debug-sidebar');
+  if (oldSidebar != undefined) {
+    oldSidebar.parentNode.removeChild(oldSidebar);
+  }
   let table = metadataTable();
   let tbody = metadataTableBody(dataSet);
   table.appendChild(tbody);
-  div.appendChild(table);
-  return div;
+  node.appendChild(table);
 }
 
 function metadataTable() {
   let table = document.createElement('table');
   table.setAttribute('class', 'sidebar-table');
+  table.setAttribute('id', 'debug-sidebar');
   table.appendChild(metadataTableHeader('Image Metadata'));
   return table;
 }
