@@ -38,27 +38,31 @@ function handleFileSelect(event) {
 	let files = event.dataTransfer.files;
 	if (files.length > 0) {
 		attachDebugSidebar();
-		fileLoader.loadFile(files[0])
-    	.then( dataSet => {
-    		let imageData = processor.processDataSet(dataSet);
-			let canvas = document.getElementById('dicom-canvas');
-			renderer.render(canvas, imageData);
 
-			let sidebarDiv = document.getElementById('sidebar-metadata');
-			sidebar.populateSidebar(sidebarDiv, dataSet);
-		})
-    	.catch( err => console.error(error) );
-	}
-		
-	/*
+		/*
 		Load, parse, and render all files into their respective canvas ImageData objects.
 		On completion, fire callback with ImageData array.
 		Main stores the ImageData array and passes a default index object into the canvas.
 		Controls cycle through each of the array elements.
-	*/
-	// for (let file of files) {
-		
-	// }
+		*/
+
+		fileLoader.loadFiles(Array.from(files))
+		.then( dataSets => {
+			console.log('DataSets loaded: \r' + dataSets);
+
+			let dataSet = dataSets[0];
+			processor.processDataSet(dataSet)
+			.then( imageData => {
+				let canvas = document.getElementById('dicom-canvas');
+				renderer.render(canvas, imageData);
+				let sidebarDiv = document.getElementById('sidebar-metadata');
+				sidebar.populateSidebar(sidebarDiv, dataSet);
+			})
+			.catch( err => {
+				console.error( 'Error processing DataSet for image: ' + err);
+			});
+		});
+	}
 }
 
 function handleDragOver(event) {
