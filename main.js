@@ -3,26 +3,31 @@
 // Sets up the application for use in a browser window. Expects there to be
 // a single div element with the id 'main' for drag-n-drop functionality.
 
+'use-strict';
+
 import * as fileLoader from './fileLoader';
 import * as sidebar from './sidebar';
 import * as renderer from './renderer';
 import * as processor from './processor';
+import Promise from 'promise';
 
 const mainElement = 'main';
 const debug = true;
 
+let dicomDataSets = [];
+let dicomImages = [];
+
 window.addEventListener('load', () => {
 	let element = document.querySelector(mainElement);
 	if (element != undefined) {
-    if (window.File && window.FileReader && window.FileList && window.Blob) {
-  		element.addEventListener('dragover', handleDragOver, false);
-  		element.addEventListener('drop', handleFileSelect, false);
-  	}
-  	else {
-  		alert("File APIs are not supported in this browser.");
-  	}
+		if (window.File && window.FileReader && window.FileList && window.Blob) {
+			element.addEventListener('dragover', handleDragOver, false);
+			element.addEventListener('drop', handleFileSelect, false);
+		}	else {
+			alert('File APIs are not supported in this browser.');
+		}
 	} else {
-		console.error("main element undefined!");
+		console.error('main element undefined!');
 	}
 });
 
@@ -48,19 +53,17 @@ function handleFileSelect(event) {
 
 		fileLoader.loadFiles(Array.from(files))
 		.then( dataSets => {
-			console.log('DataSets loaded: \r' + dataSets);
+			dicomDataSets = dataSets;
 
-			let dataSet = dataSets[0];
-			processor.processDataSet(dataSet)
-			.then( imageData => {
+			Promise.all(dataSets.map( dataSet => processor.processDataSet(dataSet) ))
+			.then( imageDatas => {
+				dicomImages = imageDatas;
 				let canvas = document.getElementById('dicom-canvas');
-				renderer.render(canvas, imageData);
+				renderer.render(canvas, dicomImages[0]);
 				let sidebarDiv = document.getElementById('sidebar-metadata');
-				sidebar.populateSidebar(sidebarDiv, dataSet);
+				sidebar.populateSidebar(sidebarDiv, dicomDataSets[0]);
 			})
-			.catch( err => {
-				console.error( 'Error processing DataSet for image: ' + err);
-			});
+			.catch( err => console.log('Error processing image data: ' + err));
 		});
 	}
 }

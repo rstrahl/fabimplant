@@ -5,16 +5,32 @@
 import jpeg from 'JPEGLosslessDecoderJS';
 
 /**
- * Attempts to process the provided DataSet object and extract image data.
- * 
+ * Attempts to process a DataSet for an image and if successful returns the image
+ * in an ImageData object.
+ *
  * @param  {DataSet} dataSet a dicom-js DataSet object
  * @return {ImageData} an HTML ImageData object
  */
 export function processDataSet(dataSet) {
-	let imageMetadata = getImageMetadata(dataSet);
- 	let pixelData = processPixelData(dataSet, imageMetadata);
- 	let imageData = prepareImageData(pixelData, imageMetadata.cols, imageMetadata.rows);
- 	return imageData;
+	return new Promise( (resolve, reject) => {
+		let imageMetadata = getImageMetadata(dataSet);
+		if (imageMetadata === undefined) {
+			reject(new Error('Unable to extract image metadata from DataSet'))
+		}
+
+		//
+		let pixelData = processPixelData(dataSet, imageMetadata);
+		if (pixelData === undefined) {
+			reject(new Error('Unable to process pixel data from DataSet'))
+		}
+
+	 	let imageData = prepareImageData(pixelData, imageMetadata.cols, imageMetadata.rows);
+		if (imageData === undefined) {
+			reject(new Error('Unable to prepare ImageData from pixel data'));
+		}
+
+		resolve(imageData);
+	});
 }
 
 /**
