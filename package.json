@@ -26,6 +26,8 @@
   "devDependencies": {
     "babelify": "^6.4.0",
     "browserify": "^11.2.0",
+    "eslint": "^1.10.3",
+    "eslint-plugin-react": "^3.11.3",
     "watchify": "^3.5.0"
   }
 }
