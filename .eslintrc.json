@@ -16,7 +16,8 @@
             2,
             "always"
         ],
-        "no-console": 0
+        "no-console": 0,
+				"strict": [2, "never"]
     },
     "env": {
         "es6": true,
@@ -29,6 +30,6 @@
         "modules": true
     },
     "plugins": [
-
+			"react"
     ]
 }
