@@ -45,10 +45,10 @@ function processPixelData(dataSet, imageMetadata) {
 	let decoder = new jpeg.lossless.Decoder();
   // TODO: Note this only handles one fragment
   // TODO: Can we pass in the bytearray buffer from the imageMetadata.pixelData
-	var decompressedData = decoder.decompress(dataSet.byteArray.buffer,
+	let decompressedData = decoder.decompress(dataSet.byteArray.buffer,
     imageMetadata.pixelData.fragments[0].position, imageMetadata.pixelData.fragments[0].length);
-	var byteOutput = imageMetadata.bitsAllocated <= 8 ? 1 : 2;
-	var pixelData;
+	let byteOutput = imageMetadata.bitsAllocated <= 8 ? 1 : 2;
+	let pixelData;
 	if (imageMetadata.pixelRepresentation === 0) {
 		if (byteOutput === 2) {
 			pixelData = new Uint16Array(decompressedData);

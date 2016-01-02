@@ -4,8 +4,8 @@
 //
 
 import React from 'react';
-import dictionary from '../dataDictionary';
-import uids from '../uids';
+import { dicomDataDictionary } from '../dataDictionary';
+import { uids } from '../uids';
 
 export default class DicomDebugWindow extends React.Component {
 
@@ -16,7 +16,7 @@ export default class DicomDebugWindow extends React.Component {
 	render() {
 		let rows = [];
 		Object.keys(this.props.dataSet).forEach( key => {
-			let checkedKey = (dictionary[key] !== undefined) ? dictionary[key].name : key;
+			let checkedKey = (dicomDataDictionary[key] !== undefined) ? dicomDataDictionary[key].name : key;
 			let value = uids[this.props.dataSet[key]] || this.props.dataSet[key];
 			rows.push(<DicomDebugTableItem key={checkedKey} value={value} />);
 		});

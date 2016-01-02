@@ -6,7 +6,6 @@
 'use-strict';
 
 import * as fileLoader from './fileLoader';
-import * as renderer from './renderer';
 import * as processor from './processor';
 import Promise from 'promise';
 import React from 'react';
@@ -15,11 +14,6 @@ import Header from './ui/header.jsx';
 import ImageWindow from './ui/imageWindow.jsx';
 import DicomDebugWindow from './ui/dicomDebugWindow.jsx';
 import dicomParser from 'dicom-parser';
-
-const mainElement = 'main';
-
-let dicomImages = [];
-let currentImageIndex = 0; // TODO: Move into React renderer component
 
 // UI
 let header = React.createElement(Header, null);
@@ -36,7 +30,7 @@ ReactDOM.render(
 );
 
 window.addEventListener('load', () => {
-	let element = document.querySelector(mainElement);
+	let element = document.querySelector('main');
 	if (element !== undefined) {
 		if (window.File && window.FileReader && window.FileList && window.Blob) {
 			element.addEventListener('dragover', handleDragOver, false);
