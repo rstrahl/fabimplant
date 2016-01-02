@@ -6,29 +6,38 @@
 'use-strict';
 
 import * as fileLoader from './fileLoader';
-import * as sidebar from './sidebar';
 import * as renderer from './renderer';
 import * as processor from './processor';
 import Promise from 'promise';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Header from './ui/header.jsx';
+import ImageWindow from './ui/imageWindow.jsx';
+import DicomDebugWindow from './ui/dicomDebugWindow.jsx';
+import dicomParser from 'dicom-parser';
 
 const mainElement = 'main';
-const debug = true;
 
-let dicomDataSets = [];
 let dicomImages = [];
 let currentImageIndex = 0; // TODO: Move into React renderer component
 
+// UI
+let header = React.createElement(Header, null);
+let imageWindow = React.createElement(ImageWindow, null);
+
 ReactDOM.render(
-	React.createElement(Header, null),
+	header,
+	document.querySelector('header')
+);
+
+ReactDOM.render(
+	imageWindow,
 	document.querySelector('main')
 );
 
 window.addEventListener('load', () => {
 	let element = document.querySelector(mainElement);
-	if (element != undefined) {
+	if (element !== undefined) {
 		if (window.File && window.FileReader && window.FileList && window.Blob) {
 			element.addEventListener('dragover', handleDragOver, false);
 			element.addEventListener('drop', handleFileSelect, false);
@@ -43,36 +52,36 @@ window.addEventListener('load', () => {
 // TODO: Refactor this into a navbar script... or something.
 document.getElementById('header-button-debug').onclick = () => {
 	let e = document.getElementById('sidebar-metadata');
-	e.style.display = (window.getComputedStyle(e).display == 'block') ? 'none' : 'block';
+	e.style.display = (window.getComputedStyle(e).display === 'block') ? 'none' : 'block';
 };
 
+// TODO Refactor:
+// this event handler should be "attachable" to a given window - modularize it
+// the inner logic after the Promise.all is fulfilled should also be injectable
+// this code should be called by both drag-n-drop and by a file-select input
 function handleFileSelect(event) {
 	event.stopPropagation();
 	event.preventDefault();
 	let files = event.dataTransfer.files;
 	if (files.length > 0) {
-		attachDebugSidebar();
-
-		/*
-		Load, parse, and render all files into their respective canvas ImageData objects.
-		On completion, fire callback with ImageData array.
-		Main stores the ImageData array and passes a default index object into the canvas.
-		Controls cycle through each of the array elements.
-		*/
-
 		fileLoader.loadFiles(Array.from(files))
 		.then( dataSets => {
-			dicomDataSets = dataSets;
+			// dicomDataSets = dataSets;
 
 			Promise.all(dataSets.map( dataSet => processor.processDataSet(dataSet) ))
 			.then( imageDatas => {
-				dicomImages = imageDatas;
-				let canvas = document.getElementById('dicom-canvas');
-				renderer.render(canvas, dicomImages[currentImageIndex]);
-				let sidebarDiv = document.getElementById('sidebar-metadata');
-				sidebar.populateSidebar(sidebarDiv, dicomDataSets[0]);
 
-				createImageNavButtons();
+				ReactDOM.render(
+					React.createElement(ImageWindow, {images: imageDatas}),
+					document.querySelector('main')
+				);
+
+				// let objDataSet = dicomParser.explicitDataSetToJS(dataSets[0]);
+				// ReactDOM.render(
+				// 	React.createElement(DicomDebugWindow, {dataSet: objDataSet, title:'Image Metadata'}),
+				// 	document.querySelector('main')
+				// );
+
 			})
 			.catch( err => console.log('Error processing image data: ' + err));
 		});
@@ -85,50 +94,4 @@ function handleDragOver(event) {
 	event.dataTransfer.dropEffect = 'copy';
 }
 
-function attachDebugSidebar() {
-	if (debug === true) {
-		let sidebarDiv = document.getElementById('sidebar-metadata');
-		if (sidebarDiv == undefined) {
-			sidebarDiv = document.createElement('div');
-			sidebarDiv.setAttribute('class', 'sidebar');
-			sidebarDiv.setAttribute('id', 'sidebar-metadata');
-			sidebarDiv.style.display = 'none';
-			document.querySelector('main').appendChild(sidebarDiv);
-		}
-	}
-}
-
-// Image Review Navigation ---
-function createImageNavButtons() {
-	let imageUpButton = document.createElement('div');
-	imageUpButton.onclick = onImageUpButtonPressed;
-	imageUpButton.style.background = '#FFFFFF';
-	imageUpButton.appendChild(document.createTextNode('+'));
-
-	let imageDownButton = document.createElement('div');
-	imageDownButton.style.background = '#FFFFFF';
-	imageDownButton.onclick = onImageDownButtonPressed;
-	imageDownButton.appendChild(document.createTextNode('-'));
-
-	let buttonDiv = document.createElement('div');
-	buttonDiv.appendChild(imageUpButton);
-	buttonDiv.appendChild(imageDownButton);
-	document.querySelector('main').appendChild(buttonDiv);
-}
-
-function onImageUpButtonPressed() {
-	if (currentImageIndex < dicomImages.length-1) {
-		currentImageIndex += 1;
-		let canvas = document.getElementById('dicom-canvas');
-		renderer.render(canvas, dicomImages[currentImageIndex]);
-	}
-}
-
-function onImageDownButtonPressed() {
-	if (currentImageIndex > 0) {
-		currentImageIndex -= 1;
-		let canvas = document.getElementById('dicom-canvas');
-		renderer.render(canvas, dicomImages[currentImageIndex]);
-	}
-}
 // ---

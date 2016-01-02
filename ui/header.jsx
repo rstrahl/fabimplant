@@ -14,7 +14,7 @@ export default class Header extends React.Component {
 	render() {
 		return (
 
-			<header>
+			<div>
 				<span id="header-title-container">
 					DICOM Project
 				</span>
@@ -23,7 +23,7 @@ export default class Header extends React.Component {
 						<span id="header-button-debug">Debug</span>
 					</span>
 				</span>
-			</header>
+			</div>
 
 		);
 	}

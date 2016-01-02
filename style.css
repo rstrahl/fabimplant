@@ -26,6 +26,8 @@ main {
   bottom: 0;
 }
 
+/* === Header === */
+
 #header-title-container {
   padding: 0px 10px 0px 10px;
 }
@@ -38,7 +40,9 @@ main {
   padding: 0px 10px 0px 10px;
 }
 
-.sidebar {
+/* === DicomDebugWindow === */
+
+.dicom-debug-window {
   position: relative;
   background: rgba(255,255,255,.85);
   box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.25);
@@ -51,31 +55,33 @@ main {
   height: 100%;
 }
 
-.sidebar-table {
+.dicom-debug-window-table {
   width: 100%;
   table-layout: fixed;
   word-wrap: break-word;
 }
 
-.sidebar-table-body {
+.dicom-debug-window-body {
   font-size: .7em;
 }
 
-.sidebar-table-header {
+.dicom-debug-window-table-header {
   font-size: .8em;
 }
 
-.table-column-property {
+.dicom-debug-window-table-property {
   font-weight: bold;
   text-align: right;
 }
 
-.table-column-value {
+.dicom-debug-window-table-value {
   font-weight: normal;
   text-align: left;
 }
 
-#canvas-container {
+/* ImageWindow */
+
+#image-window {
   display: block;
   width: 100%;
   margin: auto;
@@ -87,7 +93,7 @@ main {
   right: 0;
 }
 
-#dicom-canvas {
+#image-window-canvas {
   display: block;
   margin: auto;
   padding: 0;
@@ -97,4 +103,33 @@ main {
   bottom: 0;
   left: 0;
   right: 0;
+}
+
+.image-window-button {
+  display: inline-block;
+  background: rgba(0,0,0,0);
+  border: 0px;
+  padding: 2px;
+  color: rgba(255,255,255,0.75);
+  width: auto;
+}
+
+.image-navigation-bar {
+  background: rgba(0,0,0,255);
+  text-align: center;
+  color: rgba(255,255,255,0.75);
+}
+
+.image-navigation-text {
+  display: inline-block;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.image-navigation-button {
+  display: inline-block;
+  background: rgba(0,0,0,0);
+  border: 0px;
+  padding: 2px;
+  width: auto;
 }
