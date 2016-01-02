@@ -5,15 +5,18 @@
   "main": "bundle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserify main.js -t babelify -d -o bundle.js",
+    "build": "browserify main.js -t babelify --presets react -d -o bundle.js",
     "watch": "watchify main.js -t babelify -d -o bundle.js",
     "start": "http-server --cors --port ${PORT:-8080}"
   },
   "dependencies": {
+    "JPEGLosslessDecoderJS": "https://github.com/rstrahl/JPEGLosslessDecoderJS#master",
+    "babel-preset-react": "^6.3.13",
     "dicom-parser": "^1.1.7",
     "http-server": "^0.8.5",
     "promise": "^7.0.4",
-    "JPEGLosslessDecoderJS": "https://github.com/rstrahl/JPEGLosslessDecoderJS#master"
+    "react": "^0.14.3",
+    "react-dom": "^0.14.3"
   },
   "repository": {
     "type": "git",
@@ -24,8 +27,12 @@
   "license": "Copyright",
   "homepage": "https://bitbucket.org/strahlr/dicom#readme",
   "devDependencies": {
+    "babel-cli": "^6.3.17",
+    "babel-eslint": "^4.1.6",
     "babelify": "^6.4.0",
     "browserify": "^11.2.0",
+    "eslint": "^1.10.3",
+    "eslint-plugin-react": "^3.11.3",
     "watchify": "^3.5.0"
   }
 }

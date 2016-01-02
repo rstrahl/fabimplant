@@ -2,6 +2,8 @@
 //
 // Provides a lightweight loader for DICOM files via the FileReader API.
 
+'use-strict';
+
 import Promise from 'promise';
 import dicomParser from 'dicom-parser';
 
@@ -12,7 +14,7 @@ import dicomParser from 'dicom-parser';
  * @return {Promise<DataSet>} A promise to the DataSet
  */
 export function loadFile(file) {
-	return new Promise(function(resolve, reject) {
+	return new Promise( (resolve, reject) => {
 		let reader = new FileReader();
 		reader.onload = () => {
 			let arrayBuffer = reader.result;
@@ -25,4 +27,19 @@ export function loadFile(file) {
 		};
 		reader.readAsArrayBuffer(file);
 	});
+}
+
+/**
+ * Attempts to load an array of File objects and parse them as DICOM files,
+ * returning an Array of DataSet objects.
+ *
+ * @param  {Array} files an Array of File objects
+ * @return {Promise} a Promise returning an Array of DataSets
+ */
+export function loadFiles(files) {
+	return Promise.all(files.map( file => loadFile(file) ))
+	.then( dataSets => {
+		return dataSets;
+	})
+	.catch( err => console.error('Error loading file set: ' + err) );
 }
