@@ -104,6 +104,14 @@ function applyWindowLevelAndCenter(pixelValue, windowCenter, windowWidth) {
 	return alteredPixelValue;
 }
 
+export function pixelValueToInterpretedValue(value, slope, intercept) {
+	return value * slope + intercept;
+}
+
+export function pixelValueFromInterpretedValue(value, slope, intercept) {
+	return (value - intercept) / value;
+}
+
 // TODO: This is lazy and bad engineering - should be refactored as convenience getter extension over DataSet
 /**
  * Convenience method for extracting the relevant image parameters from a DataSet

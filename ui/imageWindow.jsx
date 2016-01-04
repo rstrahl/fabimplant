@@ -5,8 +5,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { prepareImageData } from '../processor';
+import { prepareImageData, pixelValueToInterpretedValue } from '../processor';
 import DicomDebugWindow from './dicomDebugWindow.jsx';
+import { DicomFile } from '../dicomFile';
 
 /**
  * A UI component that displays images from a DICOM file with image navigation
@@ -35,6 +36,9 @@ export default class ImageWindow extends React.Component {
 		let width = this.props.dicomFile.getImageWidth();
 		let imageData = prepareImageData(pixelArray, width, height, this.state.windowCenter, this.state.windowWidth);
 
+		let interpretedCenter = pixelValueToInterpretedValue(this.state.windowCenter, this.props.dicomFile.getImageSlope(), this.props.dicomFile.getImageIntercept());
+		let interpretedWidth =  pixelValueToInterpretedValue(this.state.windowWidth, this.props.dicomFile.getImageSlope(), this.props.dicomFile.getImageIntercept());
+
 		// TODO: Add WL/WC controls
 		// TODO: Add debug toggle buttons
 		return (
@@ -45,6 +49,7 @@ export default class ImageWindow extends React.Component {
 						handleImageIndexChanged={this.handleImageIndexChanged.bind(this)}
 						currentImageIndex={this.state.imageIndex}
 						imageIndexMax={this.props.dicomFile.pixelArrays.length} />
+					<ImageWindowCenterWidthDisplay windowCenter={interpretedCenter} windowWidth={interpretedWidth} />
 				</div>
 				<DicomDebugWindow dataSet={this.props.dicomFile.getDicomMetadata()} title='Image Metadata'/>
 			</div>
@@ -111,6 +116,22 @@ export class ImageCanvas extends React.Component {
 
 	renderImage(context) {
 		context.putImageData(this.props.imageData, 0, 0);
+	}
+
+}
+
+class ImageWindowCenterWidthDisplay extends React.Component {
+
+	constructor(props) {
+		super(props);
+	}
+
+	render() {
+		return (
+			<div className="image-window-centerwidth-display">
+					Window Center: {this.props.windowCenter} / Window Width: {this.props.windowWidth}
+			</div>
+		);
 	}
 
 }

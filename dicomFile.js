@@ -34,4 +34,12 @@ export default class DicomFile {
 		return this.dataSet.uint16('x00280010');
 	}
 
+	getImageSlope() {
+		return parseFloat(this.dataSet.string('x00281053'));
+	}
+
+	getImageIntercept() {
+		return parseFloat(this.dataSet.string('x00281052'));
+	}
+
 }
