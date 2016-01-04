@@ -5,11 +5,11 @@
 import jpeg from 'JPEGLosslessDecoderJS';
 
 /**
- * Attempts to process a DataSet for an image and if successful returns the image
- * in an ImageData object.
+ * Attempts to process a DataSet for an image and if successful returns the pixel values
+ * for the image.
  *
  * @param  {DataSet} dataSet a dicom-js DataSet object
- * @return {ImageData} an HTML ImageData object
+ * @return {TypedArray} an array containg pixel values extract from the image
  */
 export function processDataSet(dataSet) {
 	return new Promise( (resolve, reject) => {
@@ -23,24 +23,20 @@ export function processDataSet(dataSet) {
 			reject(new Error('Unable to process pixel data from DataSet'));
 		}
 
-		let imageData = prepareImageData(pixelData, imageMetadata.cols, imageMetadata.rows, 2048, 4096);
-		if (imageData === undefined) {
-			reject(new Error('Unable to prepare ImageData from pixel data'));
-		}
-
-		resolve(imageData);
+		resolve(pixelData);
 	});
 }
 
 /**
- * Processes the image data contained in a provided DataSet and returns a
- * TypedArray containing the pixel data.
+ * Processes the provided DataSet and attempts to decode its image data; if successful
+ * will return a TypedArray containing the image's pixel values.
  *
  * @param  {DataSet} dataSet a dicom-parser DataSet.
  * @param  {Object} imageMetadata an Object containing the image data.
  * @return {TypedArray} a TypedArray of pixel data, may be either 16 or 8 bit.
  */
 export function processPixelData(dataSet, imageMetadata) {
+	// TODO: Convert to promise?
 	let decoder = new jpeg.lossless.Decoder();
   // TODO: Note this only handles one fragment
   // TODO: Can we pass in the bytearray buffer from the imageMetadata.pixelData
@@ -108,6 +104,7 @@ function applyWindowLevelAndCenter(pixelValue, windowCenter, windowWidth) {
 	return alteredPixelValue;
 }
 
+// TODO: This is lazy and bad engineering - should be refactored as convenience getter extension over DataSet
 /**
  * Convenience method for extracting the relevant image parameters from a DataSet
  * object.

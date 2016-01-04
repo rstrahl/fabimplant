@@ -13,7 +13,7 @@ import ReactDOM from 'react-dom';
 import Header from './ui/header.jsx';
 import ImageWindow from './ui/imageWindow.jsx';
 import DicomDebugWindow from './ui/dicomDebugWindow.jsx';
-import dicomParser from 'dicom-parser';
+import DicomFile from './dicomFile';
 
 // UI
 let header = React.createElement(Header, null);
@@ -60,22 +60,16 @@ function handleFileSelect(event) {
 	if (files.length > 0) {
 		fileLoader.loadFiles(Array.from(files))
 		.then( dataSets => {
-			// dicomDataSets = dataSets;
-
 			Promise.all(dataSets.map( dataSet => processor.processDataSet(dataSet) ))
-			.then( imageDatas => {
+			.then( pixelDataArrays => {
 
+				let file = new DicomFile(dataSets[0], pixelDataArrays);
 				ReactDOM.render(
-					React.createElement(ImageWindow, {images: imageDatas}),
+					// React.createElement(ImageWindow, {images: imageDatas}),
+					React.createElement(ImageWindow, {dicomFile: file}),
 					document.querySelector('main')
 				);
-
-				// let objDataSet = dicomParser.explicitDataSetToJS(dataSets[0]);
-				// ReactDOM.render(
-				// 	React.createElement(DicomDebugWindow, {dataSet: objDataSet, title:'Image Metadata'}),
-				// 	document.querySelector('main')
-				// );
-
+				
 			})
 			.catch( err => console.log('Error processing image data: ' + err));
 		});
