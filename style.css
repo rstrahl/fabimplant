@@ -28,11 +28,14 @@ main {
 
 /* === Header === */
 
-#header-title-container {
+.header-title {
   padding: 0px 10px 0px 10px;
+  font-size: 1.3em;
+  font-weight: normal;
+  letter-spacing: .5em;
 }
 
-#header-button-container {
+.header-button-container {
   float:right;
 }
 
