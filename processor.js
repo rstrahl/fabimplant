@@ -5,11 +5,11 @@
 import jpeg from 'JPEGLosslessDecoderJS';
 
 /**
- * Attempts to process a DataSet for an image and if successful returns the image
- * in an ImageData object.
+ * Attempts to process a DataSet for an image and if successful returns the pixel values
+ * for the image.
  *
  * @param  {DataSet} dataSet a dicom-js DataSet object
- * @return {ImageData} an HTML ImageData object
+ * @return {TypedArray} an array containg pixel values extract from the image
  */
 export function processDataSet(dataSet) {
 	return new Promise( (resolve, reject) => {
@@ -18,30 +18,25 @@ export function processDataSet(dataSet) {
 			reject(new Error('Unable to extract image metadata from DataSet'));
 		}
 
-		//
 		let pixelData = processPixelData(dataSet, imageMetadata);
 		if (pixelData === undefined) {
 			reject(new Error('Unable to process pixel data from DataSet'));
 		}
 
-		let imageData = prepareImageData(pixelData, imageMetadata.cols, imageMetadata.rows);
-		if (imageData === undefined) {
-			reject(new Error('Unable to prepare ImageData from pixel data'));
-		}
-
-		resolve(imageData);
+		resolve(pixelData);
 	});
 }
 
 /**
- * Processes the image data contained in a provided DataSet and returns a
- * TypedArray containing the pixel data.
+ * Processes the provided DataSet and attempts to decode its image data; if successful
+ * will return a TypedArray containing the image's pixel values.
  *
  * @param  {DataSet} dataSet a dicom-parser DataSet.
  * @param  {Object} imageMetadata an Object containing the image data.
  * @return {TypedArray} a TypedArray of pixel data, may be either 16 or 8 bit.
  */
-function processPixelData(dataSet, imageMetadata) {
+export function processPixelData(dataSet, imageMetadata) {
+	// TODO: Convert to promise?
 	let decoder = new jpeg.lossless.Decoder();
   // TODO: Note this only handles one fragment
   // TODO: Can we pass in the bytearray buffer from the imageMetadata.pixelData
@@ -63,20 +58,21 @@ function processPixelData(dataSet, imageMetadata) {
 }
 
 /**
- * Processes a TypedArray of pixel data into an ImageData object that can be
- * injected into a Canvas element.
+ * Processes a TypedArray of pixel data into an ImageData object.
  *
- * @param  {TypedArray} pixelData a TypedArray containing pixel data.
- * @param  {uint16} width the width of the image.
- * @param  {uint16} height the height of the image.
+ * @param  {Array} pixelData a TypedArray containing pixel data.
+ * @param  {number} width the width of the image.
+ * @param  {number} height the height of the image.
+ * @param  {number} windowCenter the Window Center used when rendering the image
+ * @param  {number} windowWidth the Window Width used when rendering the image
  * @return {ImageData} an ImageData object in RGBA interlaced format.
  */
-function prepareImageData(pixelData, width, height) {
+export function prepareImageData(pixelData, width, height, windowCenter, windowWidth) {
 	let image = new ImageData(width, height);
 	let data = image.data;
 	let i = 0, j = 0;
 	while (i < pixelData.length) {
-		let val = (pixelData[i] / 4096) * 255; // normalized to 8bit
+		let val = applyWindowLevelAndCenter(pixelData[i], windowCenter, windowWidth);
 		j = i*4;
 		data[j] = val;		// r
 		data[j+1] = val;	// g
@@ -87,6 +83,36 @@ function prepareImageData(pixelData, width, height) {
 	return image;
 }
 
+function applyWindowLevelAndCenter(pixelValue, windowCenter, windowWidth) {
+	// By spec, windowWidth can never be less than 1 - we gracefully fail by returning an unaltered pixelValue
+	if (windowWidth < 1) {
+		console.error('windowWidth cannot be < 1');
+		return pixelValue;
+	}
+
+	const MAX_VALUE = 255;
+	const MIN_VALUE = 0;
+
+	let alteredPixelValue = 0;
+	if (pixelValue <= (windowCenter - 0.5 - ((windowWidth - 1) / 2))) {
+		 alteredPixelValue = MIN_VALUE;
+	} else if (pixelValue > ((windowCenter - 0.5) + (windowWidth - 1) / 2)) {
+		alteredPixelValue = MAX_VALUE;
+	} else {
+		alteredPixelValue = ((pixelValue - (windowCenter - 0.5)) / (windowWidth - 1) + 0.5) * (MAX_VALUE - MIN_VALUE) + MIN_VALUE;
+	}
+	return alteredPixelValue;
+}
+
+export function pixelValueToInterpretedValue(value, slope, intercept) {
+	return value * slope + intercept;
+}
+
+export function pixelValueFromInterpretedValue(value, slope, intercept) {
+	return (value - intercept) / slope;
+}
+
+// TODO: This is lazy and bad engineering - should be refactored as convenience getter extension over DataSet
 /**
  * Convenience method for extracting the relevant image parameters from a DataSet
  * object.

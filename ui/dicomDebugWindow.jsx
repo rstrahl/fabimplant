@@ -17,8 +17,8 @@ export default class DicomDebugWindow extends React.Component {
 		let rows = [];
 		Object.keys(this.props.dataSet).forEach( key => {
 			let checkedKey = (dicomDataDictionary[key] !== undefined) ? dicomDataDictionary[key].name : key;
-			let value = uids[this.props.dataSet[key]] || this.props.dataSet[key];
-			rows.push(<DicomDebugTableItem key={checkedKey} value={value} />);
+			let value = uids[this.props.dataSet[key]] || this.props.dataSet[key].toString();
+			rows.push(<DicomDebugTableItem key={key} element={checkedKey} value={value} />);
 		});
 		return (
 			<div className="dicom-debug-window">
@@ -49,8 +49,8 @@ class DicomDebugTableItem extends React.Component {
 	render() {
 		return (
 			<tr>
-				<td className="dicom-debug-window-table-property">Property</td>
-				<td className="dicom-debug-window-table-value">Value</td>
+				<td className="dicom-debug-window-table-property">{this.props.element}</td>
+				<td className="dicom-debug-window-table-value">{this.props.value}</td>
 			</tr>
 		);
 	}
