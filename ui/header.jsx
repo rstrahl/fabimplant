@@ -15,12 +15,15 @@ export default class Header extends React.Component {
 		return (
 
 			<div>
-				<span id="header-title-container">
-					DICOM Project
+				<span className="header-title">
+					FABIMPLANT
 				</span>
-				<span id="header-button-container">
+				<span className="header-button-container">
 					<span className="header-button">
-						<span id="header-button-debug">Debug</span>
+						Account
+					</span>
+					<span className="header-button">
+						Help
 					</span>
 				</span>
 			</div>
