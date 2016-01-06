@@ -7,7 +7,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { prepareImageData, pixelValueToInterpretedValue } from '../processor';
 import DicomDebugWindow from './dicomDebugWindow.jsx';
-import { DicomFile } from '../dicomFile';
 
 /**
  * A UI component that displays images from a DICOM file with image navigation
@@ -19,7 +18,7 @@ export default class ImageWindow extends React.Component {
 		super(props);
 		this.state = {
 			imageIndex: 0,
-			windowWidth: 4096,
+			windowWidth: 4096, // TODO: Modify these to use HU-based values
 			windowCenter: 2048
 		};
 	}

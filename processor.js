@@ -109,7 +109,7 @@ export function pixelValueToInterpretedValue(value, slope, intercept) {
 }
 
 export function pixelValueFromInterpretedValue(value, slope, intercept) {
-	return (value - intercept) / value;
+	return (value - intercept) / slope;
 }
 
 // TODO: This is lazy and bad engineering - should be refactored as convenience getter extension over DataSet
