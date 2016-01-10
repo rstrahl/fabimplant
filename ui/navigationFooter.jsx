@@ -7,7 +7,7 @@ import React from 'react';
 /**
  * A UI component that displays a forward/backward-style navigation control.
  */
-export default class navigationFooter extends React.Component {
+export default class NavigationFooter extends React.Component {
 
 	constructor(props) {
 		super(props);
@@ -24,18 +24,15 @@ export default class navigationFooter extends React.Component {
 	}
 
 	handleLeftClick() {
-		console.log('Left navigation item clicked');
-		this.props.handleNavigationUpdate('Left');
+		this.props.handleNavigationUpdate(-1);
 	}
 
 	handleMiddleClick() {
-		console.log('Middle navigation item clicked');
-		this.props.handleNavigationUpdate('Middle');
+		this.props.handleNavigationUpdate(0);
 	}
 
 	handleRightClick() {
-		console.log('Right navigation item clicked');
-		this.props.handleNavigationUpdate('Right');
+		this.props.handleNavigationUpdate(+1);
 	}
 
 }
