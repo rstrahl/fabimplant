@@ -10,22 +10,28 @@ import * as processor from './processor';
 import Promise from 'promise';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Header from './ui/header.jsx';
+// import Header from './ui/header.jsx';
 import ImageWindow from './ui/imageWindow.jsx';
-import DicomDebugWindow from './ui/dicomDebugWindow.jsx';
 import DicomFile from './dicomFile';
+import MainWindow from './ui/mainWindow.jsx';
 
 // UI
-let header = React.createElement(Header, null);
-let imageWindow = React.createElement(ImageWindow, null);
+// let header = React.createElement(Header, null);
+// let imageWindow = React.createElement(ImageWindow, null);
+//
+// ReactDOM.render(
+// 	header,
+// 	document.querySelector('header')
+// );
+//
+// ReactDOM.render(
+// 	imageWindow,
+// 	document.querySelector('main')
+// );
 
+let main = React.createElement(MainWindow, null);
 ReactDOM.render(
-	header,
-	document.querySelector('header')
-);
-
-ReactDOM.render(
-	imageWindow,
+	main,
 	document.querySelector('main')
 );
 
@@ -44,10 +50,10 @@ window.addEventListener('load', () => {
 });
 
 // TODO: Refactor this into a navbar script... or something.
-document.getElementById('header-button-debug').onclick = () => {
-	let e = document.getElementById('sidebar-metadata');
-	e.style.display = (window.getComputedStyle(e).display === 'block') ? 'none' : 'block';
-};
+// document.getElementById('header-button-debug').onclick = () => {
+// 	let e = document.getElementById('sidebar-metadata');
+// 	e.style.display = (window.getComputedStyle(e).display === 'block') ? 'none' : 'block';
+// };
 
 // TODO Refactor:
 // this event handler should be "attachable" to a given window - modularize it
@@ -69,7 +75,7 @@ function handleFileSelect(event) {
 					React.createElement(ImageWindow, {dicomFile: file}),
 					document.querySelector('main')
 				);
-				
+
 			})
 			.catch( err => console.log('Error processing image data: ' + err));
 		});
