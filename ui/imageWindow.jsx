@@ -24,7 +24,7 @@ export default class ImageWindow extends React.Component {
 	}
 
 	render() {
-		if (this.props.dicomFile === undefined) {
+		if (this.props.dicomFile === undefined || this.props.dicomFile === null) {
 			return (
 				<div id="image-window"></div>
 			);
