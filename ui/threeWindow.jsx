@@ -7,7 +7,7 @@ import ReactTHREE from 'react-three';
 import { findDOMNode } from 'react-dom';
 import THREE from 'three';
 
-const NEAR = 1;
+const NEAR = -500;
 const FAR = 5000;
 
 /**
@@ -19,7 +19,15 @@ export default class ThreeWindow extends React.Component {
 		super(props);
 		this.state = {
 			width : 0,
-			height : 0
+			height : 0,
+			cameraProps : {
+				left : 0,
+				right: 0,
+				top : 0,
+				bottom : 0,
+				near : NEAR,
+				far : FAR
+			}
 		};
 	}
 
@@ -32,50 +40,54 @@ export default class ThreeWindow extends React.Component {
 		removeEventListener('resize', this.updateSize);
 	}
 
-	updateSize() {
-		this.setState({
-			width: findDOMNode(this).offsetWidth,
-			height: findDOMNode(this).offsetHeight
-		});
-	}
-
 	render() {
 		let { Scene, Mesh, OrthographicCamera } = ReactTHREE;
-		let { Vector3 } = THREE;
-		let { width, height } = this.state;
+		let { Vector3, BoxGeometry, MeshBasicMaterial } = THREE;
+		let { width, height, cameraProps } = this.state;
 
-		let aspectratio = width / height;
-		let perspectiveCameraProps = {
-			fov : 75,
-			aspect : aspectratio,
-			near : NEAR,
-			far : FAR,
-			position : new Vector3(0,0,600),
-			lookat : new Vector3(0,0,0)
-		};
-		let orthoCameraProps = {
-			left : width / -2,
-			right: width / 2,
-			top : height / 2,
-			bottom : height / -2,
-			near : -500,
-			far : FAR
-		};
-
+		// TODO: Replace with generated mesh
 		let meshProps = {
-			position : new THREE.Vector3(0,0,0),
-			geometry : new THREE.BoxGeometry(100,100,100),
-			material : new THREE.MeshBasicMaterial( {color: 0x0000ff} )
+			position : new Vector3(0,0,0),
+			geometry : new BoxGeometry(100,100,100),
+			material : new MeshBasicMaterial( {color: 0x0000ff} )
 		};
 
 		return (
-			<div className="three-window">
+			<div className="three-window" onMouseDown={this.handleMouseDown.bind(this)} onMouseUp={this.handleMouseUp.bind(this)}>
 		        <Scene camera="maincamera" width={width} height={height}>
-		            <OrthographicCamera name="maincamera" {...orthoCameraProps} />
+		            <OrthographicCamera name="maincamera" {...cameraProps} />
 					<Mesh {...meshProps} />
 		        </Scene>
 			</div>
 		);
 	}
 
+
+	updateSize() {
+		let w = findDOMNode(this).offsetWidth;
+		let h = findDOMNode(this).offsetHeight;
+		this.setState({
+			width: w,
+			height: h,
+			cameraProps : {
+				left : w / -2,
+				right: w / 2,
+				top : h / 2,
+				bottom : h / -2,
+				near : NEAR,
+				far : FAR
+			}
+		});
+	}
+
+	handleMouseDown(mouseEvent) {
+		window.addEventListener('mousemove', this.handleMouseMove);
+	}
+
+	handleMouseMove(mouseEvent) {
+	}
+
+	handleMouseUp(mouseEvent) {
+		window.removeEventListener('mousemove', this.handleMouseMove);
+	}
 }
