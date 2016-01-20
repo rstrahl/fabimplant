@@ -17,9 +17,14 @@ export default class ThreeWindow extends React.Component {
 
 	constructor(props) {
 		super(props);
+		this.handleMouseMove = this.handleMouseMove.bind(this);
 		this.state = {
 			width : 0,
 			height : 0,
+			mouseDownX : 0,
+			mouseDownY : 0,
+			xDelta : 0,
+			yDelta : 0,
 			cameraProps : {
 				left : 0,
 				right: 0,
@@ -62,7 +67,6 @@ export default class ThreeWindow extends React.Component {
 		);
 	}
 
-
 	updateSize() {
 		let w = findDOMNode(this).offsetWidth;
 		let h = findDOMNode(this).offsetHeight;
@@ -81,13 +85,25 @@ export default class ThreeWindow extends React.Component {
 	}
 
 	handleMouseDown(mouseEvent) {
-		window.addEventListener('mousemove', this.handleMouseMove);
+		this.setState({
+			mouseTracking: true,
+			mouseDownX : mouseEvent.clientX,
+			mouseDownY : mouseEvent.clientY
+		});
+		addEventListener('mousemove', this.handleMouseMove);
 	}
 
 	handleMouseMove(mouseEvent) {
+		mouseEvent.preventDefault();
+		let xD = this.state.mouseDownX - mouseEvent.clientX;
+		let yD = this.state.mouseDownY - mouseEvent.clientY;
+		this.setState({
+			xDelta : this.state.xDelta += xD,
+			yDelta : this.state.yDelta += yD
+		});
 	}
 
-	handleMouseUp(mouseEvent) {
-		window.removeEventListener('mousemove', this.handleMouseMove);
+	handleMouseUp() {
+		removeEventListener('mousemove', this.handleMouseMove);
 	}
 }
