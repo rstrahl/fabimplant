@@ -18,8 +18,7 @@
     "promise": "^7.1.1",
     "react": "^0.14.6",
     "react-dom": "^0.14.6",
-    "react-three": "^0.7.5",
-    "three": "^0.72.0"
+    "three": "^0.73.2"
   },
   "repository": {
     "type": "git",
