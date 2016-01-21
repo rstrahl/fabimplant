@@ -5,6 +5,7 @@
 import React from 'react';
 import ReactTHREE from 'react-three';
 import { findDOMNode } from 'react-dom';
+import { bind } from 'decko';
 import THREE from 'three';
 
 const NEAR = -500;
@@ -17,7 +18,6 @@ export default class ThreeWindow extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.handleMouseMove = this.handleMouseMove.bind(this);
 		this.state = {
 			width : 0,
 			height : 0,
@@ -57,16 +57,19 @@ export default class ThreeWindow extends React.Component {
 			material : new MeshBasicMaterial( {color: 0x0000ff} )
 		};
 
+		let cube = <Mesh {...meshProps} />;
+
 		return (
-			<div className="three-window" onMouseDown={this.handleMouseDown.bind(this)} onMouseUp={this.handleMouseUp.bind(this)}>
+			<div className="three-window" onMouseDown={this.handleMouseDown} onMouseUp={this.handleMouseUp}>
 		        <Scene camera="maincamera" width={width} height={height}>
 		            <OrthographicCamera name="maincamera" {...cameraProps} />
-					<Mesh {...meshProps} />
+					{cube}
 		        </Scene>
 			</div>
 		);
 	}
 
+	@bind
 	updateSize() {
 		let w = findDOMNode(this).offsetWidth;
 		let h = findDOMNode(this).offsetHeight;
@@ -84,6 +87,7 @@ export default class ThreeWindow extends React.Component {
 		});
 	}
 
+	@bind
 	handleMouseDown(mouseEvent) {
 		this.setState({
 			mouseTracking: true,
@@ -93,16 +97,19 @@ export default class ThreeWindow extends React.Component {
 		addEventListener('mousemove', this.handleMouseMove);
 	}
 
+	@bind
 	handleMouseMove(mouseEvent) {
 		mouseEvent.preventDefault();
-		let xD = this.state.mouseDownX - mouseEvent.clientX;
-		let yD = this.state.mouseDownY - mouseEvent.clientY;
+		let xD = mouseEvent.clientX - this.state.mouseDownX;
+		let yD = mouseEvent.clientY - this.state.mouseDownY;
+		console.log("mouse delta: "+xD+","+yD);
 		this.setState({
 			xDelta : this.state.xDelta += xD,
 			yDelta : this.state.yDelta += yD
 		});
 	}
 
+	@bind
 	handleMouseUp() {
 		removeEventListener('mousemove', this.handleMouseMove);
 	}
