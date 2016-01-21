@@ -16,8 +16,8 @@
     "dicom-parser": "^1.1.7",
     "http-server": "^0.8.5",
     "promise": "^7.1.1",
-    "react": "^0.14.3",
-    "react-dom": "^0.14.3",
+    "react": "^0.14.6",
+    "react-dom": "^0.14.6",
     "react-three": "^0.7.5",
     "three": "^0.72.0"
   },
@@ -38,7 +38,7 @@
     "babel-preset-react": "^6.3.13",
     "babel-preset-stage-0": "^6.3.13",
     "babelify": "^7.0.0",
-    "browserify": "^11.2.0",
+    "browserify": "^13.0.0",
     "eslint": "^1.10.3",
     "eslint-plugin-react": "^3.15.0",
     "watchify": "^3.7.0"
