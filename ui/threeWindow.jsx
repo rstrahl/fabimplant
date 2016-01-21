@@ -3,7 +3,6 @@
 // Displays a threejs scene
 
 import React from 'react';
-import ReactTHREE from 'react-three';
 import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
 import THREE from 'three';
@@ -36,8 +35,21 @@ export default class ThreeWindow extends React.Component {
 		};
 	}
 
+	shouldComponentUpdate(nextProps, nextState) {
+		// Should only update if the dimensions of the window changes
+		return (nextState.width !== this.state.width || nextState.height !== this.state.height);
+	}
+
+	componentWillUpdate() {
+	}
+
+	componentDidUpdate() {
+		this.renderThree();
+	}
+
 	componentDidMount() {
 		addEventListener('resize', this.updateSize);
+		this.setupThree();
 		this.updateSize();
 	}
 
@@ -46,27 +58,39 @@ export default class ThreeWindow extends React.Component {
 	}
 
 	render() {
-		let { Scene, Mesh, OrthographicCamera } = ReactTHREE;
-		let { Vector3, BoxGeometry, MeshBasicMaterial } = THREE;
-		let { width, height, cameraProps } = this.state;
-
-		// TODO: Replace with generated mesh
-		let meshProps = {
-			position : new Vector3(0,0,0),
-			geometry : new BoxGeometry(100,100,100),
-			material : new MeshBasicMaterial( {color: 0x0000ff} )
-		};
-
-		let cube = <Mesh {...meshProps} />;
-
 		return (
 			<div className="three-window" onMouseDown={this.handleMouseDown} onMouseUp={this.handleMouseUp}>
-		        <Scene camera="maincamera" width={width} height={height}>
-		            <OrthographicCamera name="maincamera" {...cameraProps} />
-					{cube}
-		        </Scene>
 			</div>
 		);
+	}
+
+	@bind
+	setupThree() {
+		let { left, right, top, bottom } = this.state.cameraProps;
+		this.camera = new THREE.OrthographicCamera(left, right, top, bottom, NEAR, FAR);
+		this.mesh = new THREE.Mesh(
+			new THREE.BoxGeometry(100,100,100),
+			new THREE.MeshBasicMaterial( {color: 0x0000ff})
+		);
+		this.scene = new THREE.Scene();
+		this.scene.add(this.mesh);
+		this.renderer = new THREE.WebGLRenderer();
+		findDOMNode(this).appendChild(this.renderer.domElement);
+		this.renderThree();
+	}
+
+	@bind
+	renderThree() {
+		let { width, height } = this.state;
+		let { left, right, top, bottom } = this.state.cameraProps;
+		// apply any rendering changes here
+		this.renderer.setSize(width, height);
+		this.camera.left = left;
+		this.camera.right = right;
+		this.camera.top = top;
+		this.camera.bottom = bottom;
+		this.camera.updateProjectionMatrix();
+		this.renderer.render(this.scene, this.camera);
 	}
 
 	@bind
