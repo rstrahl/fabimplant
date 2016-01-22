@@ -84,15 +84,23 @@ export default class ThreeWindow extends React.Component {
 	@bind
 	renderThree() {
 		let { width, height } = this.state;
-		let { left, right, top, bottom, zoom } = this.cameraProps;
+		let { left, right, top, bottom, near, far, zoom } = this.cameraProps;
 		// apply any rendering changes here
 		this.renderer.setSize(width, height);
 		this.camera.left = left;
 		this.camera.right = right;
 		this.camera.top = top;
 		this.camera.bottom = bottom;
+		this.camera.near = near;
+		this.camera.far = far;
 		this.camera.zoom = zoom;
 		this.camera.updateProjectionMatrix();
+
+		let rotationX = this.yDelta*0.005 * Math.PI;
+		let rotationY = -this.xDelta*0.005 * Math.PI;
+		this.mesh.rotation.x = rotationX;
+		this.mesh.rotation.y = rotationY;
+
 		this.renderer.render(this.scene, this.camera);
 	}
 
@@ -130,6 +138,7 @@ export default class ThreeWindow extends React.Component {
 		this.yDelta += yD;
 		this.lastX = mouseEvent.clientX;
 		this.lastY = mouseEvent.clientY;
+		this.renderThree();
 		console.log("mouse delta: "+xD+","+yD+" mesh delta: "+this.xDelta+","+this.yDelta);
 	}
 
