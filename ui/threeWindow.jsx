@@ -19,28 +19,31 @@ export default class ThreeWindow extends React.Component {
 		super(props);
 		this.state = {
 			width : 0,
-			height : 0,
-			mouseDownX : 0,
-			mouseDownY : 0,
-			xDelta : 0,
-			yDelta : 0,
-			cameraProps : {
-				left : 0,
-				right: 0,
-				top : 0,
-				bottom : 0,
-				near : NEAR,
-				far : FAR
-			}
+			height : 0
 		};
+		this.cameraProps = {
+			left : 0,
+			right: 0,
+			top : 0,
+			bottom : 0,
+			near : NEAR,
+			far : FAR,
+			zoom : 1.0
+		};
+		this.lastX = 0;
+		this.lastY = 0;
+		this.xDelta = 0;
+		this.yDelta = 0;
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
 		// Should only update if the dimensions of the window changes
+		// This impacts the renderer canvas and the camera
 		return (nextState.width !== this.state.width || nextState.height !== this.state.height);
 	}
 
-	componentWillUpdate() {
+	componentWillUpdate(nextProps, nextState) {
+		this.updateCamera(nextState.width, nextState.height);
 	}
 
 	componentDidUpdate() {
@@ -66,7 +69,7 @@ export default class ThreeWindow extends React.Component {
 
 	@bind
 	setupThree() {
-		let { left, right, top, bottom } = this.state.cameraProps;
+		let { left, right, top, bottom } = this.cameraProps;
 		this.camera = new THREE.OrthographicCamera(left, right, top, bottom, NEAR, FAR);
 		this.mesh = new THREE.Mesh(
 			new THREE.BoxGeometry(100,100,100),
@@ -76,21 +79,29 @@ export default class ThreeWindow extends React.Component {
 		this.scene.add(this.mesh);
 		this.renderer = new THREE.WebGLRenderer();
 		findDOMNode(this).appendChild(this.renderer.domElement);
-		this.renderThree();
 	}
 
 	@bind
 	renderThree() {
 		let { width, height } = this.state;
-		let { left, right, top, bottom } = this.state.cameraProps;
+		let { left, right, top, bottom, zoom } = this.cameraProps;
 		// apply any rendering changes here
 		this.renderer.setSize(width, height);
 		this.camera.left = left;
 		this.camera.right = right;
 		this.camera.top = top;
 		this.camera.bottom = bottom;
+		this.camera.zoom = zoom;
 		this.camera.updateProjectionMatrix();
 		this.renderer.render(this.scene, this.camera);
+	}
+
+	@bind
+	updateCamera(width, height) {
+		this.cameraProps.left = width / -2;
+		this.cameraProps.right = width / 2;
+		this.cameraProps.top = height / 2;
+		this.cameraProps.bottom = height / -2;
 	}
 
 	@bind
@@ -99,38 +110,27 @@ export default class ThreeWindow extends React.Component {
 		let h = findDOMNode(this).offsetHeight;
 		this.setState({
 			width: w,
-			height: h,
-			cameraProps : {
-				left : w / -2,
-				right: w / 2,
-				top : h / 2,
-				bottom : h / -2,
-				near : NEAR,
-				far : FAR
-			}
+			height: h
 		});
 	}
 
 	@bind
 	handleMouseDown(mouseEvent) {
-		this.setState({
-			mouseTracking: true,
-			mouseDownX : mouseEvent.clientX,
-			mouseDownY : mouseEvent.clientY
-		});
+		this.lastX = mouseEvent.clientX;
+		this.lastY = mouseEvent.clientY;
 		addEventListener('mousemove', this.handleMouseMove);
 	}
 
 	@bind
 	handleMouseMove(mouseEvent) {
 		mouseEvent.preventDefault();
-		let xD = mouseEvent.clientX - this.state.mouseDownX;
-		let yD = mouseEvent.clientY - this.state.mouseDownY;
-		console.log("mouse delta: "+xD+","+yD);
-		this.setState({
-			xDelta : this.state.xDelta += xD,
-			yDelta : this.state.yDelta += yD
-		});
+		let xD = mouseEvent.clientX - this.lastX;
+		let yD = this.lastY - mouseEvent.clientY;
+		this.xDelta += xD;
+		this.yDelta += yD;
+		this.lastX = mouseEvent.clientX;
+		this.lastY = mouseEvent.clientY;
+		console.log("mouse delta: "+xD+","+yD+" mesh delta: "+this.xDelta+","+this.yDelta);
 	}
 
 	@bind
