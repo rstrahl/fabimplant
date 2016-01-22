@@ -6,6 +6,7 @@
 import React from 'react';
 import NavigationFooter from './navigationFooter.jsx';
 import ImageWindow from './imageWindow.jsx';
+import ThreeWindow from './threeWindow.jsx';
 import TestWindow from './testWindow.jsx';
 
 import * as fileLoader from '../fileLoader';
@@ -23,7 +24,7 @@ export default class WorkspaceWindow extends React.Component {
 		super(props);
 		this.state = {
 			index: 0,
-			stageWindows: [ImageWindow, TestWindow],
+			stageWindows: [ImageWindow, ThreeWindow, TestWindow],
 			dicomFile: null
 		};
 	}
