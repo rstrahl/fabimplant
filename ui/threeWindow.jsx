@@ -70,14 +70,26 @@ export default class ThreeWindow extends React.Component {
 	@bind
 	setupThree() {
 		let { left, right, top, bottom } = this.cameraProps;
+		this.scene = new THREE.Scene();
+
+		// Lights
+		this.ambientLight = new THREE.AmbientLight(0x404040);
+		this.scene.add(this.ambientLight);
+		this.directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
+		this.directionalLight.position.set(0,1000,1000);
+		this.scene.add(this.directionalLight);
+
+		// Camera
 		this.camera = new THREE.OrthographicCamera(left, right, top, bottom, NEAR, FAR);
+
+		// Action!
 		this.mesh = new THREE.Mesh(
 			new THREE.BoxGeometry(100,100,100),
-			new THREE.MeshBasicMaterial( {color: 0x0000ff})
+			new THREE.MeshLambertMaterial( {color: 0x0000ff})
 		);
-		this.scene = new THREE.Scene();
 		this.scene.add(this.mesh);
-		this.renderer = new THREE.WebGLRenderer();
+
+		this.renderer = new THREE.WebGLRenderer({antialias : true});
 		findDOMNode(this).appendChild(this.renderer.domElement);
 	}
 
@@ -96,8 +108,8 @@ export default class ThreeWindow extends React.Component {
 		this.camera.zoom = zoom;
 		this.camera.updateProjectionMatrix();
 
-		let rotationX = this.yDelta*0.005 * Math.PI;
-		let rotationY = -this.xDelta*0.005 * Math.PI;
+		let rotationX = -this.yDelta*0.005 * Math.PI;
+		let rotationY = this.xDelta*0.005 * Math.PI;
 		this.mesh.rotation.x = rotationX;
 		this.mesh.rotation.y = rotationY;
 
