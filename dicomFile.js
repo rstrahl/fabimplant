@@ -15,7 +15,8 @@ export default class DicomFile {
 	/**
 	 * Default constructor.
 	 * @param {Object} dataSet a dicom-js DataSet object
-	 * @param {Array} pixelArrays	an array of arrays containing pixel values for an image
+	 * @param {Array} pixelArrays an array of arrays, each containing the pixel
+	 * values for an image slice in the DICOM file
 	 */
 	constructor(dataSet, pixelArrays) {
 		this.dataSet = dataSet;

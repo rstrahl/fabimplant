@@ -6,6 +6,8 @@ import React from 'react';
 import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
 import THREE from 'three';
+import { getThresholdPixelArray } from '../processor';
+import marchingCubes from '../marchingCubes';
 
 const NEAR = -500;
 const FAR = 5000;
@@ -34,6 +36,7 @@ export default class ThreeWindow extends React.Component {
 		this.lastY = 0;
 		this.xDelta = 0;
 		this.yDelta = 0;
+		this.geometry = null;
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
@@ -52,6 +55,18 @@ export default class ThreeWindow extends React.Component {
 
 	componentDidMount() {
 		addEventListener('resize', this.updateSize);
+
+		let { dicomFile } = this.props;
+		if (dicomFile !== undefined && dicomFile !== null) {
+			let pixelData = getThresholdPixelArray(dicomFile, 1424, 1);
+
+			let resolution = 32;
+			let range = 2;
+			let isolevel = 0.5;
+			// This is incorrect - it PRESUMES that the data inserted will be precisely cubic!
+			this.geometry = marchingCubes(resolution, range, pixelData, isolevel);
+		}
+
 		this.setupThree();
 		this.updateSize();
 	}
@@ -84,8 +99,9 @@ export default class ThreeWindow extends React.Component {
 
 		// Action!
 		this.mesh = new THREE.Mesh(
-			new THREE.BoxGeometry(100,100,100),
-			new THREE.MeshLambertMaterial( {color: 0x0000ff})
+			// new THREE.BoxGeometry(100,100,100),
+			this.geometry,
+			new THREE.MeshLambertMaterial({color: 0x0000ff, side: THREE.DoubleSide})
 		);
 		this.scene.add(this.mesh);
 
