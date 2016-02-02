@@ -7,9 +7,10 @@ import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
 import THREE from 'three';
 import { getThresholdPixelArray } from '../processor';
-import marchingCubes from '../marchingCubes';
+import { default as marchingCubes, sphereVolume } from '../marchingCubes';
+// import { marchingCubes } from 'isosurface';
 
-const NEAR = -500;
+const NEAR = -1000;
 const FAR = 5000;
 
 /**
@@ -37,6 +38,7 @@ export default class ThreeWindow extends React.Component {
 		this.xDelta = 0;
 		this.yDelta = 0;
 		this.geometry = null;
+		this.sphereVolume = sphereVolume(10, 10, 10);
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
@@ -58,13 +60,13 @@ export default class ThreeWindow extends React.Component {
 
 		let { dicomFile } = this.props;
 		if (dicomFile !== undefined && dicomFile !== null) {
-			let pixelData = getThresholdPixelArray(dicomFile, 1424, 1);
-
-			let resolution = 32;
-			let range = 2;
-			let isolevel = 0.5;
+			// let pixelData = getThresholdPixelArray(dicomFile, 1424, 1);
+			// let isolevel = 0.5;
+			// let width = dicomFile.getImageWidth();
+			// let height = dicomFile.getImageHeight();
+			// let depth = dicomFile.pixelArrays.length;
 			// This is incorrect - it PRESUMES that the data inserted will be precisely cubic!
-			this.geometry = marchingCubes(resolution, range, pixelData, isolevel);
+
 		}
 
 		this.setupThree();
@@ -98,12 +100,34 @@ export default class ThreeWindow extends React.Component {
 		this.camera = new THREE.OrthographicCamera(left, right, top, bottom, NEAR, FAR);
 
 		// Action!
+		this.geometry = marchingCubes(10, 10, 10, 1, this.sphereVolume, 5);
+
 		this.mesh = new THREE.Mesh(
 			// new THREE.BoxGeometry(100,100,100),
 			this.geometry,
-			new THREE.MeshLambertMaterial({color: 0x0000ff, side: THREE.DoubleSide})
+			new THREE.MeshLambertMaterial({color: 0x101010, side: THREE.DoubleSide})
 		);
 		this.scene.add(this.mesh);
+
+		this.wireframeMesh = new THREE.Mesh(
+			this.geometry,
+			new THREE.MeshBasicMaterial({
+				color : 0xffffff,
+				wireframe : true,
+				side: THREE.DoubleSide
+			})
+		);
+		// this.scene.add(this.wireframeMesh);
+
+		this.scaffoldMesh = new THREE.Mesh(
+			this.scaffoldGeometry,
+			new THREE.MeshBasicMaterial({
+				color: 0x00ff00,
+				wireframe: true,
+				side: THREE.DoubleSide
+			})
+		);
+		this.scene.add(this.scaffoldMesh);
 
 		this.renderer = new THREE.WebGLRenderer({antialias : true});
 		findDOMNode(this).appendChild(this.renderer.domElement);

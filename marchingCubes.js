@@ -9,17 +9,163 @@
 
 import THREE from 'three';
 
-export default function (resolution, range, data, isolevel) {
-	let cube = calculateGridCube(resolution, range);
-	let geometry = polygonise(cube, data, isolevel);
+export default function (resX, resY, resZ, unitSize, values, isolevel) {
+	let points = generateScaffold(resX, resY, resZ, unitSize);
+	let geometry = new THREE.Geometry();
+	let vertexIndex = 0;
+
+	let size = resX;
+	let size2 = resX * resY;
+	for (let z = 0; z < resZ - 1; z++) {
+		for (let y = 0; y < resY - 1; y++) {
+			for (let x = 0; x < resX - 1; x++) {
+
+				// calculate the array index that corresponds with each vertex of the current cube section
+				let p    = x + size * y + size2 * z,
+					px   = p   + 1,
+					py   = p   + size,
+					pxy  = py  + 1,
+					pz   = p   + size2,
+					pxz  = px  + size2,
+					pyz  = py  + size2,
+					pxyz = pxy + size2;
+
+				// cache the volume data for each vertex being evaluated
+				let value0 = values[p],
+					value1 = values[px],
+					value2 = values[py],
+					value3 = values[pxy],
+					value4 = values[pz],
+					value5 = values[pxz],
+					value6 = values[pyz],
+					value7 = values[pxyz];
+
+				// place a "1" in bit positions corresponding to vertices whose
+				// isovalue is less than given isolevel constant.
+				let cubeindex = 0;
+				if ( value0 < isolevel ) cubeindex |= 1;
+				if ( value1 < isolevel ) cubeindex |= 2;
+				if ( value2 < isolevel ) cubeindex |= 8;
+				if ( value3 < isolevel ) cubeindex |= 4;
+				if ( value4 < isolevel ) cubeindex |= 16;
+				if ( value5 < isolevel ) cubeindex |= 32;
+				if ( value6 < isolevel ) cubeindex |= 128;
+				if ( value7 < isolevel ) cubeindex |= 64;
+
+				// a 12-bit bitmask that indicates which edges are crossed by the isosurface
+				let edges = edgeTable[ cubeindex ];
+
+				// if no edges are crossed, then the cube is entirely inside/outside the surface
+				// and there's nothing to draw; return to process the next grid vertex
+				if ( edges === 0 ) continue;
+
+				// check which edges are crossed, and estimate the point location
+				// using a weighted average of scalar values at edge endpoints.
+				// store the vertex in an array for use later.
+				let mu = 0.5,
+					vlist = new Array(12);
+
+				// bottom of the cube
+				if ( edges & 1 )	{
+					mu = ( isolevel - value0 ) / ( value1 - value0 );
+					vlist[0] = points[p].clone().lerp( points[px], mu );
+				}
+				if ( edges & 2 )	{
+					mu = ( isolevel - value1 ) / ( value3 - value1 );
+					vlist[1] = points[px].clone().lerp( points[pxy], mu );
+				}
+				if ( edges & 4 )	{
+					mu = ( isolevel - value2 ) / ( value3 - value2 );
+					vlist[2] = points[py].clone().lerp( points[pxy], mu );
+				}
+				if ( edges & 8 )	{
+					mu = ( isolevel - value0 ) / ( value2 - value0 );
+					vlist[3] = points[p].clone().lerp( points[py], mu );
+				}
+				// top of the cube
+				if ( edges & 16 ) {
+					mu = ( isolevel - value4 ) / ( value5 - value4 );
+					vlist[4] = points[pz].clone().lerp( points[pxz], mu );
+				}
+				if ( edges & 32 ) {
+					mu = ( isolevel - value5 ) / ( value7 - value5 );
+					vlist[5] = points[pxz].clone().lerp( points[pxyz], mu );
+				}
+				if ( edges & 64 ) {
+					mu = ( isolevel - value6 ) / ( value7 - value6 );
+					vlist[6] = points[pyz].clone().lerp( points[pxyz], mu );
+				}
+				if ( edges & 128 ) {
+					mu = ( isolevel - value4 ) / ( value6 - value4 );
+					vlist[7] = points[pz].clone().lerp( points[pyz], mu );
+				}
+				// vertical lines of the cube
+				if ( edges & 256 ) {
+					mu = ( isolevel - value0 ) / ( value4 - value0 );
+					vlist[8] = points[p].clone().lerp( points[pz], mu );
+				}
+				if ( edges & 512 ) {
+					mu = ( isolevel - value1 ) / ( value5 - value1 );
+					vlist[9] = points[px].clone().lerp( points[pxz], mu );
+				}
+				if ( edges & 1024 ) {
+					mu = ( isolevel - value3 ) / ( value7 - value3 );
+					vlist[10] = points[pxy].clone().lerp( points[pxyz], mu );
+				}
+				if ( edges & 2048 ) {
+					mu = ( isolevel - value2 ) / ( value6 - value2 );
+					vlist[11] = points[py].clone().lerp( points[pyz], mu );
+				}
+
+				// Construct facets via triTable vertices lookup
+				let i = 0;
+				cubeindex <<= 4; // triTable offset; the original triTable was 2d array [256][16]
+
+				while (triTable[cubeindex + i] !== -1) {
+					let index1 = triTable[cubeindex + i],
+						index2 = triTable[cubeindex + i + 1],
+						index3 = triTable[cubeindex + i + 2];
+
+					// add vertices to Geometry
+					geometry.vertices.push(vlist[index1].clone());
+					geometry.vertices.push(vlist[index2].clone());
+					geometry.vertices.push(vlist[index3].clone());
+
+					// add faces to Geometry
+					geometry.faces.push(new THREE.Face3(vertexIndex, vertexIndex+1, vertexIndex+2));
+					geometry.faceVertexUvs[0].push([
+						new THREE.Vector2(0,0),
+						new THREE.Vector2(0,1),
+						new THREE.Vector2(1,1)
+					]);
+
+					vertexIndex += 3;
+					i += 3;
+				}
+			}
+		}
+	}
+
 	geometry.mergeVertices();
 	geometry.computeFaceNormals();
 	geometry.computeVertexNormals();
 	return geometry;
 }
 
+export function sphereVolume(resX, resY, resZ) {
+	let values = [];
+	for (let z = 0; z < resZ; z++) {
+		for (let y = 0; y < resY; y++) {
+			for (let x = 0; x < resX; x++) {
+				values.push(x*x + y*y + z*z - 1);
+			}
+		}
+	}
+	return values;
+}
+
 export function polygonise(points, values, isolevel) {
-	let size = Math.round(Math.pow(values.length, 1/3)),
+	let size = Math.round(Math.pow(values.length, 1/3)), // TODO: INCORRECT - presumes all sides equal size
 		size2 = size * size,
 		vertexIndex = 0;
 	let geometry = new THREE.Geometry();
@@ -156,28 +302,22 @@ export function polygonise(points, values, isolevel) {
 	return geometry;
 }
 
-/**
- * Generates the vertices of the Cube structure used in the algorithm.
- *
- * @param {number} resolution the resolution of the cube in grid units
- * @param {number} range the geometric coordinate range of the cube; if no value
- * is specified will default to 1.0
- */
-export function calculateGridCube(resolution, range) {
-	// TODO: REQUIRES UNIT TEST
-	let min = -range / 2;
-	let cubeVertices = [];
-	for (let k = 0; k < resolution; k++) {
-		for (let j = 0; j < resolution; j++) {
-			for (let i = 0; i < resolution; i++) {
-				let x = min + range * i / (resolution - 1);
-				let y = min + range * j / (resolution - 1);
-				let z = min + range * k / (resolution - 1);
-				cubeVertices.push(new THREE.Vector3(x,y,z));
+export function generateScaffold(resX, resY, resZ, step) {
+	let vertices = [],
+		minZ = -1 * resZ * step,
+		minY = -1 * resY * step,
+		minX = -1 * resX * step;
+	for (let k = 0; k < resZ; k++) {
+		let z = minZ + step * k;
+		for (let j = 0; j < resY; j++) {
+			let y = minY + step * j;
+			for (let i = 0; i < resX; i++) {
+				let x = minX + step * i;
+				vertices.push(new THREE.Vector3(x,y,z));
 			}
 		}
 	}
-	return cubeVertices;
+	return vertices;
 }
 
 /**
