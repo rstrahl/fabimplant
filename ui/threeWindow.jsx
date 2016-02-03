@@ -9,7 +9,7 @@ import THREE from 'three';
 import Stats from 'stats.js';
 import createOrbitControls from 'three-orbit-controls';
 import { getThresholdPixelArray } from '../processor';
-import { default as marchingCubes, generateScaffold, makeSphere } from '../marchingCubes';
+import { default as marchingCubes, generateScaffold, generateScaffoldGeometry, makeSphere } from '../marchingCubes';
 // import { marchingCubes } from 'isosurface';
 
 const NEAR = -500;
@@ -65,13 +65,51 @@ export default class ThreeWindow extends React.Component {
 
 		let { dicomFile } = this.props;
 		if (dicomFile !== undefined && dicomFile !== null) {
-			// let pixelData = getThresholdPixelArray(dicomFile, 1424, 1);
-			// let isolevel = 0.5;
-			// let width = dicomFile.getImageWidth();
-			// let height = dicomFile.getImageHeight();
-			// let depth = dicomFile.pixelArrays.length;
+			let pixelData = getThresholdPixelArray(dicomFile, 1424, 1);
+			let isolevel = 0.5;
+			let width = dicomFile.getImageWidth();
+			let height = dicomFile.getImageHeight();
+			let depth = dicomFile.pixelArrays.length;
 
+			let volume = marchingCubes(width, height, depth, pixelData, isolevel);
+			this.volumeMesh = new THREE.Mesh(
+				volume,
+				new THREE.MeshLambertMaterial({
+					color : 0xFFFFFF,
+					side : THREE.DoubleSide
+				})
+			);
 
+			this.scaffoldMesh = new THREE.Mesh(
+				generateScaffold(width, height, depth),
+				new THREE.MeshBasicMaterial({
+					color : 0xAAAAFF,
+					transparent : true,
+					opacity : 0.5,
+					wireframe : true
+				})
+			);
+
+		} else {
+			let volume = makeSphere();
+			let volumeGeometry = marchingCubes(volume.dims[0], volume.dims[1], volume.dims[2], volume.data, 1);
+			this.volumeMesh = new THREE.Mesh(
+				volumeGeometry,
+				new THREE.MeshLambertMaterial({
+					color : 0xFFFFFF,
+					side : THREE.DoubleSide
+				})
+			);
+			let scaffold = generateScaffold(volume.dims[0], volume.dims[1], volume.dims[2]);
+			this.scaffoldMesh = new THREE.Mesh(
+				generateScaffoldGeometry(scaffold.points, volume.dims[0], volume.dims[1], volume.dims[2]),
+				new THREE.MeshBasicMaterial({
+					color : 0xAAAAFF,
+					transparent : true,
+					opacity : 0.5,
+					wireframe : true
+				})
+			);
 		}
 
 		this.setupThree();
@@ -98,7 +136,7 @@ export default class ThreeWindow extends React.Component {
 		this.ambientLight = new THREE.AmbientLight(0x404040);
 		this.scene.add(this.ambientLight);
 		this.directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
-		this.directionalLight.position.set(0,1000,1000);
+		this.directionalLight.position.set(0,500,50);
 		this.scene.add(this.directionalLight);
 
 		// Camera
@@ -110,31 +148,8 @@ export default class ThreeWindow extends React.Component {
 		this.scene.add(this.axisHelper);
 
 		// Action!
-		let height = 10,
-			width = 10,
-			depth = 10;
-		this.scaffoldMesh = new THREE.Mesh(
-			generateScaffold(width, height, depth),
-			new THREE.MeshBasicMaterial({
-				color : 0xAAAAFF,
-				transparent : true,
-				opacity : 0.5,
-				wireframe : true
-			})
-		);
 		this.scene.add(this.scaffoldMesh);
-
-		let volume = makeSphere();
-		let volumeGeometry = marchingCubes(volume.dims[0], volume.dims[1], volume.dims[2], volume.data, 1);
-		let volumeMesh = new THREE.Mesh(
-			volumeGeometry,
-			new THREE.MeshLambertMaterial({
-				color : 0xFFFFFF,
-				side : THREE.DoubleSide
-			})
-		);
-		this.scene.add(volumeMesh);
-
+		this.scene.add(this.volumeMesh);
 
 		this.renderer = new THREE.WebGLRenderer({antialias : true});
 		let OrbitControls = createOrbitControls(THREE);

@@ -11,7 +11,7 @@ import THREE from 'three';
 
 export default function (resX, resY, resZ, values, isolevel) {
 	let scaffold = generateScaffold(resX, resY, resZ);
-	let points = scaffold.vertices;
+	let points = scaffold.points;
 	let geometry = new THREE.Geometry();
 	let vertexIndex = 0;
 
@@ -184,6 +184,7 @@ export function makeSphere() {
 	);
 }
 
+/*
 export function polygonise(points, values, isolevel) {
 	let size = Math.round(Math.pow(values.length, 1/3)), // TODO: INCORRECT - presumes all sides equal size
 		size2 = size * size,
@@ -321,23 +322,32 @@ export function polygonise(points, values, isolevel) {
 	}
 	return geometry;
 }
+*/
 
 export function generateScaffold(width, height, depth) {
-	let step = 0.25;
-	let geometry = new THREE.Geometry();
-	let minZ = -1 * depth * step / 2,
+	let step = 0.25,
+		minZ = -1 * depth * step / 2,
 		minY = -1 * height * step / 2,
-		minX = -1 * width * step / 2;
+		minX = -1 * width * step / 2,
+		vertices = [];
 	for (let k = 0; k < depth; k++) {
 		let z = minZ + step * k;
 		for (let j = 0; j < height; j++) {
 			let y = minY + step * j;
 			for (let i = 0; i < width; i++) {
 				let x = minX + step * i;
-				geometry.vertices.push(new THREE.Vector3(x,y,z));
+				vertices.push(new THREE.Vector3(x,y,z));
 			}
 		}
 	}
+	return { points: vertices, dims: [width, height, depth] };
+}
+
+export function generateScaffoldGeometry(vertices, width, height, depth) {
+	let geometry = new THREE.Geometry();
+	vertices.forEach( (element) => {
+		geometry.vertices.push(element);
+	});
 	let vertex0 = 0, // good
 		vertex1 = width - 1, //good
 		vertex5 = width * height - 1, //good
