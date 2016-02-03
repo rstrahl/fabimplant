@@ -9,7 +9,7 @@ import THREE from 'three';
 import Stats from 'stats.js';
 import createOrbitControls from 'three-orbit-controls';
 import { getThresholdPixelArray } from '../processor';
-import { default as marchingCubes, generateScaffold, sphereVolume } from '../marchingCubes';
+import { default as marchingCubes, generateScaffold } from '../marchingCubes';
 // import { marchingCubes } from 'isosurface';
 
 const NEAR = -500;
@@ -44,10 +44,6 @@ export default class ThreeWindow extends React.Component {
 		this.stats.domElement.style.position = 'absolute';
 		this.stats.domElement.style.left = '0px';
 		this.stats.domElement.style.top = '0px';
-		this.scaffoldGeometry = null;
-		this.volumeGeometry = null;
-
-		this.sphereVolume = sphereVolume(10, 10, 10);
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
@@ -74,7 +70,7 @@ export default class ThreeWindow extends React.Component {
 			// let width = dicomFile.getImageWidth();
 			// let height = dicomFile.getImageHeight();
 			// let depth = dicomFile.pixelArrays.length;
-			// This is incorrect - it PRESUMES that the data inserted will be precisely cubic!
+
 
 		}
 
@@ -114,32 +110,21 @@ export default class ThreeWindow extends React.Component {
 		this.scene.add(this.axisHelper);
 
 		// Action!
-		// this.volumeGeometry = marchingCubes(10, 10, 10, 1, this.sphereVolume, 5);
-		// this.mesh = new THREE.Mesh(
-		// 	this.volumeGeometry,
-		// 	new THREE.MeshLambertMaterial({color: 0x101010, side: THREE.DoubleSide})
-		// );
-		// this.scene.add(this.mesh);
-
-		// this.wireframeMesh = new THREE.Mesh(
-		// 	this.volumeGeometry,
-		// 	new THREE.MeshBasicMaterial({
-		// 		color : 0xffffff,
-		// 		wireframe : true,
-		// 		side: THREE.DoubleSide
-		// 	})
-		// );
-		// this.scene.add(this.wireframeMesh);
-		this.scaffoldGeometry = generateScaffold(1, 1, 1, 100);
+		let height = 10,
+			width = 10,
+			depth = 10;
 		this.scaffoldMesh = new THREE.Mesh(
-			this.scaffoldGeometry,
+			generateScaffold(width, height, depth),
 			new THREE.MeshBasicMaterial({
-				color : 0xf0f0f0,
-				opacity : 0.25,
+				color : 0xAAAAFF,
+				transparent : true,
+				opacity : 0.5,
 				wireframe : true
 			})
 		);
 		this.scene.add(this.scaffoldMesh);
+
+
 
 		this.renderer = new THREE.WebGLRenderer({antialias : true});
 		let OrbitControls = createOrbitControls(THREE);
@@ -194,29 +179,5 @@ export default class ThreeWindow extends React.Component {
 			height: h
 		});
 	}
-	//
-	// @bind
-	// handleMouseDown(mouseEvent) {
-	// 	this.lastX = mouseEvent.clientX;
-	// 	this.lastY = mouseEvent.clientY;
-	// 	addEventListener('mousemove', this.handleMouseMove);
-	// }
-	//
-	// @bind
-	// handleMouseMove(mouseEvent) {
-	// 	mouseEvent.preventDefault();
-	// 	let xD = mouseEvent.clientX - this.lastX;
-	// 	let yD = this.lastY - mouseEvent.clientY;
-	// 	this.xDelta += xD;
-	// 	this.yDelta += yD;
-	// 	this.lastX = mouseEvent.clientX;
-	// 	this.lastY = mouseEvent.clientY;
-	// 	this.renderThree();
-	// 	console.log("mouse delta: "+xD+","+yD+" mesh delta: "+this.xDelta+","+this.yDelta);
-	// }
-	//
-	// @bind
-	// handleMouseUp() {
-	// 	removeEventListener('mousemove', this.handleMouseMove);
-	// }
+
 }
