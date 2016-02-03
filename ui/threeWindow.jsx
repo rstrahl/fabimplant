@@ -9,7 +9,7 @@ import THREE from 'three';
 import Stats from 'stats.js';
 import createOrbitControls from 'three-orbit-controls';
 import { getThresholdPixelArray } from '../processor';
-import { default as marchingCubes, generateScaffold } from '../marchingCubes';
+import { default as marchingCubes, generateScaffold, makeSphere } from '../marchingCubes';
 // import { marchingCubes } from 'isosurface';
 
 const NEAR = -500;
@@ -124,6 +124,16 @@ export default class ThreeWindow extends React.Component {
 		);
 		this.scene.add(this.scaffoldMesh);
 
+		let volume = makeSphere();
+		let volumeGeometry = marchingCubes(volume.dims[0], volume.dims[1], volume.dims[2], volume.data, 1);
+		let volumeMesh = new THREE.Mesh(
+			volumeGeometry,
+			new THREE.MeshLambertMaterial({
+				color : 0xFFFFFF,
+				side : THREE.DoubleSide
+			})
+		);
+		this.scene.add(volumeMesh);
 
 
 		this.renderer = new THREE.WebGLRenderer({antialias : true});

@@ -9,16 +9,17 @@
 
 import THREE from 'three';
 
-export default function (resX, resY, resZ, unitSize, values, isolevel) {
-	let points = generateScaffold(resX, resY, resZ, unitSize);
+export default function (resX, resY, resZ, values, isolevel) {
+	let scaffold = generateScaffold(resX, resY, resZ);
+	let points = scaffold.vertices;
 	let geometry = new THREE.Geometry();
 	let vertexIndex = 0;
 
 	let size = resX;
 	let size2 = resX * resY;
-	for (let z = 0; z < resZ - 1; z++) {
-		for (let y = 0; y < resY - 1; y++) {
-			for (let x = 0; x < resX - 1; x++) {
+	for (let z = 0; z < resZ-1; z++) {
+		for (let y = 0; y < resY-1; y++) {
+			for (let x = 0; x < resX-1; x++) {
 
 				// calculate the array index that corresponds with each vertex of the current cube section
 				let p    = x + size * y + size2 * z,
@@ -152,16 +153,35 @@ export default function (resX, resY, resZ, unitSize, values, isolevel) {
 	return geometry;
 }
 
-export function sphereVolume(resX, resY, resZ) {
-	let values = [];
-	for (let z = 0; z < resZ; z++) {
-		for (let y = 0; y < resY; y++) {
-			for (let x = 0; x < resX; x++) {
-				values.push(x*x + y*y + z*z - 1);
+function makeVolume(width, height, depth, f) {
+	let volume = new Float32Array(width * height * depth),
+		step = 0.25,
+		n = 0,
+		minZ = -1 * depth * step / 2,
+		minY = -1 * height * step / 2,
+		minX = -1 * width * step / 2,
+		res = [width, height, depth];
+
+	for(let k=0, z=minZ; k<res[2]; ++k, z+=step)
+		for(let j=0, y=minY; j<res[1]; ++j, y+=step)
+			for(let i=0, x=minX; i<res[0]; ++i, x+=step, ++n) {
+				volume[n] = f(x,y,z);
 			}
+	return {data: volume, dims:[width, height, depth]};
+}
+
+/**
+ * Creates a sample volume in the shape of a sphere
+ *
+ * @return {Object} The volume as an object
+ */
+export function makeSphere() {
+	return makeVolume(
+		10, 10, 10,
+		(x,y,z) => {
+			return Math.sqrt(x*x + y*y + z*z);
 		}
-	}
-	return values;
+	);
 }
 
 export function polygonise(points, values, isolevel) {
