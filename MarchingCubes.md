@@ -1,4 +1,4 @@
-# TODO.md
+# Implementing Marching Cubes
 
 ## Creating a 3D Model from Pixel Data
 
@@ -79,6 +79,13 @@ export function calculateGridCube(resolution, range) {
 }
 
 ```
+
+This is acceptable as long as the sample data is cubic; that is all dimensions are of
+equal length.  But we cannot guarantee that with imaging data.  
+
+
+
+
 
 **TODO:** (next - marching through the cube sections)
 

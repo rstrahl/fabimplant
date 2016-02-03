@@ -6,12 +6,14 @@ import React from 'react';
 import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
 import THREE from 'three';
+import Stats from 'stats.js';
+import createOrbitControls from 'three-orbit-controls';
 import { getThresholdPixelArray } from '../processor';
-import { default as marchingCubes, sphereVolume } from '../marchingCubes';
+import { default as marchingCubes, generateScaffold, sphereVolume } from '../marchingCubes';
 // import { marchingCubes } from 'isosurface';
 
-const NEAR = -1000;
-const FAR = 5000;
+const NEAR = -500;
+const FAR = 1000;
 
 /**
  * Displays a threejs scene inside a window component.
@@ -26,7 +28,7 @@ export default class ThreeWindow extends React.Component {
 		};
 		this.cameraProps = {
 			left : 0,
-			right: 0,
+			right : 0,
 			top : 0,
 			bottom : 0,
 			near : NEAR,
@@ -37,7 +39,14 @@ export default class ThreeWindow extends React.Component {
 		this.lastY = 0;
 		this.xDelta = 0;
 		this.yDelta = 0;
-		this.geometry = null;
+		this.stats = new Stats();
+		this.stats.setMode(0);
+		this.stats.domElement.style.position = 'absolute';
+		this.stats.domElement.style.left = '0px';
+		this.stats.domElement.style.top = '0px';
+		this.scaffoldGeometry = null;
+		this.volumeGeometry = null;
+
 		this.sphereVolume = sphereVolume(10, 10, 10);
 	}
 
@@ -79,7 +88,7 @@ export default class ThreeWindow extends React.Component {
 
 	render() {
 		return (
-			<div className="three-window" onMouseDown={this.handleMouseDown} onMouseUp={this.handleMouseUp}>
+			<div className="three-window">
 			</div>
 		);
 	}
@@ -98,39 +107,46 @@ export default class ThreeWindow extends React.Component {
 
 		// Camera
 		this.camera = new THREE.OrthographicCamera(left, right, top, bottom, NEAR, FAR);
+		this.camera.position.x = 200;
+		this.camera.position.y = 100;
+		this.camera.position.z = 200;
+		this.axisHelper = new THREE.AxisHelper(FAR/2);
+		this.scene.add(this.axisHelper);
 
 		// Action!
-		this.geometry = marchingCubes(10, 10, 10, 1, this.sphereVolume, 5);
+		// this.volumeGeometry = marchingCubes(10, 10, 10, 1, this.sphereVolume, 5);
+		// this.mesh = new THREE.Mesh(
+		// 	this.volumeGeometry,
+		// 	new THREE.MeshLambertMaterial({color: 0x101010, side: THREE.DoubleSide})
+		// );
+		// this.scene.add(this.mesh);
 
-		this.mesh = new THREE.Mesh(
-			// new THREE.BoxGeometry(100,100,100),
-			this.geometry,
-			new THREE.MeshLambertMaterial({color: 0x101010, side: THREE.DoubleSide})
-		);
-		this.scene.add(this.mesh);
-
-		this.wireframeMesh = new THREE.Mesh(
-			this.geometry,
-			new THREE.MeshBasicMaterial({
-				color : 0xffffff,
-				wireframe : true,
-				side: THREE.DoubleSide
-			})
-		);
+		// this.wireframeMesh = new THREE.Mesh(
+		// 	this.volumeGeometry,
+		// 	new THREE.MeshBasicMaterial({
+		// 		color : 0xffffff,
+		// 		wireframe : true,
+		// 		side: THREE.DoubleSide
+		// 	})
+		// );
 		// this.scene.add(this.wireframeMesh);
-
+		this.scaffoldGeometry = generateScaffold(1, 1, 1, 100);
 		this.scaffoldMesh = new THREE.Mesh(
 			this.scaffoldGeometry,
 			new THREE.MeshBasicMaterial({
-				color: 0x00ff00,
-				wireframe: true,
-				side: THREE.DoubleSide
+				color : 0xf0f0f0,
+				opacity : 0.25,
+				wireframe : true
 			})
 		);
 		this.scene.add(this.scaffoldMesh);
 
 		this.renderer = new THREE.WebGLRenderer({antialias : true});
+		let OrbitControls = createOrbitControls(THREE);
+		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+		this.controls.addEventListener('change', this.animate);
 		findDOMNode(this).appendChild(this.renderer.domElement);
+		findDOMNode(this).appendChild(this.stats.domElement);
 	}
 
 	@bind
@@ -148,11 +164,16 @@ export default class ThreeWindow extends React.Component {
 		this.camera.zoom = zoom;
 		this.camera.updateProjectionMatrix();
 
-		let rotationX = -this.yDelta*0.005 * Math.PI;
-		let rotationY = this.xDelta*0.005 * Math.PI;
-		this.mesh.rotation.x = rotationX;
-		this.mesh.rotation.y = rotationY;
+		// let rotationX = -this.yDelta*0.005 * Math.PI;
+		// let rotationY = this.xDelta*0.005 * Math.PI;
+		// this.scaffoldMesh.rotation.x = rotationX;
+		// this.scaffoldMesh.rotation.y = rotationY;
+		this.renderer.render(this.scene, this.camera);
+	}
 
+	@bind
+	animate() {
+		this.controls.update();
 		this.renderer.render(this.scene, this.camera);
 	}
 
@@ -173,29 +194,29 @@ export default class ThreeWindow extends React.Component {
 			height: h
 		});
 	}
-
-	@bind
-	handleMouseDown(mouseEvent) {
-		this.lastX = mouseEvent.clientX;
-		this.lastY = mouseEvent.clientY;
-		addEventListener('mousemove', this.handleMouseMove);
-	}
-
-	@bind
-	handleMouseMove(mouseEvent) {
-		mouseEvent.preventDefault();
-		let xD = mouseEvent.clientX - this.lastX;
-		let yD = this.lastY - mouseEvent.clientY;
-		this.xDelta += xD;
-		this.yDelta += yD;
-		this.lastX = mouseEvent.clientX;
-		this.lastY = mouseEvent.clientY;
-		this.renderThree();
-		console.log("mouse delta: "+xD+","+yD+" mesh delta: "+this.xDelta+","+this.yDelta);
-	}
-
-	@bind
-	handleMouseUp() {
-		removeEventListener('mousemove', this.handleMouseMove);
-	}
+	//
+	// @bind
+	// handleMouseDown(mouseEvent) {
+	// 	this.lastX = mouseEvent.clientX;
+	// 	this.lastY = mouseEvent.clientY;
+	// 	addEventListener('mousemove', this.handleMouseMove);
+	// }
+	//
+	// @bind
+	// handleMouseMove(mouseEvent) {
+	// 	mouseEvent.preventDefault();
+	// 	let xD = mouseEvent.clientX - this.lastX;
+	// 	let yD = this.lastY - mouseEvent.clientY;
+	// 	this.xDelta += xD;
+	// 	this.yDelta += yD;
+	// 	this.lastX = mouseEvent.clientX;
+	// 	this.lastY = mouseEvent.clientY;
+	// 	this.renderThree();
+	// 	console.log("mouse delta: "+xD+","+yD+" mesh delta: "+this.xDelta+","+this.yDelta);
+	// }
+	//
+	// @bind
+	// handleMouseUp() {
+	// 	removeEventListener('mousemove', this.handleMouseMove);
+	// }
 }

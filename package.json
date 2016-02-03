@@ -18,7 +18,9 @@
     "promise": "^7.1.1",
     "react": "^0.14.6",
     "react-dom": "^0.14.6",
-    "three": "^0.73.2"
+    "stats.js": "git+https://github.com/mrdoob/stats.js.git",
+    "three": "^0.73.2",
+    "three-orbit-controls": "^72.0.0"
   },
   "repository": {
     "type": "git",

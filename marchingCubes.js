@@ -303,21 +303,56 @@ export function polygonise(points, values, isolevel) {
 }
 
 export function generateScaffold(resX, resY, resZ, step) {
-	let vertices = [],
-		minZ = -1 * resZ * step,
-		minY = -1 * resY * step,
-		minX = -1 * resX * step;
-	for (let k = 0; k < resZ; k++) {
+	let geometry = new THREE.Geometry();
+	let minZ = -1 * resZ * step / 2,
+		minY = -1 * resY * step / 2,
+		minX = -1 * resX * step / 2,
+		vertexCountZ = resZ+1,
+		vertexCountY = resY+1,
+		vertexCountX = resX+1;
+	for (let k = 0; k < vertexCountZ; k++) {
 		let z = minZ + step * k;
-		for (let j = 0; j < resY; j++) {
+		for (let j = 0; j < vertexCountY; j++) {
 			let y = minY + step * j;
-			for (let i = 0; i < resX; i++) {
+			for (let i = 0; i < vertexCountX; i++) {
 				let x = minX + step * i;
-				vertices.push(new THREE.Vector3(x,y,z));
+				geometry.vertices.push(new THREE.Vector3(x,y,z));
 			}
 		}
 	}
-	return vertices;
+	let vertex0 = 0, // good
+		vertex1 = vertex0 + vertexCountX - 1, //good
+		vertex5 = vertexCountX * vertexCountY - 1, //good
+		vertex4 = vertexCountX * (vertexCountY - 1), //good?
+		vertex6 = vertexCountX * vertexCountY * vertexCountZ - 1, // good
+		vertex7 = vertexCountX * vertexCountY * vertexCountZ - vertexCountZ,
+		vertex3 = vertexCountX * vertexCountY * (vertexCountZ - 1),
+		vertex2 = vertexCountX * vertexCountY + (vertexCountZ - 1);
+
+	// Brute force create faces - because I suck at math.
+	//bottom
+	geometry.faces.push(new THREE.Face3(vertex0, vertex1, vertex2));
+	geometry.faces.push(new THREE.Face3(vertex0, vertex3, vertex2));
+	//top
+	geometry.faces.push(new THREE.Face3(vertex4, vertex5, vertex6));
+	geometry.faces.push(new THREE.Face3(vertex4, vertex6, vertex7));
+	//back
+	geometry.faces.push(new THREE.Face3(vertex0, vertex1, vertex4));
+	geometry.faces.push(new THREE.Face3(vertex1, vertex4, vertex5));
+	//right
+	geometry.faces.push(new THREE.Face3(vertex1, vertex2, vertex6));
+	geometry.faces.push(new THREE.Face3(vertex1, vertex5, vertex6));
+	//front
+	geometry.faces.push(new THREE.Face3(vertex2, vertex3, vertex7));
+	geometry.faces.push(new THREE.Face3(vertex2, vertex6, vertex7));
+	//left
+	geometry.faces.push(new THREE.Face3(vertex3, vertex0, vertex4));
+	geometry.faces.push(new THREE.Face3(vertex3, vertex7, vertex4));
+
+	geometry.mergeVertices();
+	geometry.computeFaceNormals();
+	geometry.computeVertexNormals();
+	return geometry;
 }
 
 /**
