@@ -327,7 +327,7 @@ export function generateScaffold(resX, resY, resZ, step) {
 		vertex6 = vertexCountX * vertexCountY * vertexCountZ - 1, // good
 		vertex7 = vertexCountX * vertexCountY * vertexCountZ - vertexCountZ,
 		vertex3 = vertexCountX * vertexCountY * (vertexCountZ - 1),
-		vertex2 = vertexCountX * vertexCountY + (vertexCountZ - 1);
+		vertex2 = vertexCountX * vertexCountY * (vertexCountZ - 1) + vertexCountX - 1;
 
 	// Brute force create faces - because I suck at math.
 	//bottom
