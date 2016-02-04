@@ -10,7 +10,8 @@
 import THREE from 'three';
 
 export default function (resX, resY, resZ, values, isolevel) {
-	let scaffold = generateScaffold(resX, resY, resZ);
+	let step = 0.25;
+	let scaffold = generateScaffold(resX, resY, resZ, step);
 	let points = scaffold.points;
 	let geometry = new THREE.Geometry();
 	let vertexIndex = 0;
@@ -157,14 +158,13 @@ function makeVolume(width, height, depth, f) {
 	let volume = new Float32Array(width * height * depth),
 		step = 0.25,
 		n = 0,
-		minZ = -1 * depth * step / 2,
-		minY = -1 * height * step / 2,
-		minX = -1 * width * step / 2,
-		res = [width, height, depth];
+		minZ = -1 * ((depth-1)/2) * step, // TODO: Refactor this into separate method
+		minY = -1 * ((height-1)/2) * step,
+		minX = -1 * ((width-1)/2) * step;
 
-	for(let k=0, z=minZ; k<res[2]; ++k, z+=step)
-		for(let j=0, y=minY; j<res[1]; ++j, y+=step)
-			for(let i=0, x=minX; i<res[0]; ++i, x+=step, ++n) {
+	for(let k = 0, z=minZ; k < depth; ++k, z+=step)
+		for(let j = 0, y=minY; j < height; ++j, y+=step)
+			for(let i = 0, x=minX; i < width; ++i, x+=step, ++n) {
 				volume[n] = f(x,y,z);
 			}
 	return {data: volume, dims:[width, height, depth]};
@@ -184,158 +184,15 @@ export function makeSphere() {
 	);
 }
 
-/*
-export function polygonise(points, values, isolevel) {
-	let size = Math.round(Math.pow(values.length, 1/3)), // TODO: INCORRECT - presumes all sides equal size
-		size2 = size * size,
-		vertexIndex = 0;
-	let geometry = new THREE.Geometry();
-
-	for (let z = 0; z < size - 1; z++) {
-		for (let y = 0; y < size - 1; y++) {
-			for (let x = 0; x < size - 1; x++) {
-
-				// calculate the array index that corresponds with each vertex of the current cube section
-				let p    = x + size * y + size2 * z,
-					px   = p   + 1,
-					py   = p   + size,
-					pxy  = py  + 1,
-					pz   = p   + size2,
-					pxz  = px  + size2,
-					pyz  = py  + size2,
-					pxyz = pxy + size2;
-
-				// cache the volume data for each vertex being evaluated
-				let value0 = values[p],
-					value1 = values[px],
-					value2 = values[py],
-					value3 = values[pxy],
-					value4 = values[pz],
-					value5 = values[pxz],
-					value6 = values[pyz],
-					value7 = values[pxyz];
-
-				// place a "1" in bit positions corresponding to vertices whose
-				// isovalue is less than given isolevel constant.
-				let cubeindex = 0;
-				if ( value0 < isolevel ) cubeindex |= 1;
-				if ( value1 < isolevel ) cubeindex |= 2;
-				if ( value2 < isolevel ) cubeindex |= 8;
-				if ( value3 < isolevel ) cubeindex |= 4;
-				if ( value4 < isolevel ) cubeindex |= 16;
-				if ( value5 < isolevel ) cubeindex |= 32;
-				if ( value6 < isolevel ) cubeindex |= 128;
-				if ( value7 < isolevel ) cubeindex |= 64;
-
-				// a 12-bit bitmask that indicates which edges are crossed by the isosurface
-				let edges = edgeTable[ cubeindex ];
-
-				// if no edges are crossed, then the cube is entirely inside/outside the surface
-				// and there's nothing to draw; return to process the next grid vertex
-				if ( edges === 0 ) continue;
-
-				// check which edges are crossed, and estimate the point location
-				// using a weighted average of scalar values at edge endpoints.
-				// store the vertex in an array for use later.
-				let mu = 0.5,
-					vlist = new Array(12);
-
-				// bottom of the cube
-				if ( edges & 1 )	{
-					mu = ( isolevel - value0 ) / ( value1 - value0 );
-					vlist[0] = points[p].clone().lerp( points[px], mu );
-				}
-				if ( edges & 2 )	{
-					mu = ( isolevel - value1 ) / ( value3 - value1 );
-					vlist[1] = points[px].clone().lerp( points[pxy], mu );
-				}
-				if ( edges & 4 )	{
-					mu = ( isolevel - value2 ) / ( value3 - value2 );
-					vlist[2] = points[py].clone().lerp( points[pxy], mu );
-				}
-				if ( edges & 8 )	{
-					mu = ( isolevel - value0 ) / ( value2 - value0 );
-					vlist[3] = points[p].clone().lerp( points[py], mu );
-				}
-				// top of the cube
-				if ( edges & 16 ) {
-					mu = ( isolevel - value4 ) / ( value5 - value4 );
-					vlist[4] = points[pz].clone().lerp( points[pxz], mu );
-				}
-				if ( edges & 32 ) {
-					mu = ( isolevel - value5 ) / ( value7 - value5 );
-					vlist[5] = points[pxz].clone().lerp( points[pxyz], mu );
-				}
-				if ( edges & 64 ) {
-					mu = ( isolevel - value6 ) / ( value7 - value6 );
-					vlist[6] = points[pyz].clone().lerp( points[pxyz], mu );
-				}
-				if ( edges & 128 ) {
-					mu = ( isolevel - value4 ) / ( value6 - value4 );
-					vlist[7] = points[pz].clone().lerp( points[pyz], mu );
-				}
-				// vertical lines of the cube
-				if ( edges & 256 ) {
-					mu = ( isolevel - value0 ) / ( value4 - value0 );
-					vlist[8] = points[p].clone().lerp( points[pz], mu );
-				}
-				if ( edges & 512 ) {
-					mu = ( isolevel - value1 ) / ( value5 - value1 );
-					vlist[9] = points[px].clone().lerp( points[pxz], mu );
-				}
-				if ( edges & 1024 ) {
-					mu = ( isolevel - value3 ) / ( value7 - value3 );
-					vlist[10] = points[pxy].clone().lerp( points[pxyz], mu );
-				}
-				if ( edges & 2048 ) {
-					mu = ( isolevel - value2 ) / ( value6 - value2 );
-					vlist[11] = points[py].clone().lerp( points[pyz], mu );
-				}
-
-				// Construct facets via triTable vertices lookup
-				let i = 0;
-				cubeindex <<= 4; // triTable offset; the original triTable was 2d array [256][16]
-
-				while (triTable[cubeindex + i] !== -1) {
-					let index1 = triTable[cubeindex + i],
-						index2 = triTable[cubeindex + i + 1],
-						index3 = triTable[cubeindex + i + 2];
-
-					// add vertices to Geometry
-					geometry.vertices.push(vlist[index1].clone());
-					geometry.vertices.push(vlist[index2].clone());
-					geometry.vertices.push(vlist[index3].clone());
-
-					// add faces to Geometry
-					geometry.faces.push(new THREE.Face3(vertexIndex, vertexIndex+1, vertexIndex+2));
-					geometry.faceVertexUvs[0].push([
-						new THREE.Vector2(0,0),
-						new THREE.Vector2(0,1),
-						new THREE.Vector2(1,1)
-					]);
-
-					vertexIndex += 3;
-					i += 3;
-				}
-			}
-		}
-	}
-	return geometry;
-}
-*/
-
-export function generateScaffold(width, height, depth) {
-	let step = 0.25,
-		minZ = -1 * depth * step / 2,
-		minY = -1 * height * step / 2,
-		minX = -1 * width * step / 2,
+export function generateScaffold(width, height, depth, step) {
+	// TODO: UNIT TEST
+	let minZ = -1 * ((depth-1)/2) * step,
+		minY = -1 * ((height-1)/2) * step,
+		minX = -1 * ((width-1)/2) * step,
 		vertices = [];
-	for (let k = 0; k < depth; k++) {
-		let z = minZ + step * k;
-		for (let j = 0; j < height; j++) {
-			let y = minY + step * j;
-			for (let i = 0; i < width; i++) {
-				let x = minX + step * i;
+	for (let k = 0, z = minZ; k < depth; k++, z += step) {
+		for (let j = 0, y = minY; j < height; j++, y += step) {
+			for (let i = 0, x = minX; i < width; i++, x += step) {
 				vertices.push(new THREE.Vector3(x,y,z));
 			}
 		}
@@ -352,7 +209,7 @@ export function generateScaffoldGeometry(vertices, width, height, depth) {
 		vertex1 = width - 1, //good
 		vertex5 = width * height - 1, //good
 		vertex4 = width * (height - 1), //good?
-		vertex6 = width * height * depth - 1, // good
+		vertex6 = width * height * depth -1, // good
 		vertex7 = width * height * depth - depth,
 		vertex3 = width * height * (depth - 1),
 		vertex2 = width * height * (depth - 1) + width - 1;

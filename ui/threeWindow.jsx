@@ -81,7 +81,7 @@ export default class ThreeWindow extends React.Component {
 			);
 
 			this.scaffoldMesh = new THREE.Mesh(
-				generateScaffold(width, height, depth),
+				generateScaffold(width, height, depth, 0.25),
 				new THREE.MeshBasicMaterial({
 					color : 0xAAAAFF,
 					transparent : true,
@@ -100,7 +100,7 @@ export default class ThreeWindow extends React.Component {
 					side : THREE.DoubleSide
 				})
 			);
-			let scaffold = generateScaffold(volume.dims[0], volume.dims[1], volume.dims[2]);
+			let scaffold = generateScaffold(volume.dims[0], volume.dims[1], volume.dims[2], 0.25);
 			this.scaffoldMesh = new THREE.Mesh(
 				generateScaffoldGeometry(scaffold.points, volume.dims[0], volume.dims[1], volume.dims[2]),
 				new THREE.MeshBasicMaterial({

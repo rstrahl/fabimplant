@@ -61,58 +61,49 @@ the origin 0,0 for simplicity.
  * @param {number} range the geometric coordinate range of the cube; if no value
  * is specified will default to 1.0
  */
-export function calculateGridCube(resolution, range) {
-	// TODO: REQUIRES UNIT TEST
+export function generateScaffold(resolution, range) {
 	let min = -range / 2;
-	let cubeVertices = [];
+	let vertices = [];
 	for (let k = 0; k < resolution; k++) {
 		for (let j = 0; j < resolution; j++) {
 			for (let i = 0; i < resolution; i++) {
 				let x = min + range * i / (resolution - 1);
 				let y = min + range * j / (resolution - 1);
 				let z = min + range * k / (resolution - 1);
-				cubeVertices.push(new THREE.Vector3(x,y,z));
+				vertices.push(new THREE.Vector3(x,y,z));
 			}
 		}
 	}
 	return cubeVertices;
 }
-
 ```
 
 This is acceptable as long as the sample data is cubic; that is all dimensions are of
 equal length.  But for imaging data the dimensions create a cuboid; typically `x` and `y`
-are equal, but `z` is unique, creating a non-cubic rectangular solid.
+are equal, but `z` is unique, creating a non-cubic rectangular solid.  So we need
+to modify the equation to accept separate dimensions for `width`, `height`, and `depth`.
 
-
-
-### Rendering DICOM
-
-DICOM images tend to be > 100x100 in pixel size, which creates a problem for rendering
-apparently.  Memory consumption for calculating a size of 276x276x179 image breaks a
-browser limit it turns out.
-
-One solution is to reduce the level of detail applied to the volume set; define a
-resolution that is less than the pixel size, and sub-sample the volume data into
-that resolution.
-
-> ie - if the original image slice was 100*100, it can be resampled down to 50*50 by
-taking every second value.
-
-Concept:  define a resolution factor (1 = full, 2 = half, 4...), and apply that as
-the a sampling step in a method.  
+The `range` parameter is also removed in favour of being able to set a step/unit value
+for each vertex increment/decrement.
 
 ```javascript
-function resample(values, dimensions, resolution) {
-	let resampledVolume = new UintArray();
-	for (let z = 0; z < dimensions[2]; z += resolution) {
-		for (let y = 0; y < dimensions[1]; y += resolution) {
-			for (let x = 0; x < dimensions[0]; x += resolution) {
-				resampledVolume[n] = values[z*y*x + z*y + z];
+export function generateScaffold(width, height, depth) {
+	let step = 0.25,
+		minZ = -1 * depth * step / 2,
+		minY = -1 * height * step / 2,
+		minX = -1 * width * step / 2,
+		vertices = [];
+	for (let k = 0; k < depth; k++) {
+		let z = minZ + step * k;
+		for (let j = 0; j < height; j++) {
+			let y = minY + step * j;
+			for (let i = 0; i < width; i++) {
+				let x = minX + step * i;
+				vertices.push(new THREE.Vector3(x,y,z));
 			}
 		}
 	}
-
+	return { points: vertices, dims: [width, height, depth] };
 }
 ```
 
