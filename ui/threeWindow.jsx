@@ -68,7 +68,7 @@ export default class ThreeWindow extends React.Component {
 			let width = dicomFile.getImageWidth(),
 				height = dicomFile.getImageHeight(),
 				depth = dicomFile.pixelArrays.length,
-				isolevel = 1.1;
+				isolevel = 0.5;
 
 			let pixelData = getThresholdPixelArray(dicomFile, 1424, 1);
 			let volume = resampleVolumeData(pixelData, width, height, depth);

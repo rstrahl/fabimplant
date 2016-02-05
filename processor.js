@@ -99,8 +99,7 @@ export function flattenPixelArrays(pixelArrays, colourChannels) {
 		for (let j = 0; j < pixelArray.length; j += colourChannels) {
 			// For this purpose we can assume the pixel data is grayscale
 			//  and only need to sample one of the colour channels for presence
-			let gridValue = (pixelArray[j] > 0) ? 1 : 0;
-			gridArray.push(gridValue);
+			gridArray.push(pixelArray[j]);
 		}
 	}
 	return gridArray;
