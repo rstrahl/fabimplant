@@ -9,10 +9,8 @@
 
 import THREE from 'three';
 
-export default function (resX, resY, resZ, values, isolevel) {
-	let step = 0.25;
-	let scaffold = generateScaffold(resX, resY, resZ, step);
-	let points = scaffold.points;
+export default function (resX, resY, resZ, step, values, isolevel) {
+	let points = generateScaffold(resX, resY, resZ, step);
 	let geometry = new THREE.Geometry();
 	let vertexIndex = 0;
 
@@ -154,17 +152,16 @@ export default function (resX, resY, resZ, values, isolevel) {
 	return geometry;
 }
 
-function makeVolume(width, height, depth, f) {
+function makeVolume(width, height, depth, step, f) {
 	let volume = new Float32Array(width * height * depth),
-		step = 0.25,
 		n = 0,
-		minZ = -1 * ((depth-1)/2) * step, // TODO: Refactor this into separate method
-		minY = -1 * ((height-1)/2) * step,
-		minX = -1 * ((width-1)/2) * step;
+		minZ = getAxisRange(depth, step)[0],
+		minY = getAxisRange(height, step)[0],
+		minX = getAxisRange(width, step)[0];
 
-	for(let k = 0, z=minZ; k < depth; ++k, z+=step)
-		for(let j = 0, y=minY; j < height; ++j, y+=step)
-			for(let i = 0, x=minX; i < width; ++i, x+=step, ++n) {
+	for (let k = 0, z = minZ; k < depth; ++k, z += step)
+		for (let j = 0, y = minY; j < height; ++j, y += step)
+			for (let i = 0, x = minX; i < width; ++i, x += step, ++n) {
 				volume[n] = f(x,y,z);
 			}
 	return {data: volume, dims:[width, height, depth]};
@@ -175,20 +172,26 @@ function makeVolume(width, height, depth, f) {
  *
  * @return {Object} The volume as an object
  */
-export function makeSphere() {
-	return makeVolume(
-		10, 10, 10,
-		(x,y,z) => {
-			return Math.sqrt(x*x + y*y + z*z);
-		}
-	);
+export function makeSphere(width, height, depth, step) {
+	return makeVolume(width, height, depth, step, (x,y,z) => {
+		return Math.sqrt(x*x + y*y + z*z);
+	});
 }
 
+/**
+ * Generates a "scaffold" of vertices to be used as the test points in the
+ * marching cubes algorithm.
+ *
+ * @param  {number} width the width of the scaffold
+ * @param  {number} height the height of the scaffold
+ * @param  {number} depth the depth of the scaffold
+ * @param  {number} step the distance between vertices
+ * @return {Array} an array of Three.Vector3 objects
+ */
 export function generateScaffold(width, height, depth, step) {
-	// TODO: UNIT TEST
-	let minZ = -1 * ((depth-1)/2) * step,
-		minY = -1 * ((height-1)/2) * step,
-		minX = -1 * ((width-1)/2) * step,
+	let minZ = getAxisRange(depth, step)[0],
+		minY = getAxisRange(height, step)[0],
+		minX = getAxisRange(width, step)[0],
 		vertices = [];
 	for (let k = 0, z = minZ; k < depth; k++, z += step) {
 		for (let j = 0, y = minY; j < height; j++, y += step) {
@@ -197,20 +200,42 @@ export function generateScaffold(width, height, depth, step) {
 			}
 		}
 	}
-	return { points: vertices, dims: [width, height, depth] };
+	return vertices;
 }
 
+/**
+ * Returns the minimum and maximum values along an axis given the number of
+ * vertices specified and the distance between vertices.
+ *
+ * @param  {[type]} dim the number of vertices
+ * @param  {[type]} step the distance between vertices
+ * @return {Array} An array in the format of [min, max]
+ */
+export function getAxisRange(dim, step) {
+	let max = ((dim-1)/2) * step;
+	return [-1 * max, max];
+}
+
+/**
+ * Generates a THREE.Geometry box that outlines the scaffold area edge to edge.
+ *
+ * @param  {Array} vertices the scaffold vertices
+ * @param  {number} width the projected width of the scaffold
+ * @param  {number} height the projected height of the scaffold
+ * @param  {number} depth the projected depth of the scaffold
+ * @return {Object} a THREE.Geometry object with vertices and faces
+ */
 export function generateScaffoldGeometry(vertices, width, height, depth) {
 	let geometry = new THREE.Geometry();
 	vertices.forEach( (element) => {
 		geometry.vertices.push(element);
 	});
-	let vertex0 = 0, // good
-		vertex1 = width - 1, //good
-		vertex5 = width * height - 1, //good
-		vertex4 = width * (height - 1), //good?
-		vertex6 = width * height * depth -1, // good
-		vertex7 = width * height * depth - depth,
+	let vertex0 = 0,
+		vertex1 = width - 1,
+		vertex5 = width * height - 1,
+		vertex4 = width * (height - 1),
+		vertex6 = width * height * depth -1,
+		vertex7 = width * height * depth - width,
 		vertex3 = width * height * (depth - 1),
 		vertex2 = width * height * (depth - 1) + width - 1;
 
@@ -238,6 +263,34 @@ export function generateScaffoldGeometry(vertices, width, height, depth) {
 	geometry.computeFaceNormals();
 	geometry.computeVertexNormals();
 	return geometry;
+}
+
+/**
+ * Down-samples a given array representing a 3-d volume by its cube-root.
+ *
+ * @param  {Array} data   [description]
+ * @param  {number} width  [description]
+ * @param  {number} height [description]
+ * @param  {number} depth  [description]
+ * @return {Object} an object containing the resampled volume data and the new dimensions
+ */
+export function resampleVolumeData(data, width, height, depth) {
+	// TODO: UNIT TEST
+	let newWidth = Math.floor(width/2),
+		newHeight = Math.floor(height/2),
+		newDepth = Math.floor(depth/2),
+		resampledVolume = new Uint8Array(newWidth * newHeight * newDepth),
+		n = 0;
+	for (let z = 0; z < depth; z += 2) {
+		for (let y = 0; y < height; y += 2) {
+			for (let x = 0; x < width; x += 2) {
+				let arrayIndex = z*height*width + y*width + x;
+				resampledVolume[n] = data[arrayIndex];
+				n += 1;
+			}
+		}
+	}
+	return { data : resampledVolume, dims : [newWidth, newHeight, newDepth] };
 }
 
 /**

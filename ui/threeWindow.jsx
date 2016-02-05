@@ -9,7 +9,7 @@ import THREE from 'three';
 import Stats from 'stats.js';
 import createOrbitControls from 'three-orbit-controls';
 import { getThresholdPixelArray } from '../processor';
-import { default as marchingCubes, generateScaffold, generateScaffoldGeometry, makeSphere } from '../marchingCubes';
+import { default as marchingCubes, resampleVolumeData, generateScaffold, generateScaffoldGeometry, makeSphere } from '../marchingCubes';
 // import { marchingCubes } from 'isosurface';
 
 const NEAR = -500;
@@ -65,23 +65,25 @@ export default class ThreeWindow extends React.Component {
 
 		let { dicomFile } = this.props;
 		if (dicomFile !== undefined && dicomFile !== null) {
-			let pixelData = getThresholdPixelArray(dicomFile, 1424, 1);
-			let isolevel = 0.5;
-			let width = dicomFile.getImageWidth();
-			let height = dicomFile.getImageHeight();
-			let depth = dicomFile.pixelArrays.length;
+			let width = dicomFile.getImageWidth(),
+				height = dicomFile.getImageHeight(),
+				depth = dicomFile.pixelArrays.length,
+				isolevel = 1.1;
 
-			let volume = marchingCubes(width, height, depth, pixelData, isolevel);
+			let pixelData = getThresholdPixelArray(dicomFile, 1424, 1);
+			let volume = resampleVolumeData(pixelData, width, height, depth);
+			let step = 0.25;
+			let volumeGeometry = marchingCubes(volume.dims[0], volume.dims[1], volume.dims[2], step, volume.data, isolevel);
 			this.volumeMesh = new THREE.Mesh(
-				volume,
+				volumeGeometry,
 				new THREE.MeshLambertMaterial({
 					color : 0xFFFFFF,
 					side : THREE.DoubleSide
 				})
 			);
-
+			let scaffold = generateScaffold(volume.dims[0], volume.dims[1], volume.dims[2], step);
 			this.scaffoldMesh = new THREE.Mesh(
-				generateScaffold(width, height, depth, 0.25),
+				generateScaffoldGeometry(scaffold, volume.dims[0], volume.dims[1], volume.dims[2]),
 				new THREE.MeshBasicMaterial({
 					color : 0xAAAAFF,
 					transparent : true,
@@ -91,8 +93,9 @@ export default class ThreeWindow extends React.Component {
 			);
 
 		} else {
-			let volume = makeSphere();
-			let volumeGeometry = marchingCubes(volume.dims[0], volume.dims[1], volume.dims[2], volume.data, 1);
+			let step = 10;
+			let volume = makeSphere(10, 10, 10, step);
+			let volumeGeometry = marchingCubes(volume.dims[0], volume.dims[1], volume.dims[2], step, volume.data, 45);
 			this.volumeMesh = new THREE.Mesh(
 				volumeGeometry,
 				new THREE.MeshLambertMaterial({
@@ -100,9 +103,9 @@ export default class ThreeWindow extends React.Component {
 					side : THREE.DoubleSide
 				})
 			);
-			let scaffold = generateScaffold(volume.dims[0], volume.dims[1], volume.dims[2], 0.25);
+			let scaffold = generateScaffold(volume.dims[0], volume.dims[1], volume.dims[2], step);
 			this.scaffoldMesh = new THREE.Mesh(
-				generateScaffoldGeometry(scaffold.points, volume.dims[0], volume.dims[1], volume.dims[2]),
+				generateScaffoldGeometry(scaffold, volume.dims[0], volume.dims[1], volume.dims[2]),
 				new THREE.MeshBasicMaterial({
 					color : 0xAAAAFF,
 					transparent : true,
