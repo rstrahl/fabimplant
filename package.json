@@ -4,7 +4,7 @@
   "description": "",
   "main": "bundle.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --compilers js:babel-core/register",
     "build": "browserify main.js -t babelify -d -o bundle.js",
     "watch": "watchify main.js -t babelify -d -o bundle.js",
     "start": "http-server --cors --port ${PORT:-8080}"
@@ -40,8 +40,10 @@
     "babel-preset-stage-0": "^6.3.13",
     "babelify": "^7.0.0",
     "browserify": "^13.0.0",
+    "chai": "^3.5.0",
     "eslint": "^1.10.3",
     "eslint-plugin-react": "^3.15.0",
+    "mocha": "^2.4.5",
     "watchify": "^3.7.0"
   }
 }

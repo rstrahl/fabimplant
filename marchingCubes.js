@@ -275,7 +275,6 @@ export function generateScaffoldGeometry(vertices, width, height, depth) {
  * @return {Object} an object containing the resampled volume data and the new dimensions
  */
 export function resampleVolumeData(data, width, height, depth) {
-	// TODO: UNIT TEST
 	let newWidth = Math.floor(width/2),
 		newHeight = Math.floor(height/2),
 		newDepth = Math.floor(depth/2),
