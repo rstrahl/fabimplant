@@ -9,7 +9,8 @@ import THREE from 'three';
 import Stats from 'stats.js';
 import createOrbitControls from 'three-orbit-controls';
 import { getThresholdPixelArray } from '../processor';
-import { default as marchingCubes, resampleVolumeData, generateScaffold, generateScaffoldGeometry, makeSphere } from '../marchingCubes';
+import { default as marchingCubes, flattenPixelArrays, resamplePixelArray, normalizePixelArray,
+	generateScaffold, generateScaffoldGeometry, makeSphere } from '../marchingCubes';
 // import { marchingCubes } from 'isosurface';
 
 const NEAR = -500;
@@ -70,20 +71,31 @@ export default class ThreeWindow extends React.Component {
 				depth = dicomFile.pixelArrays.length,
 				isolevel = 0.5;
 
-			let pixelData = getThresholdPixelArray(dicomFile, 1424, 1);
-			let volume = resampleVolumeData(pixelData, width, height, depth);
+			let pixelArrays = getThresholdPixelArray(dicomFile, 1500, 1);
+			let downsampledArrays = {
+				data : []
+			};
+			for (let i = 0; pixelArrays.length - i >= 2; i += 2) {
+				let normalizedArray = normalizePixelArray(pixelArrays[i], width, height);
+				let array = resamplePixelArray(normalizedArray.data);
+				downsampledArrays.data.push(array.data);
+				if (downsampledArrays.width === undefined) downsampledArrays.width = array.width;
+				if (downsampledArrays.height === undefined) downsampledArrays.height = array.height;
+			}
+			let volume = flattenPixelArrays(downsampledArrays.data, downsampledArrays.width, downsampledArrays.height);
+			// let volume = resampleVolumeData(flatArray.data, flatArray.width, flatArray.height, flatArray.depth);
 			let step = 0.25;
-			let volumeGeometry = marchingCubes(volume.dims[0], volume.dims[1], volume.dims[2], step, volume.data, isolevel);
+			let volumeGeometry = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, isolevel);
 			this.volumeMesh = new THREE.Mesh(
 				volumeGeometry,
 				new THREE.MeshLambertMaterial({
-					color : 0xFFFFFF,
+					color : 0xF0F0F0,
 					side : THREE.DoubleSide
 				})
 			);
-			let scaffold = generateScaffold(volume.dims[0], volume.dims[1], volume.dims[2], step);
+			let scaffold = generateScaffold(volume.width, volume.height, volume.depth, step);
 			this.scaffoldMesh = new THREE.Mesh(
-				generateScaffoldGeometry(scaffold, volume.dims[0], volume.dims[1], volume.dims[2]),
+				generateScaffoldGeometry(scaffold, volume.width, volume.height, volume.depth),
 				new THREE.MeshBasicMaterial({
 					color : 0xAAAAFF,
 					transparent : true,
@@ -95,7 +107,7 @@ export default class ThreeWindow extends React.Component {
 		} else {
 			let step = 10;
 			let volume = makeSphere(10, 10, 10, step);
-			let volumeGeometry = marchingCubes(volume.dims[0], volume.dims[1], volume.dims[2], step, volume.data, 45);
+			let volumeGeometry = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, 45);
 			this.volumeMesh = new THREE.Mesh(
 				volumeGeometry,
 				new THREE.MeshLambertMaterial({
@@ -103,9 +115,9 @@ export default class ThreeWindow extends React.Component {
 					side : THREE.DoubleSide
 				})
 			);
-			let scaffold = generateScaffold(volume.dims[0], volume.dims[1], volume.dims[2], step);
+			let scaffold = generateScaffold(volume.width, volume.height, volume.depth, step);
 			this.scaffoldMesh = new THREE.Mesh(
-				generateScaffoldGeometry(scaffold, volume.dims[0], volume.dims[1], volume.dims[2]),
+				generateScaffoldGeometry(scaffold, volume.width, volume.height, volume.depth),
 				new THREE.MeshBasicMaterial({
 					color : 0xAAAAFF,
 					transparent : true,
@@ -139,8 +151,14 @@ export default class ThreeWindow extends React.Component {
 		this.ambientLight = new THREE.AmbientLight(0x404040);
 		this.scene.add(this.ambientLight);
 		this.directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
-		this.directionalLight.position.set(0,500,50);
+		this.directionalLight.position.set(250,500,50);
 		this.scene.add(this.directionalLight);
+		this.directionalLight2 = new THREE.DirectionalLight(0xFFFFFF, 1);
+		this.directionalLight2.position.set(-250,500,50);
+		this.scene.add(this.directionalLight2);
+		this.directionalLight2 = new THREE.DirectionalLight(0x101010, 1);
+		this.directionalLight2.position.set(0,-500,0);
+		this.scene.add(this.directionalLight3);
 
 		// Camera
 		this.camera = new THREE.OrthographicCamera(left, right, top, bottom, NEAR, FAR);

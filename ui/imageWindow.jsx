@@ -19,7 +19,7 @@ export default class ImageWindow extends React.Component {
 		this.state = {
 			imageIndex: 0,
 			windowWidth: 1, // TODO: Modify these to use HU-based values
-			windowCenter: 1424
+			windowCenter: 1550
 		};
 	}
 

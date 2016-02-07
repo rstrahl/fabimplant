@@ -84,28 +84,6 @@ export function prepareImageData(pixelData, width, height, windowCenter, windowW
 }
 
 /**
- * Collapses an array of pixel data arrays of a specified number of color channels,
- * down to an array of true/false values that reflect whether the pixel at the plane
- * location is occupied.
- *
- * @param  {TypedArray} an array of arrays containing pixel colour values
- * @param  {number} colourChannels the number of colour channels used in the pixel data
- * @return {Array} a flattened array containing all pixel arrays in sequence
- */
-export function flattenPixelArrays(pixelArrays, colourChannels) {
-	let gridArray = [];
-	for (let i = 0; i < pixelArrays.length; i += 1) {
-		let pixelArray = pixelArrays[i];
-		for (let j = 0; j < pixelArray.length; j += colourChannels) {
-			// For this purpose we can assume the pixel data is grayscale
-			//  and only need to sample one of the colour channels for presence
-			gridArray.push(pixelArray[j]);
-		}
-	}
-	return gridArray;
-}
-
-/**
  * Generates an array of all image pixel data contained in the specified DicomFile
  * object.  The pixel data will have the resulting Window Center and Window Width
  * applied.
@@ -113,7 +91,7 @@ export function flattenPixelArrays(pixelArrays, colourChannels) {
  * @param  {Object} dicomFile a DicomFile object
  * @param  {number} windowCenter the desired Window Center
  * @param  {number} windowWidth the desired Window Width
- * @return {Array} a contiguous array containing single-channel pixel values
+ * @return {Array} an array of pixel value arrays
  */
 export function getThresholdPixelArray(dicomFile, windowCenter, windowWidth) {
 	let height = dicomFile.getImageHeight();
@@ -122,14 +100,18 @@ export function getThresholdPixelArray(dicomFile, windowCenter, windowWidth) {
 	let thresholdPixelArrays = [];
 	for (let i = 0; i < pixelArrays.length; i++) {
 		let pixelArray = pixelArrays[i];
-		let imageData = prepareImageData(pixelArray, width, height, windowCenter, windowWidth);
-		thresholdPixelArrays.push(imageData.data);
+		let thresholdArray = [];
+		// let imageData = prepareImageData(pixelArray, width, height, windowCenter, windowWidth);
+		pixelArray.forEach( (value) => {
+			thresholdArray.push(applyWindowLevelAndCenter(value, windowCenter, windowWidth));
+		});
+		thresholdPixelArrays.push(thresholdArray);
 	}
-	let flatPixelArray = flattenPixelArrays(thresholdPixelArrays, 4);
-	return flatPixelArray;
+	return thresholdPixelArrays;
 }
 
-function applyWindowLevelAndCenter(pixelValue, windowCenter, windowWidth) {
+export function applyWindowLevelAndCenter(pixelValue, windowCenter, windowWidth) {
+	// TODO: UNIT TEST
 	// By spec, windowWidth can never be less than 1 - we gracefully fail by returning an unaltered pixelValue
 	if (windowWidth < 1) {
 		console.error('windowWidth cannot be < 1');

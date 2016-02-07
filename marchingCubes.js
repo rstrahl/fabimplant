@@ -7,6 +7,7 @@
 
 'use-strict';
 
+import Volume from './volumeArray';
 import THREE from 'three';
 
 export default function (resX, resY, resZ, step, values, isolevel) {
@@ -152,7 +153,16 @@ export default function (resX, resY, resZ, step, values, isolevel) {
 	return geometry;
 }
 
-function makeVolume(width, height, depth, step, f) {
+/** Creates a volume from a function.
+ *
+ * @param  {number} width the width of the volume
+ * @param  {number} height the height of the volume
+ * @param  {number} depth the depth of the volume
+ * @param  {number} step the increment between vertices
+ * @param  {function} f a function that accepts x, y, z values iteratively
+ * @return {Object} A Volume object.
+ */
+export function makeVolume(width, height, depth, step, f) {
 	let volume = new Float32Array(width * height * depth),
 		n = 0,
 		minZ = getAxisRange(depth, step)[0],
@@ -164,13 +174,12 @@ function makeVolume(width, height, depth, step, f) {
 			for (let i = 0, x = minX; i < width; ++i, x += step, ++n) {
 				volume[n] = f(x,y,z);
 			}
-	return {data: volume, dims:[width, height, depth]};
+	return new Volume(volume, width, height, depth);
 }
 
-/**
- * Creates a sample volume in the shape of a sphere
+/** Creates a sample volume in the shape of a sphere.
  *
- * @return {Object} The volume as an object
+ * @return {Object} A Volume object.
  */
 export function makeSphere(width, height, depth, step) {
 	return makeVolume(width, height, depth, step, (x,y,z) => {
@@ -178,9 +187,8 @@ export function makeSphere(width, height, depth, step) {
 	});
 }
 
-/**
- * Generates a "scaffold" of vertices to be used as the test points in the
- * marching cubes algorithm.
+/** Generates a "scaffold" of vertices with the given dimensions.
+ * Used in the Marching Cubes algorithm when mapping values to vertices.
  *
  * @param  {number} width the width of the scaffold
  * @param  {number} height the height of the scaffold
@@ -203,12 +211,10 @@ export function generateScaffold(width, height, depth, step) {
 	return vertices;
 }
 
-/**
- * Returns the minimum and maximum values along an axis given the number of
- * vertices specified and the distance between vertices.
+/** Returns the minimum and maximum values along an axis.
  *
- * @param  {[type]} dim the number of vertices
- * @param  {[type]} step the distance between vertices
+ * @param  {number} dim the number of vertices
+ * @param  {number} step the distance between vertices
  * @return {Array} An array in the format of [min, max]
  */
 export function getAxisRange(dim, step) {
@@ -216,8 +222,8 @@ export function getAxisRange(dim, step) {
 	return [-1 * max, max];
 }
 
-/**
- * Generates a THREE.Geometry box that outlines the scaffold area edge to edge.
+/** Generates a THREE.Geometry box that outlines the scaffold area edge to edge.
+ * Used typically for debugging purposes.
  *
  * @param  {Array} vertices the scaffold vertices
  * @param  {number} width the projected width of the scaffold
@@ -265,6 +271,27 @@ export function generateScaffoldGeometry(vertices, width, height, depth) {
 	return geometry;
 }
 
+/** Collapses an array of pixel-data arrays down to into one contiguous array.
+ * The colour channels will be flattened during this process down to one.
+ *
+ * @param  {Array} pixelArrays an array of arrays
+ * @param  {number} width the width of an individual array in pixelArrays
+ * @param  {number} height the height of an individual array in pixelArrays
+ * @param  {number} colourChannels the number of colour channels used in the pixelArrays
+ * @return {Array} a contiguous array
+ */
+export function flattenPixelArrays(pixelArrays, width, height) {
+	let needsPadX = (width % 2 !== 0),
+		needsPadY = (height % 2 !== 0),
+		needsPadZ = (pixelArrays.length % 2 !== 0),
+		flatArray = [];
+
+	for (let pixelArray of pixelArrays) {
+		flatArray = flatArray.concat(...pixelArray);
+	}
+	return new Volume(flatArray, width, height, pixelArrays.length);
+}
+
 /**
  * Down-samples a given array representing a 3-d volume by its cube-root.
  *
@@ -272,24 +299,75 @@ export function generateScaffoldGeometry(vertices, width, height, depth) {
  * @param  {number} width  [description]
  * @param  {number} height [description]
  * @param  {number} depth  [description]
- * @return {Object} an object containing the resampled volume data and the new dimensions
+ * @return {Object} a Volume object containing the resampled volume data and the
+ * new dimensions
  */
 export function resampleVolumeData(data, width, height, depth) {
-	let newWidth = Math.floor(width/2),
+	let dim = width * height,
+		size = depth * height * width,
+		newWidth = Math.floor(width/2),
 		newHeight = Math.floor(height/2),
 		newDepth = Math.floor(depth/2),
 		resampledVolume = new Uint8Array(newWidth * newHeight * newDepth),
 		n = 0;
-	for (let z = 0; z < depth; z += 2) {
-		for (let y = 0; y < height; y += 2) {
-			for (let x = 0; x < width; x += 2) {
-				let arrayIndex = z*height*width + y*width + x;
-				resampledVolume[n] = data[arrayIndex];
-				n += 1;
-			}
+	for (let i=0; i<size; i+=2) {
+		if (i && i%width === 0) i += width;
+		if (i && i%dim===0) i += dim;
+		if (i<size) resampledVolume[n++] = data[i];
+	}
+	return new Volume(resampledVolume, newWidth, newHeight, newDepth);
+}
+
+/** Resamples a given pixel array down by a given factor.
+ * The array is presumed to be a contiguous array that represents a 2-dimensional
+ * array that has been normalized.
+ * @see normalizePixelArray
+ *
+ * @param  {Array} pixelArray a normalized array
+ * @param  {number} width (optional) the width of the array
+ * @param  {number} height (optional) the height of the array
+ * @param  {number} factor (optional) the downsampling factor (2, 4, etc.)
+ * @return {Object} an object containing the downsampled pixel array and new dimensions
+ */
+export function resamplePixelArray(pixelArray, width, height, factor) {
+	factor = (factor === undefined) ? 2 : factor;
+	width = (width === undefined) ? Math.sqrt(pixelArray.length) : width;
+	height = (height === undefined) ? width : height;
+
+	let dim = width * height,
+		newWidth = Math.floor(width/factor),
+		newHeight = Math.floor(height/factor),
+		array = new Uint8Array(newWidth * newHeight),
+		n = 0;
+
+	for (let i = 0; i < dim; i += factor, n += 1) {
+		if (i && i % width === 0) {
+			i += (width * (factor - 1));
+		}
+		if (i < dim) {
+			array[n] = pixelArray[i];
 		}
 	}
-	return { data : resampledVolume, dims : [newWidth, newHeight, newDepth] };
+	return { data: array, width: newWidth, height: newHeight };
+}
+
+export function normalizePixelArray(pixelArray, width, height) {
+	let dim = width * height;
+
+	if (height % 2 !== 0) {
+		pixelArray.splice(dim - width, width);
+		height -= 1;
+		dim = width * height;
+	}
+
+	if (width % 2 !== 0) {
+		for (let i = dim-width; i >= 0; i -= width) {
+			pixelArray.splice(i + width-1, 1);
+		}
+		width -= 1;
+		dim = width * height;
+	}
+	return { data: pixelArray, width, height };
 }
 
 /**

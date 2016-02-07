@@ -32,3 +32,8 @@ function resample(values, dimensions, resolution) {
 
 }
 ```
+
+Steps:
+
+1. Reduce the size of the input data to something reasonable
+2. Flatten the resulting input data into a single contiguous array
