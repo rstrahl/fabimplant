@@ -11,7 +11,7 @@ import createOrbitControls from 'three-orbit-controls';
 import { getThresholdPixelArray } from '../processor';
 import { default as marchingCubes, flattenPixelArrays, resamplePixelArray, normalizePixelArray,
 	generateScaffold, generateScaffoldGeometry, makeSphere } from '../marchingCubes';
-// import { marchingCubes } from 'isosurface';
+import Serializer from '../STLSerializer';
 
 const NEAR = -500;
 const FAR = 1000;
@@ -40,6 +40,7 @@ export default class ThreeWindow extends React.Component {
 		this.lastY = 0;
 		this.xDelta = 0;
 		this.yDelta = 0;
+		// STATS - TODO: Refactor this out of the jsx
 		this.stats = new Stats();
 		this.stats.setMode(0);
 		this.stats.domElement.style.position = 'absolute';
@@ -64,6 +65,7 @@ export default class ThreeWindow extends React.Component {
 	componentDidMount() {
 		addEventListener('resize', this.updateSize);
 
+		// TODO: Refactor all this shit out of the jsx and into a functional helper
 		let { dicomFile } = this.props;
 		if (dicomFile !== undefined && dicomFile !== null) {
 			let width = dicomFile.getImageWidth(),
@@ -138,6 +140,8 @@ export default class ThreeWindow extends React.Component {
 	render() {
 		return (
 			<div className="three-window">
+				<button className="three-window-button-export" type="button"
+					onClick={this.handleExportSTL}>Export</button>
 			</div>
 		);
 	}
@@ -150,14 +154,14 @@ export default class ThreeWindow extends React.Component {
 		// Lights
 		this.ambientLight = new THREE.AmbientLight(0x404040);
 		this.scene.add(this.ambientLight);
-		this.directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
-		this.directionalLight.position.set(250,500,50);
+		this.directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.8);
+		this.directionalLight.position.set(500,500,50);
 		this.scene.add(this.directionalLight);
-		this.directionalLight2 = new THREE.DirectionalLight(0xFFFFFF, 1);
-		this.directionalLight2.position.set(-250,500,50);
+		this.directionalLight2 = new THREE.DirectionalLight(0xFFFFFF, 0.6);
+		this.directionalLight2.position.set(-500,500,50);
 		this.scene.add(this.directionalLight2);
-		this.directionalLight2 = new THREE.DirectionalLight(0x101010, 1);
-		this.directionalLight2.position.set(0,-500,0);
+		this.directionalLight3 = new THREE.DirectionalLight(0xF0F0F0, 1);
+		this.directionalLight3.position.set(0,-500,50);
 		this.scene.add(this.directionalLight3);
 
 		// Camera
@@ -224,6 +228,29 @@ export default class ThreeWindow extends React.Component {
 			width: w,
 			height: h
 		});
+	}
+
+	@bind
+	handleExportSTL() {
+		if (this.volumeMesh !== undefined) {
+			let stl = Serializer(this.volumeMesh);
+			var textFile = null,
+				makeTextFile = function (text) {
+					var data = new Blob([text], {type: '{type: "octet/stream"}'});
+
+				    // If we are replacing a previously generated file we need to
+				    // manually revoke the object URL to avoid memory leaks.
+				    if (textFile !== null) {
+						window.URL.revokeObjectURL(textFile);
+				    }
+
+				    textFile = window.URL.createObjectURL(data);
+
+				    // returns a URL you can use as a href
+				    return textFile;
+				  };
+			window.open(makeTextFile(stl));
+		}
 	}
 
 }
