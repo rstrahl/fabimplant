@@ -18,25 +18,29 @@ export default class ImageWindow extends React.Component {
 		super(props);
 		this.state = {
 			imageIndex: 0,
-			windowWidth: 4096, // TODO: Modify these to use HU-based values
-			windowCenter: 2048
+			windowWidth: 1, // TODO: Modify these to use HU-based values
+			windowCenter: 1550
 		};
 	}
 
 	render() {
-		if (this.props.dicomFile === undefined || this.props.dicomFile === null) {
+		let { dicomFile } = this.props;
+		let { imageIndex, windowCenter, windowWidth } = this.state;
+
+		if (dicomFile === undefined || dicomFile === null) {
 			return (
 				<div id="image-window"></div>
 			);
 		}
 
-		let pixelArray = this.props.dicomFile.pixelArrays[this.state.imageIndex];
-		let height = this.props.dicomFile.getImageHeight();
-		let width = this.props.dicomFile.getImageWidth();
-		let imageData = prepareImageData(pixelArray, width, height, this.state.windowCenter, this.state.windowWidth);
+		// TODO: Seems like this could be refactored out into somewhere cleaner
+		let pixelArray = dicomFile.pixelArrays[imageIndex];
+		let height = dicomFile.getImageHeight();
+		let width = dicomFile.getImageWidth();
+		let imageData = prepareImageData(pixelArray, width, height, windowCenter, windowWidth);
 
-		let interpretedCenter = pixelValueToInterpretedValue(this.state.windowCenter, this.props.dicomFile.getImageSlope(), this.props.dicomFile.getImageIntercept());
-		let interpretedWidth =  pixelValueToInterpretedValue(this.state.windowWidth, this.props.dicomFile.getImageSlope(), this.props.dicomFile.getImageIntercept());
+		let interpretedCenter = pixelValueToInterpretedValue(windowCenter, dicomFile.getImageSlope(), dicomFile.getImageIntercept());
+		let interpretedWidth =  pixelValueToInterpretedValue(windowWidth, dicomFile.getImageSlope(), dicomFile.getImageIntercept());
 
 		// TODO: Add WL/WC controls
 		// TODO: Add debug toggle buttons
@@ -46,20 +50,21 @@ export default class ImageWindow extends React.Component {
 					<ImageCanvas imageData={imageData}/>
 					<ImageNavigationBar
 						handleImageIndexChanged={this.handleImageIndexChanged.bind(this)}
-						currentImageIndex={this.state.imageIndex}
-						imageIndexMax={this.props.dicomFile.pixelArrays.length} />
+						currentImageIndex={imageIndex}
+						imageIndexMax={dicomFile.pixelArrays.length} />
 					<ImageWindowCenterWidthDisplay windowCenter={interpretedCenter} windowWidth={interpretedWidth} />
 				</div>
-				<DicomDebugWindow dataSet={this.props.dicomFile.getDicomMetadata()} title='Image Metadata'/>
+				<DicomDebugWindow dataSet={dicomFile.getDicomMetadata()} title='Image Metadata'/>
 			</div>
 		);
 	}
 
 	handleImageIndexChanged(newIndex) {
+		let { dicomFile } = this.props;
 		if (newIndex < 0) {
 			this.setState({imageIndex: 0});
-		} else if (newIndex >= this.props.dicomFile.pixelArrays.length) {
-			this.setState({imageIndex:this.props.dicomFile.pixelArrays.length - 1});
+		} else if (newIndex >= dicomFile.pixelArrays.length) {
+			this.setState({imageIndex:dicomFile.pixelArrays.length - 1});
 		} else {
 			this.setState({imageIndex: newIndex});
 		}

@@ -83,7 +83,35 @@ export function prepareImageData(pixelData, width, height, windowCenter, windowW
 	return image;
 }
 
-function applyWindowLevelAndCenter(pixelValue, windowCenter, windowWidth) {
+/**
+ * Generates an array of all image pixel data contained in the specified DicomFile
+ * object.  The pixel data will have the resulting Window Center and Window Width
+ * applied.
+ *
+ * @param  {Object} dicomFile a DicomFile object
+ * @param  {number} windowCenter the desired Window Center
+ * @param  {number} windowWidth the desired Window Width
+ * @return {Array} an array of pixel value arrays
+ */
+export function getThresholdPixelArray(dicomFile, windowCenter, windowWidth) {
+	let height = dicomFile.getImageHeight();
+	let width = dicomFile.getImageWidth();
+	let pixelArrays = dicomFile.pixelArrays;
+	let thresholdPixelArrays = [];
+	for (let i = 0; i < pixelArrays.length; i++) {
+		let pixelArray = pixelArrays[i];
+		let thresholdArray = [];
+		// let imageData = prepareImageData(pixelArray, width, height, windowCenter, windowWidth);
+		pixelArray.forEach( (value) => {
+			thresholdArray.push(applyWindowLevelAndCenter(value, windowCenter, windowWidth));
+		});
+		thresholdPixelArrays.push(thresholdArray);
+	}
+	return thresholdPixelArrays;
+}
+
+export function applyWindowLevelAndCenter(pixelValue, windowCenter, windowWidth) {
+	// TODO: UNIT TEST
 	// By spec, windowWidth can never be less than 1 - we gracefully fail by returning an unaltered pixelValue
 	if (windowWidth < 1) {
 		console.error('windowWidth cannot be < 1');
