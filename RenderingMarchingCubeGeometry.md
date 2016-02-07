@@ -37,3 +37,17 @@ Steps:
 
 1. Reduce the size of the input data to something reasonable
 2. Flatten the resulting input data into a single contiguous array
+
+### Observations
+
+Downsampling by a factor of 2 is successful; the dimensions are kept and the results
+meet expectations in that the surface is less defined.  However downsampling by a
+factor of 4 is unsuccessful; the image is off-center as observed due to incorrect
+downsampling of an unevenly-dimensioned area.
+
+Theory: If offset is appearing, that may be a result of attempting to downsample
+at a factor that is not "evenly" divisible in terms of width and/or height.
+(e.g. for a width of 266, dividing it by 4 equals a result of 66.5)
+
+Either we repeatedly normalize+downsample until we hit the factor desired (not performant)
+or we permit normalization as a part of the downsampling process.
