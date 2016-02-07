@@ -1,9 +1,10 @@
 # TODO
 
 ## P1
-- Normalize image values so that we always deal in even dimensions
-- Proper mesh output
-- Integrate writing to STL file format
+- Fix issue with > 2 downsampling
+- Change approach to thresholding:
+	- Remove direct thresholding before marching cubes
+	- Use window levels as isolevel?
 
 ## BACKLOG
 - Refactor out the THREE.js geometry creation/management code from jsx into module
@@ -12,3 +13,8 @@
 - Add proper logging facility
 - Refactor dicomFile out of using `class` and into Factory (constructor style)
 - Add unit tests for processor.js
+
+Serializer
+- Add unit tests for STLSerializer
+- Set up separate node project
+- Package and upload to github

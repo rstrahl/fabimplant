@@ -217,6 +217,12 @@ main {
     overflow: hidden;
 }
 
+.three-window-button-export {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
 /* Workspace Window */
 
 .workspace-window {
