@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { getAxisRange, flattenPixelArrays, resampleVolumeData, resamplePixelArray,
-	normalizePixelArray, generateScaffold } from '../marchingCubes';
+	normalizeDownPixelArray, normalizeUpPixelArray, generateScaffold } from '../marchingCubes';
 
 describe('getAxisRange', () => {
 
@@ -177,7 +177,7 @@ describe('flattenPixelArrays', () => {
 	});
 });
 
-describe('normalizePixelArray', () => {
+describe('normalizeDownPixelArray', () => {
 	let oddArray;
 
 	beforeEach( () => {
@@ -185,43 +185,86 @@ describe('normalizePixelArray', () => {
 	});
 
 	it('normalizes an uneven height array', () => {
-		let normalizedArray = normalizePixelArray(oddArray, 2, 3);
+		let normalizedArray = normalizeDownPixelArray(oddArray, 2, 3);
 		expect(Array.from(normalizedArray.data)).to.eql([1,2,3,4]);
 	});
 
 	it('normalizes an uneven width array', () => {
-		let normalizedArray = normalizePixelArray(oddArray, 3, 2);
+		let normalizedArray = normalizeDownPixelArray(oddArray, 3, 2);
 		expect(Array.from(normalizedArray.data)).to.eql([1,2,4,5]);
 	});
 
 	it('normalizes an uneven height and width array', () => {
 		let veryOddArray = [1,2,3,4,5,6,7,8,9],
-			normalizedArray = normalizePixelArray(veryOddArray, 3, 3);
+			normalizedArray = normalizeDownPixelArray(veryOddArray, 3, 3);
 		expect(Array.from(normalizedArray.data)).to.eql([1,2,4,5]);
 	});
 
 	it('reports the correct new height for an normalized array', () => {
-		let normalizedArray = normalizePixelArray(oddArray, 2, 3);
+		let normalizedArray = normalizeDownPixelArray(oddArray, 2, 3);
 		expect(normalizedArray.height).to.equal(2);
 	});
 
 	it('reports the correct new width for an normalized array', () => {
-		let normalizedArray = normalizePixelArray(oddArray, 3, 2);
+		let normalizedArray = normalizeDownPixelArray(oddArray, 3, 2);
 		expect(normalizedArray.width).to.equal(2);
 	});
 
 	it('does not normalize an already normalized array', () => {
-		let normalizedArray = normalizePixelArray([1,2,3,4], 2, 2);
+		let normalizedArray = normalizeDownPixelArray([1,2,3,4], 2, 2);
 		expect(Array.from(normalizedArray.data)).to.eql([1,2,3,4]);
 	});
 
 	it('repots the correct width for an already normalized array', () => {
-		let normalizedArray = normalizePixelArray([1,2,3,4], 2, 2);
+		let normalizedArray = normalizeDownPixelArray([1,2,3,4], 2, 2);
 		expect(normalizedArray.width).to.equal(2);
 	});
 
 	it('repots the correct height for an already normalized array', () => {
-		let normalizedArray = normalizePixelArray([1,2,3,4], 2, 2);
+		let normalizedArray = normalizeDownPixelArray([1,2,3,4], 2, 2);
+		expect(normalizedArray.height).to.equal(2);
+	});
+
+});
+
+describe('normalizeUpPixelArray', () => {
+
+	it('normalizes array width to factor', () => {
+		let oddArray = [1,2,3,4,5,6];
+		let normalizedArray = normalizeUpPixelArray(oddArray, 3, 2, 2);
+		expect(Array.from(normalizedArray.data)).to.eql([1,2,3,0,4,5,6,0]);
+	});
+
+	it('reports the correct width for a normalized array', () => {
+		let oddArray = [1,2,3,4,5,6];
+		let normalizedArray = normalizeUpPixelArray(oddArray, 3, 2, 2);
+		expect(normalizedArray.width).to.equal(4);
+	});
+
+	it('normalizes array height to factor', () => {
+		let oddArray = [1,2,3,4,5,6];
+		let normalizedArray = normalizeUpPixelArray(oddArray, 2, 3, 2);
+		expect(Array.from(normalizedArray.data)).to.eql([1,2,3,4,5,6,0,0]);
+	});
+
+	it('reports the correct height for a normalized array', () => {
+		let oddArray = [1,2,3,4,5,6];
+		let normalizedArray = normalizeUpPixelArray(oddArray, 2, 3, 2);
+		expect(normalizedArray.height).to.equal(4);
+	});
+
+	it('does not normalize an already normalized array', () => {
+		let normalizedArray = normalizeUpPixelArray([1,2,3,4], 2, 2, 2);
+		expect(Array.from(normalizedArray.data)).to.eql([1,2,3,4]);
+	});
+
+	it('reports the correct width for an already normalized array', () => {
+		let normalizedArray = normalizeUpPixelArray([1,2,3,4], 2, 2, 2);
+		expect(normalizedArray.width).to.equal(2);
+	});
+
+	it('reports the correct height for an already normalized array', () => {
+		let normalizedArray = normalizeUpPixelArray([1,2,3,4], 2, 2, 2);
 		expect(normalizedArray.height).to.equal(2);
 	});
 

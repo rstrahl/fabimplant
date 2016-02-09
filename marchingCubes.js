@@ -351,7 +351,7 @@ export function resamplePixelArray(pixelArray, width, height, factor) {
 	return { data: array, width: newWidth, height: newHeight };
 }
 
-export function normalizePixelArray(pixelArray, width, height) {
+export function normalizeDownPixelArray(pixelArray, width, height) {
 	let dim = width * height;
 
 	if (height % 2 !== 0) {
@@ -367,6 +367,37 @@ export function normalizePixelArray(pixelArray, width, height) {
 		width -= 1;
 		dim = width * height;
 	}
+	return { data: pixelArray, width, height };
+}
+
+/** Normalizes an array representing x/y values up to support resampling at a given factor.
+ * @param  {Array} pixelArray  an array
+ * @param  {number} width      the width of the array
+ * @param  {number} height     the height of the array
+ * @param  {number} factor     the resampling factor to normalize to
+ * @return {Object}            An object containing the array data, and its width and height
+ */
+export function normalizeUpPixelArray(pixelArray, width, height, factor) {
+	let dim = width * height,
+		heightDiff = height % factor,
+		widthDiff = width % factor;
+
+	if (widthDiff !== 0) {
+		let heightPad = factor - widthDiff;
+		let diff = new Array(heightPad).fill(0);
+		for (let i = dim-width; i >= 0; i -= width) {
+			pixelArray.splice(i + width, 0, ...diff);
+		}
+		width += heightPad;
+	}
+
+	if (heightDiff !== 0) {
+		let heightPad = factor - heightDiff;
+		let diff = new Array(width * (heightPad)).fill(0);
+		pixelArray.splice(dim, 0, ...diff);
+		height += heightPad;
+	}
+
 	return { data: pixelArray, width, height };
 }
 

@@ -9,7 +9,7 @@ import THREE from 'three';
 import Stats from 'stats.js';
 import createOrbitControls from 'three-orbit-controls';
 import { getThresholdPixelArray } from '../processor';
-import { default as marchingCubes, flattenPixelArrays, resamplePixelArray, normalizePixelArray,
+import { default as marchingCubes, flattenPixelArrays, resamplePixelArray, normalizeUpPixelArray,
 	generateScaffold, generateScaffoldGeometry, makeSphere } from '../marchingCubes';
 import Serializer from '../STLSerializer';
 
@@ -70,23 +70,27 @@ export default class ThreeWindow extends React.Component {
 		if (dicomFile !== undefined && dicomFile !== null) {
 			let width = dicomFile.getImageWidth(),
 				height = dicomFile.getImageHeight(),
-				depth = dicomFile.pixelArrays.length,
-				isolevel = 0.5;
+				isolevel = 50,
+				step = 0.25,
+				factor = 8;
 
 			let pixelArrays = getThresholdPixelArray(dicomFile, 1500, 1);
+			// let pixelArrays = [];
+			// dicomFile.pixelArrays.forEach( (value) => {
+			// 	pixelArrays.push(Array.from(value));
+			// });
+
 			let downsampledArrays = {
 				data : []
 			};
-			for (let i = 0; pixelArrays.length - i >= 2; i += 2) {
-				let normalizedArray = normalizePixelArray(pixelArrays[i], width, height);
-				let array = resamplePixelArray(normalizedArray.data);
+			for (let i = 0; pixelArrays.length - i >= factor; i += factor) {
+				let normalizedArray = normalizeUpPixelArray(pixelArrays[i], width, height, factor);
+				let array = resamplePixelArray(normalizedArray.data, normalizedArray.width, normalizedArray.height, factor);
 				downsampledArrays.data.push(array.data);
 				if (downsampledArrays.width === undefined) downsampledArrays.width = array.width;
 				if (downsampledArrays.height === undefined) downsampledArrays.height = array.height;
 			}
 			let volume = flattenPixelArrays(downsampledArrays.data, downsampledArrays.width, downsampledArrays.height);
-			// let volume = resampleVolumeData(flatArray.data, flatArray.width, flatArray.height, flatArray.depth);
-			let step = 0.25;
 			let volumeGeometry = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, isolevel);
 			this.volumeMesh = new THREE.Mesh(
 				volumeGeometry,
@@ -234,20 +238,14 @@ export default class ThreeWindow extends React.Component {
 	handleExportSTL() {
 		if (this.volumeMesh !== undefined) {
 			let stl = Serializer(this.volumeMesh);
-			var textFile = null,
+			let textFile = null,
 				makeTextFile = function (text) {
-					var data = new Blob([text], {type: '{type: "octet/stream"}'});
-
-				    // If we are replacing a previously generated file we need to
-				    // manually revoke the object URL to avoid memory leaks.
-				    if (textFile !== null) {
+					let data = new Blob([text], {type: '{type: "octet/stream"}'});
+					if (textFile !== null) {
 						window.URL.revokeObjectURL(textFile);
-				    }
-
-				    textFile = window.URL.createObjectURL(data);
-
-				    // returns a URL you can use as a href
-				    return textFile;
+					}
+					textFile = window.URL.createObjectURL(data);
+					return textFile;
 				  };
 			window.open(makeTextFile(stl));
 		}
