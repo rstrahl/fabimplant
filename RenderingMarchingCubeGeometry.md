@@ -1,9 +1,6 @@
 # Rendering the Marching Cubes
 
-
-
-
-### Rendering DICOM
+## Rendering DICOM
 
 DICOM images tend to be > 100x100 in pixel size, which creates a problem for rendering
 apparently.  Memory consumption for calculating a size of 276x276x179 image breaks a
@@ -35,19 +32,21 @@ function resample(values, dimensions, resolution) {
 
 Steps:
 
-1. Reduce the size of the input data to something reasonable
+1. Reduce the size of the input data to something reasonable (downsampling)
 2. Flatten the resulting input data into a single contiguous array
 
-### Observations
+## Downsampling and Normalization
 
 Downsampling by a factor of 2 is successful; the dimensions are kept and the results
 meet expectations in that the surface is less defined.  However downsampling by a
 factor of 4 is unsuccessful; the image is off-center as observed due to incorrect
 downsampling of an unevenly-dimensioned area.
 
-Theory: If offset is appearing, that may be a result of attempting to downsample
-at a factor that is not "evenly" divisible in terms of width and/or height.
+If offset is appearing, its likely a result of attempting to downsample the height
+or width by a denominator that produces a fractional result.
 (e.g. for a width of 266, dividing it by 4 equals a result of 66.5)
 
-Either we repeatedly normalize+downsample until we hit the factor desired (not performant)
-or we permit normalization as a part of the downsampling process.
+The solution is to normalize the array "up" to the closest multiple of the factor
+by padding zero values into the width and height.
+
+The result is successful, and the factor now succeeds with the correct output.
