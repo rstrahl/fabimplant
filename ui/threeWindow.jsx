@@ -70,15 +70,15 @@ export default class ThreeWindow extends React.Component {
 		if (dicomFile !== undefined && dicomFile !== null) {
 			let width = dicomFile.getImageWidth(),
 				height = dicomFile.getImageHeight(),
-				isolevel = 50,
+				isolevel = 1400,
 				step = 0.25,
-				factor = 8;
+				factor = 2;
 
-			let pixelArrays = getThresholdPixelArray(dicomFile, 1500, 1);
-			// let pixelArrays = [];
-			// dicomFile.pixelArrays.forEach( (value) => {
-			// 	pixelArrays.push(Array.from(value));
-			// });
+			// let pixelArrays = getThresholdPixelArray(dicomFile, 1500, 1);
+			let pixelArrays = [];
+			dicomFile.pixelArrays.forEach( (value) => {
+				pixelArrays.push(Array.from(value));
+			});
 
 			let downsampledArrays = {
 				data : []

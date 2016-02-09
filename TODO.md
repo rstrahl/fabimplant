@@ -1,9 +1,6 @@
 # TODO
 
 ## P1
-- Change approach to thresholding:
-	- Remove direct thresholding before marching cubes
-	- Use window levels as isolevel?
 - Add slider controls:
 	- Image selection
 	- isolevel
@@ -13,8 +10,11 @@
 	- Controls are toggled between move scene and move mesh?
 - Refactor out the THREE.js geometry creation/management code from jsx into module
 - Clean up marchingCubes.js and marchingCubesTests.js
+- Second draft smoothing
+	- Re-implement thresholding to allow wide range of values; allows removal of artifacts
 
 ## BACKLOG
+- UI Graphics for Camera Mode changing
 - Apply proper project structure (ie- js/, vendor/, etc.)
 - Refactor into a Flux architecture?
 - Add proper logging facility
