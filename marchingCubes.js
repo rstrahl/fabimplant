@@ -44,14 +44,14 @@ export default function (resX, resY, resZ, step, values, isolevel) {
 				// place a "1" in bit positions corresponding to vertices whose
 				// isovalue is less than given isolevel constant.
 				let cubeindex = 0;
-				if ( value0 < isolevel ) cubeindex |= 1;
-				if ( value1 < isolevel ) cubeindex |= 2;
-				if ( value2 < isolevel ) cubeindex |= 8;
-				if ( value3 < isolevel ) cubeindex |= 4;
-				if ( value4 < isolevel ) cubeindex |= 16;
-				if ( value5 < isolevel ) cubeindex |= 32;
-				if ( value6 < isolevel ) cubeindex |= 128;
-				if ( value7 < isolevel ) cubeindex |= 64;
+				if ( value0 > isolevel ) cubeindex |= 1;
+				if ( value1 > isolevel ) cubeindex |= 2;
+				if ( value2 > isolevel ) cubeindex |= 8;
+				if ( value3 > isolevel ) cubeindex |= 4;
+				if ( value4 > isolevel ) cubeindex |= 16;
+				if ( value5 > isolevel ) cubeindex |= 32;
+				if ( value6 > isolevel ) cubeindex |= 128;
+				if ( value7 > isolevel ) cubeindex |= 64;
 
 				// a 12-bit bitmask that indicates which edges are crossed by the isosurface
 				let edges = edgeTable[ cubeindex ];
@@ -337,7 +337,7 @@ export function resamplePixelArray(pixelArray, width, height, factor) {
 	let dim = width * height,
 		newWidth = Math.floor(width/factor),
 		newHeight = Math.floor(height/factor),
-		array = new Uint8Array(newWidth * newHeight),
+		array = new Uint16Array(newWidth * newHeight),
 		n = 0;
 
 	for (let i = 0; i < dim; i += factor, n += 1) {
