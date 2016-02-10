@@ -9,9 +9,9 @@ import ImageWindow from './imageWindow.jsx';
 import ThreeWindow from './threeWindow.jsx';
 import TestWindow from './testWindow.jsx';
 
-import * as fileLoader from '../fileLoader';
-import DicomFile from '../dicomFile';
-import * as processor from '../processor';
+import * as fileLoader from '../dicom/fileLoader';
+import DicomFile from '../dicom/dicomFile';
+import * as processor from '../dicom/processor';
 
 
 /**
