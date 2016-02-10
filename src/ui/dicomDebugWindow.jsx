@@ -4,8 +4,8 @@
 //
 
 import React from 'react';
-import { dicomDataDictionary } from '../dataDictionary';
-import { uids } from '../uids';
+import { dicomDataDictionary } from '../dicom/dataDictionary';
+import { uids } from '../dicom/uids';
 
 export default class DicomDebugWindow extends React.Component {
 

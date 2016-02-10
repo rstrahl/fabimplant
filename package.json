@@ -5,8 +5,8 @@
   "main": "bundle.js",
   "scripts": {
     "test": "mocha --compilers js:babel-core/register",
-    "build": "browserify main.js -t babelify -d -o bundle.js",
-    "watch": "watchify main.js -t babelify -d -o bundle.js",
+    "build": "browserify src/main.js -t babelify -d -o src/bundle.js",
+    "watch": "watchify src/main.js -t babelify -d -o src/bundle.js",
     "start": "http-server --cors --port ${PORT:-8080}"
   },
   "dependencies": {

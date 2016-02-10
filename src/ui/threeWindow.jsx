@@ -8,10 +8,9 @@ import { bind } from 'decko';
 import THREE from 'three';
 import Stats from 'stats.js';
 import createOrbitControls from 'three-orbit-controls';
-import { getThresholdPixelArray } from '../processor';
-import { default as marchingCubes, flattenPixelArrays, resamplePixelArray, normalizeUpPixelArray,
-	generateScaffold, generateScaffoldGeometry, makeSphere } from '../marchingCubes';
-import Serializer from '../STLSerializer';
+import { default as volumeMesh, dicomVolume, sphereVolume } from '../three/modeler';
+import { generateScaffold, generateScaffoldGeometry } from '../three/marchingCubes';
+import Serializer from '../three/STLSerializer';
 
 const NEAR = -500;
 const FAR = 1000;
@@ -68,37 +67,11 @@ export default class ThreeWindow extends React.Component {
 		// TODO: Refactor all this shit out of the jsx and into a functional helper
 		let { dicomFile } = this.props;
 		if (dicomFile !== undefined && dicomFile !== null) {
-			let width = dicomFile.getImageWidth(),
-				height = dicomFile.getImageHeight(),
-				isolevel = 1400,
-				step = 0.25,
-				factor = 2;
-
-			// let pixelArrays = getThresholdPixelArray(dicomFile, 1500, 1);
-			let pixelArrays = [];
-			dicomFile.pixelArrays.forEach( (value) => {
-				pixelArrays.push(Array.from(value));
-			});
-
-			let downsampledArrays = {
-				data : []
-			};
-			for (let i = 0; pixelArrays.length - i >= factor; i += factor) {
-				let normalizedArray = normalizeUpPixelArray(pixelArrays[i], width, height, factor);
-				let array = resamplePixelArray(normalizedArray.data, normalizedArray.width, normalizedArray.height, factor);
-				downsampledArrays.data.push(array.data);
-				if (downsampledArrays.width === undefined) downsampledArrays.width = array.width;
-				if (downsampledArrays.height === undefined) downsampledArrays.height = array.height;
-			}
-			let volume = flattenPixelArrays(downsampledArrays.data, downsampledArrays.width, downsampledArrays.height);
-			let volumeGeometry = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, isolevel);
-			this.volumeMesh = new THREE.Mesh(
-				volumeGeometry,
-				new THREE.MeshLambertMaterial({
-					color : 0xF0F0F0,
-					side : THREE.DoubleSide
-				})
-			);
+			let isolevel = 1400,
+				factor = 4,
+				step = 1;
+			let volume = dicomVolume(dicomFile, factor);
+			this.volumeMesh = volumeMesh(volume, step, isolevel);
 			let scaffold = generateScaffold(volume.width, volume.height, volume.depth, step);
 			this.scaffoldMesh = new THREE.Mesh(
 				generateScaffoldGeometry(scaffold, volume.width, volume.height, volume.depth),
@@ -109,18 +82,12 @@ export default class ThreeWindow extends React.Component {
 					wireframe : true
 				})
 			);
-
 		} else {
-			let step = 10;
-			let volume = makeSphere(10, 10, 10, step);
-			let volumeGeometry = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, 45);
-			this.volumeMesh = new THREE.Mesh(
-				volumeGeometry,
-				new THREE.MeshLambertMaterial({
-					color : 0xFFFFFF,
-					side : THREE.DoubleSide
-				})
-			);
+			let size = 10,
+				isolevel = 4.5,
+				step = 1;
+			let volume = sphereVolume(size, size, size, step);
+			this.volumeMesh = volumeMesh(volume, step, isolevel);
 			let scaffold = generateScaffold(volume.width, volume.height, volume.depth, step);
 			this.scaffoldMesh = new THREE.Mesh(
 				generateScaffoldGeometry(scaffold, volume.width, volume.height, volume.depth),
