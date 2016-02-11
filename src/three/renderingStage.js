@@ -54,18 +54,28 @@ export default class RenderingStage {
 
 		let OrbitControls = createOrbitControls(THREE);
 		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+
+		this.ambientLight = new THREE.AmbientLight(0x404040);
+		this.directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.8);
+		this.directionalLight.position.set(0,250,100);
+		this.scene.add(this.ambientLight);
+		this.scene.add(this.directionalLight);
 	}
 
 	@bind
 	loadStage() {
-		this.ambientLight = new THREE.AmbientLight(0x404040);
-		this.scene.add(this.ambientLight);
-		this.directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.8);
-		this.directionalLight.position.set(0,250,100);
-		this.scene.add(this.directionalLight);
+		// TODO: Move to using a group
 		if (this.volumeMesh !== undefined) {
 			this.scene.add(this.volumeMesh);
 		}
+		if (this.scaffoldMesh !== undefined) {
+			this.scene.add(this.scaffoldMesh);
+		}
+	}
+
+	clearStage() {
+		this.scene.remove(this.volumeMesh);
+		this.scene.remove(this.scaffoldMesh);
 	}
 
 	@bind

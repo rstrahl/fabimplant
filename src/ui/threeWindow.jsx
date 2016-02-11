@@ -22,6 +22,8 @@ export default class ThreeWindow extends React.Component {
 			width : 0,
 			height : 0
 		};
+		this.renderingStage = new RenderingStage();
+		this.subdivision = 0;
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
@@ -39,49 +41,9 @@ export default class ThreeWindow extends React.Component {
 
 	componentDidMount() {
 		addEventListener('resize', this.updateSize);
-
-		// TODO: Refactor all this shit out of the jsx and into a functional helper
-		let { dicomFile } = this.props;
-		if (dicomFile !== undefined && dicomFile !== null) {
-			let isolevel = 1400,
-				factor = 4,
-				step = 1;
-			let volume = dicomVolume(dicomFile, factor);
-			this.volumeMesh = volumeMesh(volume, step, isolevel);
-			let scaffold = generateScaffold(volume.width, volume.height, volume.depth, step);
-			this.scaffoldMesh = new THREE.Mesh(
-				generateScaffoldGeometry(scaffold, volume.width, volume.height, volume.depth),
-				new THREE.MeshBasicMaterial({
-					color : 0xAAAAFF,
-					transparent : true,
-					opacity : 0.5,
-					wireframe : true
-				})
-			);
-		} else {
-			let size = 10,
-				isolevel = 4.5,
-				step = 1;
-			let volume = sphereVolume(size, size, size, step);
-			this.volumeMesh = volumeMesh(volume, step, isolevel);
-			let scaffold = generateScaffold(volume.width, volume.height, volume.depth, step);
-			this.scaffoldMesh = new THREE.Mesh(
-				generateScaffoldGeometry(scaffold, volume.width, volume.height, volume.depth),
-				new THREE.MeshBasicMaterial({
-					color : 0xAAAAFF,
-					transparent : true,
-					opacity : 0.5,
-					wireframe : true
-				})
-			);
-		}
-
-		this.renderingStage = new RenderingStage();
-		this.renderingStage.volumeMesh = this.volumeMesh;
-		this.renderingStage.scaffoldMesh = this.scaffoldMesh;
-		this.renderingStage.loadStage();
 		findDOMNode(this).appendChild(this.renderingStage.rendererElement);
 		findDOMNode(this).appendChild(this.renderingStage.statsElement);
+		this.handleRefresh();
 		this.renderingStage.animate();
 		this.updateSize();
 	}
@@ -93,12 +55,18 @@ export default class ThreeWindow extends React.Component {
 	render() {
 		return (
 			<div className="three-window">
-				<button className="three-window-button-export" type="button"
-					onClick={this.handleExportSTL}>Export</button>
-				<button className="three-window-button-refresh" type="button"
-					onClick={this.handleRefresh}>Refresh</button>
-				<button className="three-window-button-toggleCamera" type="button"
-					onClick={this.handleToggleCamera}>{this.state.cameraMode}</button>
+				<div className="three-window-button-panel">
+					<button className="three-window-button" type="button"
+						onClick={this.handleExportSTL}>Export</button>
+					<button className="three-window-button" type="button"
+						onClick={this.handleRefresh}>Refresh</button>
+					<button className="three-window-button" type="button"
+						onClick={this.handleIncreaseSubdivision}>Increase</button>
+					<button className="three-window-button" type="button"
+						onClick={this.handleDecreaseSubdivision}>Decrease</button>
+					<button className="three-window-button" type="button"
+						onClick={this.handleToggleCamera}>{this.state.cameraMode}</button>
+				</div>
 			</div>
 		);
 	}
@@ -113,9 +81,24 @@ export default class ThreeWindow extends React.Component {
 		});
 	}
 
+	@bind
 	handleToggleCamera() {
 		// TODO: Load camera and apply
 		// this.renderingStage.setCameraMode();
+	}
+
+	@bind
+	handleRefresh() {
+		this.renderingStage.clearStage();
+		let { dicomFile } = this.props;
+		if (dicomFile !== undefined && dicomFile !== null) {
+			this.loadMeshForDicom(dicomFile);
+		} else {
+			this.loadMeshForDefault();
+		}
+		this.renderingStage.volumeMesh = this.volumeMesh;
+		this.renderingStage.scaffoldMesh = this.scaffoldMesh;
+		this.renderingStage.loadStage();
 	}
 
 	@bind
@@ -133,6 +116,58 @@ export default class ThreeWindow extends React.Component {
 				  };
 			window.open(makeTextFile(stl));
 		}
+	}
+
+	@bind
+	handleIncreaseSubdivision() {
+		this.subdivision += 1;
+		console.log('subdivision: '+ this.subdivision);
+		this.handleRefresh();
+	}
+
+	@bind
+	handleDecreaseSubdivision() {
+		this.subdivision -= 1;
+		console.log('subdivision: '+ this.subdivision);
+		this.handleRefresh();
+	}
+
+	// TODO: REFACTOR ALL THIS BELOW
+
+	loadMeshForDicom(dicomFile) {
+		let isolevel = 1600,
+			factor = 8,
+			step = 1;
+		let volume = dicomVolume(dicomFile, factor);
+		this.volumeMesh = volumeMesh(volume, step, isolevel, this.subdivision);
+		let scaffold = generateScaffold(volume.width, volume.height, volume.depth, step);
+		this.scaffoldMesh = new THREE.Mesh(
+			generateScaffoldGeometry(scaffold, volume.width, volume.height, volume.depth),
+			new THREE.MeshBasicMaterial({
+				color : 0xAAAAFF,
+				transparent : true,
+				opacity : 0.5,
+				wireframe : true
+			})
+		);
+	}
+
+	loadMeshForDefault() {
+		let size = 10,
+			isolevel = 4.5,
+			step = 1;
+		let volume = sphereVolume(size, size, size, step);
+		this.volumeMesh = volumeMesh(volume, step, isolevel);
+		let scaffold = generateScaffold(volume.width, volume.height, volume.depth, step);
+		this.scaffoldMesh = new THREE.Mesh(
+			generateScaffoldGeometry(scaffold, volume.width, volume.height, volume.depth),
+			new THREE.MeshBasicMaterial({
+				color : 0xAAAAFF,
+				transparent : true,
+				opacity : 0.5,
+				wireframe : true
+			})
+		);
 	}
 
 	// TODO: Refactor this into separate camera class in three/

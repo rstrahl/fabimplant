@@ -1,71 +1,56 @@
 /*
- *	@author zz85 / http://twitter.com/blurspline / http://www.lab4games.net/zz85/blog
  *
- *	Subdivision Geometry Modifier
- *		using Loop Subdivision Scheme
- *
- *	References:
- *		http://graphics.stanford.edu/~mdfisher/subdivision.html
- *		http://www.holmes3d.net/graphics/subdivision/
- *		http://www.cs.rutgers.edu/~decarlo/readings/subdiv-sg00c.pdf
- *
- *	Known Issues:
- *		- currently doesn't handle UVs
- *		- currently doesn't handle "Sharp Edges"
- *
+ *  Adapted to ES6 from:
+ *	https://github.com/mrdoob/three.js/blob/master/examples/js/modifiers/SubdivisionModifier.js
  */
 
-THREE.SubdivisionModifier = function ( subdivisions ) {
+import THREE from 'three';
 
-	this.subdivisions = ( subdivisions === undefined ) ? 1 : subdivisions;
+const WARNINGS = ! true; // Set to true for development
+const ABC = [ 'a', 'b', 'c' ];
 
-};
+export default class SubdivisionModifier {
 
-// Applies the "modify" pattern
-THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
+	constructor(subdivisions) {
+		this.subdivisions = ( subdivisions === undefined ) ? 1 : subdivisions;
+	}
 
-	var repeats = this.subdivisions;
+	modify(geometry) {
 
-	while ( repeats -- > 0 ) {
+		let repeats = this.subdivisions;
 
-		this.smooth( geometry );
+		while ( repeats -- > 0 ) {
+
+			this.smooth( geometry );
+
+		}
+
+		delete geometry.__tmpVertices;
+
+		geometry.computeFaceNormals();
+		geometry.computeVertexNormals();
 
 	}
 
-	delete geometry.__tmpVertices;
+	getEdge( a, b, map ) {
 
-	geometry.computeFaceNormals();
-	geometry.computeVertexNormals();
+		let vertexIndexA = Math.min( a, b );
+		let vertexIndexB = Math.max( a, b );
 
-};
-
-( function() {
-
-	// Some constants
-	var WARNINGS = ! true; // Set to true for development
-	var ABC = [ 'a', 'b', 'c' ];
-
-
-	function getEdge( a, b, map ) {
-
-		var vertexIndexA = Math.min( a, b );
-		var vertexIndexB = Math.max( a, b );
-
-		var key = vertexIndexA + "_" + vertexIndexB;
+		let key = vertexIndexA + "_" + vertexIndexB;
 
 		return map[ key ];
 
 	}
 
+	processEdge( a, b, vertices, map, face, metaVertices ) {
 
-	function processEdge( a, b, vertices, map, face, metaVertices ) {
+		let vertexIndexA = Math.min( a, b );
+		let vertexIndexB = Math.max( a, b );
 
-		var vertexIndexA = Math.min( a, b );
-		var vertexIndexB = Math.max( a, b );
+		let key = vertexIndexA + "_" + vertexIndexB;
 
-		var key = vertexIndexA + "_" + vertexIndexB;
-
-		var edge;
+		let edge;
 
 		if ( key in map ) {
 
@@ -73,8 +58,8 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 
 		} else {
 
-			var vertexA = vertices[ vertexIndexA ];
-			var vertexB = vertices[ vertexIndexB ];
+			let vertexA = vertices[ vertexIndexA ];
+			let vertexB = vertices[ vertexIndexB ];
 
 			edge = {
 
@@ -99,9 +84,9 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 
 	}
 
-	function generateLookups( vertices, faces, metaVertices, edges ) {
+	generateLookups( vertices, faces, metaVertices, edges ) {
 
-		var i, il, face, edge;
+		let i, il, face, edge;
 
 		for ( i = 0, il = vertices.length; i < il; i ++ ) {
 
@@ -113,36 +98,37 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 
 			face = faces[ i ];
 
-			processEdge( face.a, face.b, vertices, edges, face, metaVertices );
-			processEdge( face.b, face.c, vertices, edges, face, metaVertices );
-			processEdge( face.c, face.a, vertices, edges, face, metaVertices );
+			this.processEdge( face.a, face.b, vertices, edges, face, metaVertices );
+			this.processEdge( face.b, face.c, vertices, edges, face, metaVertices );
+			this.processEdge( face.c, face.a, vertices, edges, face, metaVertices );
 
 		}
 
 	}
 
-	function newFace( newFaces, a, b, c ) {
+	newFace( newFaces, a, b, c ) {
 
 		newFaces.push( new THREE.Face3( a, b, c ) );
 
 	}
 
+	/** Performs one iteration of subdivision.
+	 * Subdivision occurs in-place on the Geometry provided.
+	 *
+	 * @param {Object} geometry a Geometry object
+	 */
+	smooth(geometry) {
 
-	/////////////////////////////
+		let tmp = new THREE.Vector3();
 
-	// Performs one iteration of Subdivision
-	THREE.SubdivisionModifier.prototype.smooth = function ( geometry ) {
+		let oldVertices, oldFaces;
+		let newVertices, newFaces; // newUVs = [];
 
-		var tmp = new THREE.Vector3();
-
-		var oldVertices, oldFaces;
-		var newVertices, newFaces; // newUVs = [];
-
-		var n, l, i, il, j, k;
-		var metaVertices, sourceEdges;
+		let n, l, i, il, j, k;
+		let metaVertices, sourceEdges;
 
 		// new stuff.
-		var sourceEdges, newEdgeVertices, newSourceVertices;
+		let newEdgeVertices, newSourceVertices;
 
 		oldVertices = geometry.vertices; // { x, y, z}
 		oldFaces = geometry.faces; // { a: oldVertex1, b: oldVertex2, c: oldVertex3 }
@@ -156,7 +142,7 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 		metaVertices = new Array( oldVertices.length );
 		sourceEdges = {}; // Edge => { oldVertex1, oldVertex2, faces[]  }
 
-		generateLookups( oldVertices, oldFaces, metaVertices, sourceEdges );
+		this.generateLookups( oldVertices, oldFaces, metaVertices, sourceEdges );
 
 
 		/******************************************************
@@ -168,8 +154,8 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 		 *******************************************************/
 
 		newEdgeVertices = [];
-		var other, currentEdge, newEdge, face;
-		var edgeVertexWeight, adjacentVertexWeight, connectedFaces;
+		let other, currentEdge, newEdge, face;
+		let edgeVertexWeight, adjacentVertexWeight, connectedFaces;
 
 		for ( i in sourceEdges ) {
 
@@ -182,13 +168,13 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 			connectedFaces = currentEdge.faces.length;
 
 			// check how many linked faces. 2 should be correct.
-			if ( connectedFaces != 2 ) {
+			if ( connectedFaces !== 2 ) {
 
 				// if length is not 2, handle condition
 				edgeVertexWeight = 0.5;
 				adjacentVertexWeight = 0;
 
-				if ( connectedFaces != 1 ) {
+				if ( connectedFaces !== 1 ) {
 
 					if ( WARNINGS ) console.warn( 'Subdivision Modifier: Number of connected faces != 2, is: ', connectedFaces, currentEdge );
 
@@ -232,8 +218,8 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 		 *
 		 *******************************************************/
 
-		var beta, sourceVertexWeight, connectingVertexWeight;
-		var connectingEdge, connectingEdges, oldVertex, newSourceVertex;
+		let beta, sourceVertexWeight, connectingVertexWeight;
+		let connectingEdge, connectingEdges, oldVertex, newSourceVertex;
 		newSourceVertices = [];
 
 		for ( i = 0, il = oldVertices.length; i < il; i ++ ) {
@@ -245,7 +231,7 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 			n = connectingEdges.length;
 			beta;
 
-			if ( n == 3 ) {
+			if ( n === 3 ) {
 
 				beta = 3 / 16;
 
@@ -266,7 +252,7 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 				// crease and boundary rules
 				// console.warn('crease and boundary rules');
 
-				if ( n == 2 ) {
+				if ( n === 2 ) {
 
 					if ( WARNINGS ) console.warn( '2 connecting edges', connectingEdges );
 					sourceVertexWeight = 3 / 4;
@@ -275,11 +261,11 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 					// sourceVertexWeight = 1;
 					// connectingVertexWeight = 0;
 
-				} else if ( n == 1 ) {
+				} else if ( n === 1 ) {
 
 					if ( WARNINGS ) console.warn( 'only 1 connecting edge' );
 
-				} else if ( n == 0 ) {
+				} else if ( n === 0 ) {
 
 					if ( WARNINGS ) console.warn( '0 connecting edges' );
 
@@ -316,7 +302,7 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 		 *******************************************************/
 
 		newVertices = newSourceVertices.concat( newEdgeVertices );
-		var sl = newSourceVertices.length, edge1, edge2, edge3;
+		let sl = newSourceVertices.length, edge1, edge2, edge3;
 		newFaces = [];
 
 		for ( i = 0, il = oldFaces.length; i < il; i ++ ) {
@@ -325,16 +311,16 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 
 			// find the 3 new edges vertex of each old face
 
-			edge1 = getEdge( face.a, face.b, sourceEdges ).newEdge + sl;
-			edge2 = getEdge( face.b, face.c, sourceEdges ).newEdge + sl;
-			edge3 = getEdge( face.c, face.a, sourceEdges ).newEdge + sl;
+			edge1 = this.getEdge( face.a, face.b, sourceEdges ).newEdge + sl;
+			edge2 = this.getEdge( face.b, face.c, sourceEdges ).newEdge + sl;
+			edge3 = this.getEdge( face.c, face.a, sourceEdges ).newEdge + sl;
 
 			// create 4 faces.
 
-			newFace( newFaces, edge1, edge2, edge3 );
-			newFace( newFaces, face.a, edge1, edge3 );
-			newFace( newFaces, face.b, edge2, edge1 );
-			newFace( newFaces, face.c, edge3, edge2 );
+			this.newFace( newFaces, edge1, edge2, edge3 );
+			this.newFace( newFaces, face.a, edge1, edge3 );
+			this.newFace( newFaces, face.b, edge2, edge1 );
+			this.newFace( newFaces, face.c, edge3, edge2 );
 
 		}
 
@@ -342,9 +328,8 @@ THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
 		geometry.vertices = newVertices;
 		geometry.faces = newFaces;
 
-		// console.log('done');
+		console.log('done');
 
-	};
+	}
 
-
-} )();
+}
