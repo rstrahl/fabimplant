@@ -7,19 +7,19 @@
 
 'use-strict';
 
-import Volume from './volumeArray';
 import THREE from 'three';
+import { getAxisRange } from './utils';
 
-export default function (resX, resY, resZ, step, values, isolevel) {
-	let points = generateScaffold(resX, resY, resZ, step);
+export default function (width, height, depth, step, values, isolevel) {
+	let points = generateScaffold(width, height, depth, step);
 	let geometry = new THREE.Geometry();
 	let vertexIndex = 0;
 
-	let size = resX;
-	let size2 = resX * resY;
-	for (let z = 0; z < resZ-1; z++) {
-		for (let y = 0; y < resY-1; y++) {
-			for (let x = 0; x < resX-1; x++) {
+	let size = width;
+	let size2 = width * height;
+	for (let z = 0; z < depth-1; z++) {
+		for (let y = 0; y < height-1; y++) {
+			for (let x = 0; x < width-1; x++) {
 
 				// calculate the array index that corresponds with each vertex of the current cube section
 				let p    = x + size * y + size2 * z,
@@ -153,48 +153,14 @@ export default function (resX, resY, resZ, step, values, isolevel) {
 	return geometry;
 }
 
-/** Creates a volume from a function.
- *
- * @param  {number} width the width of the volume
- * @param  {number} height the height of the volume
- * @param  {number} depth the depth of the volume
- * @param  {number} step the increment between vertices
- * @param  {function} f a function that accepts x, y, z values iteratively
- * @return {Object} A Volume object.
- */
-export function makeVolume(width, height, depth, step, f) {
-	let volume = new Float32Array(width * height * depth),
-		n = 0,
-		minZ = getAxisRange(depth, step)[0],
-		minY = getAxisRange(height, step)[0],
-		minX = getAxisRange(width, step)[0];
-
-	for (let k = 0, z = minZ; k < depth; ++k, z += step)
-		for (let j = 0, y = minY; j < height; ++j, y += step)
-			for (let i = 0, x = minX; i < width; ++i, x += step, ++n) {
-				volume[n] = f(x,y,z);
-			}
-	return new Volume(volume, width, height, depth);
-}
-
-/** Creates a sample volume in the shape of a sphere.
- *
- * @return {Object} A Volume object.
- */
-export function makeSphere(width, height, depth, step) {
-	return makeVolume(width, height, depth, step, (x,y,z) => {
-		return Math.sqrt(x*x + y*y + z*z);
-	});
-}
-
 /** Generates a "scaffold" of vertices with the given dimensions.
  * Used in the Marching Cubes algorithm when mapping values to vertices.
  *
- * @param  {number} width the width of the scaffold
+ * @param  {number} width  the width of the scaffold
  * @param  {number} height the height of the scaffold
- * @param  {number} depth the depth of the scaffold
- * @param  {number} step the distance between vertices
- * @return {Array} an array of Three.Vector3 objects
+ * @param  {number} depth  the depth of the scaffold
+ * @param  {number} step   the distance between vertices
+ * @return {Array}         an array of THREE.Vector3 objects
  */
 export function generateScaffold(width, height, depth, step) {
 	let minZ = getAxisRange(depth, step)[0],
@@ -209,17 +175,6 @@ export function generateScaffold(width, height, depth, step) {
 		}
 	}
 	return vertices;
-}
-
-/** Returns the minimum and maximum values along an axis.
- *
- * @param  {number} dim the number of vertices
- * @param  {number} step the distance between vertices
- * @return {Array} An array in the format of [min, max]
- */
-export function getAxisRange(dim, step) {
-	let max = ((dim-1)/2) * step;
-	return [-1 * max, max];
 }
 
 /** Generates a THREE.Geometry box that outlines the scaffold area edge to edge.
@@ -271,139 +226,7 @@ export function generateScaffoldGeometry(vertices, width, height, depth) {
 	return geometry;
 }
 
-/** Collapses an array of pixel-data arrays down to into one contiguous array.
- * The colour channels will be flattened during this process down to one.
- *
- * @param  {Array} pixelArrays an array of arrays
- * @param  {number} width the width of an individual array in pixelArrays
- * @param  {number} height the height of an individual array in pixelArrays
- * @param  {number} colourChannels the number of colour channels used in the pixelArrays
- * @return {Array} a contiguous array
- */
-export function flattenPixelArrays(pixelArrays, width, height) {
-	let needsPadX = (width % 2 !== 0),
-		needsPadY = (height % 2 !== 0),
-		needsPadZ = (pixelArrays.length % 2 !== 0),
-		flatArray = [];
-
-	for (let pixelArray of pixelArrays) {
-		flatArray = flatArray.concat(...pixelArray);
-	}
-	return new Volume(flatArray, width, height, pixelArrays.length);
-}
-
-/**
- * Down-samples a given array representing a 3-d volume by its cube-root.
- *
- * @param  {Array} data   [description]
- * @param  {number} width  [description]
- * @param  {number} height [description]
- * @param  {number} depth  [description]
- * @return {Object} a Volume object containing the resampled volume data and the
- * new dimensions
- */
-export function resampleVolumeData(data, width, height, depth) {
-	let dim = width * height,
-		size = depth * height * width,
-		newWidth = Math.floor(width/2),
-		newHeight = Math.floor(height/2),
-		newDepth = Math.floor(depth/2),
-		resampledVolume = new Uint8Array(newWidth * newHeight * newDepth),
-		n = 0;
-	for (let i=0; i<size; i+=2) {
-		if (i && i%width === 0) i += width;
-		if (i && i%dim===0) i += dim;
-		if (i<size) resampledVolume[n++] = data[i];
-	}
-	return new Volume(resampledVolume, newWidth, newHeight, newDepth);
-}
-
-/** Resamples a given pixel array down by a given factor.
- * The array is presumed to be a contiguous array that represents a 2-dimensional
- * array that has been normalized.
- * @see normalizePixelArray
- *
- * @param  {Array} pixelArray a normalized array
- * @param  {number} width (optional) the width of the array
- * @param  {number} height (optional) the height of the array
- * @param  {number} factor (optional) the downsampling factor (2, 4, etc.)
- * @return {Object} an object containing the downsampled pixel array and new dimensions
- */
-export function resamplePixelArray(pixelArray, width, height, factor) {
-	factor = (factor === undefined) ? 2 : factor;
-	width = (width === undefined) ? Math.sqrt(pixelArray.length) : width;
-	height = (height === undefined) ? width : height;
-
-	let dim = width * height,
-		newWidth = Math.floor(width/factor),
-		newHeight = Math.floor(height/factor),
-		array = new Uint16Array(newWidth * newHeight),
-		n = 0;
-
-	for (let i = 0; i < dim; i += factor, n += 1) {
-		if (i && i % width === 0) {
-			i += (width * (factor - 1));
-		}
-		if (i < dim) {
-			array[n] = pixelArray[i];
-		}
-	}
-	return { data: array, width: newWidth, height: newHeight };
-}
-
-export function normalizeDownPixelArray(pixelArray, width, height) {
-	let dim = width * height;
-
-	if (height % 2 !== 0) {
-		pixelArray.splice(dim - width, width);
-		height -= 1;
-		dim = width * height;
-	}
-
-	if (width % 2 !== 0) {
-		for (let i = dim-width; i >= 0; i -= width) {
-			pixelArray.splice(i + width-1, 1);
-		}
-		width -= 1;
-		dim = width * height;
-	}
-	return { data: pixelArray, width, height };
-}
-
-/** Normalizes an array representing x/y values up to support resampling at a given factor.
- * @param  {Array} pixelArray  an array
- * @param  {number} width      the width of the array
- * @param  {number} height     the height of the array
- * @param  {number} factor     the resampling factor to normalize to
- * @return {Object}            An object containing the array data, and its width and height
- */
-export function normalizeUpPixelArray(pixelArray, width, height, factor) {
-	let dim = width * height,
-		heightDiff = height % factor,
-		widthDiff = width % factor;
-
-	if (widthDiff !== 0) {
-		let heightPad = factor - widthDiff;
-		let diff = new Array(heightPad).fill(0);
-		for (let i = dim-width; i >= 0; i -= width) {
-			pixelArray.splice(i + width, 0, ...diff);
-		}
-		width += heightPad;
-	}
-
-	if (heightDiff !== 0) {
-		let heightPad = factor - heightDiff;
-		let diff = new Array(width * (heightPad)).fill(0);
-		pixelArray.splice(dim, 0, ...diff);
-		height += heightPad;
-	}
-
-	return { data: pixelArray, width, height };
-}
-
-/**
- * Lookup table for determining which edges of the cube are intersected by the
- * isosurface.
+/** Lookup table for determining which edges of the cube are intersected by the isosurface.
  * @type {Int32Array}
  */
 export const edgeTable = new Int32Array([
@@ -440,9 +263,7 @@ export const edgeTable = new Int32Array([
 	0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c,
 	0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0]);
 
-/**
- * Lookup table for determining the triangle facets based on the edge
- * intersections.
+/** Lookup table for determining the triangle facets based on the edge intersections.
  * @type {Int32Array}
  */
 export const triTable =	new Int32Array([

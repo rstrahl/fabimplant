@@ -5,7 +5,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { prepareImageData, pixelValueToInterpretedValue } from '../processor';
+import { prepareImageData, pixelValueToInterpretedValue } from '../dicom/processor';
 import DicomDebugWindow from './dicomDebugWindow.jsx';
 
 /**
