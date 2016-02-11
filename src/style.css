@@ -1,3 +1,5 @@
+/* === Element Styling === */
+
 body {
   margin: 0;
   top: 0;
@@ -15,6 +17,32 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
+}
+
+input[type=range]{
+    -webkit-appearance: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 300px;
+    height: 3px;
+    background: #599BDE;
+    border: none;
+    border-radius: 1px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 16px;
+    width: 4px;
+    border-radius: 20%;
+    background: #90BCE8;
+    margin-top: 0px;
+}
+
+input[type=range].vertical {
+    -webkit-transform:rotate(270deg);
 }
 
 /* === Header === */
@@ -127,14 +155,23 @@ main {
 }
 
 .image-window-centerwidth-display {
-  text-align:center;
+  text-align :center;
   font-size: .7em;
+}
+
+.image-window-centerwidth-control {
+    width: 40px;
+    text-align: center;
 }
 
 .image-navigation-bar {
   background: rgba(0,0,0,255);
   text-align: center;
   color: rgba(255,255,255,0.75);
+}
+
+.image-navigation-controls {
+    display: block;
 }
 
 .image-navigation-text {
@@ -217,13 +254,17 @@ main {
     overflow: hidden;
 }
 
-.three-window-button-export {
+.three-window-button-panel {
     position: absolute;
+    width: 50px;
     top: 0;
     right: 0;
+    overflow: hidden;
 }
 
-.three-window-button-refresh {
+.three-window-button {
+    width: 50px;
+    height: 50px;
 }
 
 /* Workspace Window */
