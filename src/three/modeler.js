@@ -1,4 +1,5 @@
 import { default as marchingCubes } from './marchingCubes';
+import SubdivisionModifier from './LoopSubdivision';
 import { getThresholdPixelArray } from '../dicom/processor';
 import { getAxisRange, resamplePixelArrays, flattenPixelArrays } from './utils';
 import Volume from './volume';
@@ -11,8 +12,12 @@ import THREE from 'three';
  * @param  {number} isolevel the isolevel (threshold) used during surface extraction
  * @return {Object}          a THREE.Mesh object
  */
-export default function(volume, step, isolevel) {
+export default function(volume, step, isolevel, subdivision) {
 	let volumeGeometry = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, isolevel);
+	if (subdivision !== undefined) {
+		let modifier = new SubdivisionModifier(subdivision);
+		modifier.modify(volumeGeometry);
+	}
 	let volumeMesh = new THREE.Mesh(
 		volumeGeometry,
 		new THREE.MeshLambertMaterial({
