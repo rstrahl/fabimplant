@@ -6,14 +6,10 @@ import React from 'react';
 import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
 import THREE from 'three';
-import Stats from 'stats.js';
-import createOrbitControls from 'three-orbit-controls';
+import RenderingStage from '../three/renderingStage';
 import { default as volumeMesh, dicomVolume, sphereVolume } from '../three/modeler';
 import { generateScaffold, generateScaffoldGeometry } from '../three/marchingCubes';
 import Serializer from '../three/STLSerializer';
-
-const NEAR = -500;
-const FAR = 1000;
 
 /**
  * Displays a threejs scene inside a window component.
@@ -26,25 +22,6 @@ export default class ThreeWindow extends React.Component {
 			width : 0,
 			height : 0
 		};
-		this.cameraProps = {
-			left : 0,
-			right : 0,
-			top : 0,
-			bottom : 0,
-			near : NEAR,
-			far : FAR,
-			zoom : 1.0
-		};
-		this.lastX = 0;
-		this.lastY = 0;
-		this.xDelta = 0;
-		this.yDelta = 0;
-		// STATS - TODO: Refactor this out of the jsx
-		this.stats = new Stats();
-		this.stats.setMode(0);
-		this.stats.domElement.style.position = 'absolute';
-		this.stats.domElement.style.left = '0px';
-		this.stats.domElement.style.top = '0px';
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
@@ -54,11 +31,10 @@ export default class ThreeWindow extends React.Component {
 	}
 
 	componentWillUpdate(nextProps, nextState) {
-		this.updateCamera(nextState.width, nextState.height);
+		this.renderingStage.updateSize(nextState.width, nextState.height);
 	}
 
 	componentDidUpdate() {
-		this.renderThree();
 	}
 
 	componentDidMount() {
@@ -100,7 +76,13 @@ export default class ThreeWindow extends React.Component {
 			);
 		}
 
-		this.setupThree();
+		this.renderingStage = new RenderingStage();
+		this.renderingStage.volumeMesh = this.volumeMesh;
+		this.renderingStage.scaffoldMesh = this.scaffoldMesh;
+		this.renderingStage.loadStage();
+		findDOMNode(this).appendChild(this.renderingStage.rendererElement);
+		findDOMNode(this).appendChild(this.renderingStage.statsElement);
+		this.renderingStage.animate();
 		this.updateSize();
 	}
 
@@ -113,82 +95,12 @@ export default class ThreeWindow extends React.Component {
 			<div className="three-window">
 				<button className="three-window-button-export" type="button"
 					onClick={this.handleExportSTL}>Export</button>
+				<button className="three-window-button-refresh" type="button"
+					onClick={this.handleRefresh}>Refresh</button>
+				<button className="three-window-button-toggleCamera" type="button"
+					onClick={this.handleToggleCamera}>{this.state.cameraMode}</button>
 			</div>
 		);
-	}
-
-	@bind
-	setupThree() {
-		let { left, right, top, bottom } = this.cameraProps;
-		this.scene = new THREE.Scene();
-
-		// Lights
-		this.ambientLight = new THREE.AmbientLight(0x404040);
-		this.scene.add(this.ambientLight);
-		this.directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.8);
-		this.directionalLight.position.set(500,500,50);
-		this.scene.add(this.directionalLight);
-		this.directionalLight2 = new THREE.DirectionalLight(0xFFFFFF, 0.6);
-		this.directionalLight2.position.set(-500,500,50);
-		this.scene.add(this.directionalLight2);
-		this.directionalLight3 = new THREE.DirectionalLight(0xF0F0F0, 1);
-		this.directionalLight3.position.set(0,-500,50);
-		this.scene.add(this.directionalLight3);
-
-		// Camera
-		this.camera = new THREE.OrthographicCamera(left, right, top, bottom, NEAR, FAR);
-		this.camera.position.x = 200;
-		this.camera.position.y = 100;
-		this.camera.position.z = 200;
-		this.axisHelper = new THREE.AxisHelper(FAR/2);
-		this.scene.add(this.axisHelper);
-
-		// Action!
-		this.scene.add(this.scaffoldMesh);
-		this.scene.add(this.volumeMesh);
-
-		this.renderer = new THREE.WebGLRenderer({antialias : true});
-		let OrbitControls = createOrbitControls(THREE);
-		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-		this.controls.addEventListener('change', this.animate);
-		findDOMNode(this).appendChild(this.renderer.domElement);
-		findDOMNode(this).appendChild(this.stats.domElement);
-	}
-
-	@bind
-	renderThree() {
-		let { width, height } = this.state;
-		let { left, right, top, bottom, near, far, zoom } = this.cameraProps;
-		// apply any rendering changes here
-		this.renderer.setSize(width, height);
-		this.camera.left = left;
-		this.camera.right = right;
-		this.camera.top = top;
-		this.camera.bottom = bottom;
-		this.camera.near = near;
-		this.camera.far = far;
-		this.camera.zoom = zoom;
-		this.camera.updateProjectionMatrix();
-
-		// let rotationX = -this.yDelta*0.005 * Math.PI;
-		// let rotationY = this.xDelta*0.005 * Math.PI;
-		// this.scaffoldMesh.rotation.x = rotationX;
-		// this.scaffoldMesh.rotation.y = rotationY;
-		this.renderer.render(this.scene, this.camera);
-	}
-
-	@bind
-	animate() {
-		this.controls.update();
-		this.renderer.render(this.scene, this.camera);
-	}
-
-	@bind
-	updateCamera(width, height) {
-		this.cameraProps.left = width / -2;
-		this.cameraProps.right = width / 2;
-		this.cameraProps.top = height / 2;
-		this.cameraProps.bottom = height / -2;
 	}
 
 	@bind
@@ -199,6 +111,11 @@ export default class ThreeWindow extends React.Component {
 			width: w,
 			height: h
 		});
+	}
+
+	handleToggleCamera() {
+		// TODO: Load camera and apply
+		// this.renderingStage.setCameraMode();
 	}
 
 	@bind
@@ -216,6 +133,32 @@ export default class ThreeWindow extends React.Component {
 				  };
 			window.open(makeTextFile(stl));
 		}
+	}
+
+	// TODO: Refactor this into separate camera class in three/
+	@bind
+	handleMouseDown(mouseEvent) {
+		this.lastX = mouseEvent.clientX;
+		this.lastY = mouseEvent.clientY;
+		addEventListener('mousemove', this.handleMouseMove);
+	}
+
+	@bind
+	handleMouseMove(mouseEvent) {
+		mouseEvent.preventDefault();
+		let xD = mouseEvent.clientX - this.lastX;
+		let yD = this.lastY - mouseEvent.clientY;
+		this.xDelta += xD;
+		this.yDelta += yD;
+		this.lastX = mouseEvent.clientX;
+		this.lastY = mouseEvent.clientY;
+		this.renderThree();
+		console.log("mouse delta: "+xD+","+yD+" mesh delta: "+this.xDelta+","+this.yDelta);
+	}
+
+	@bind
+	handleMouseUp() {
+		removeEventListener('mousemove', this.handleMouseMove);
 	}
 
 }
