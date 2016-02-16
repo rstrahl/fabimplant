@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { generateScaffold } from '../three/marchingCubes';
+import { generateScaffold } from '../src/three/marchingCubes';
 
 describe('marchingCubes.js', () => {
 
@@ -27,5 +27,5 @@ describe('marchingCubes.js', () => {
 		});
 
 	});
-	
+
 });

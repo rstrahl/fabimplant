@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { getAxisRange, flattenPixelArrays, resamplePixelArray,
-	normalizeDownPixelArray, normalizeUpPixelArray } from '../three/utils';
+	normalizeDownPixelArray, normalizeUpPixelArray } from '../src/three/utils';
 
 describe('utils.js', () => {
 
