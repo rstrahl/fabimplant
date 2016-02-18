@@ -45,11 +45,11 @@ export default class ImageWindow extends React.Component {
 		return (
 			<div id="image-window">
 				<div id="image-window-canvascontainer">
-					<ImageCanvas imageData={imageData} />
 					<ImageNavigationBar
 						handleImageIndexChanged={this.handleImageIndexChanged}
 						currentImageIndex={imageIndex}
 						imageIndexMax={dicomFile.pixelArrays.length} />
+					<ImageCanvas imageData={imageData} />
 					<ImageWindowCenterWidthDisplay
 						windowCenter={windowCenter}
 						windowWidth={windowWidth}
@@ -199,6 +199,9 @@ class ImageNavigationBar extends React.Component {
 	 render() {
 		 return (
 			 <div className="image-navigation-bar">
+				 <div className="image-navigation-title">
+					 Image Index
+				 </div>
 				 <div className="image-navigation-text">
 					 {this.props.currentImageIndex + 1} / {this.props.imageIndexMax}
 				 </div>

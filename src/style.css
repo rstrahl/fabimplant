@@ -172,8 +172,9 @@ input[type=range].vertical {
 .image-window-centerwidth-display {
     width: 320px;
     text-align :center;
-    margin: auto;
     font-size: 11px;
+    margin: auto;
+    padding: 16px 16px 16px 16px;
 }
 
 .image-window-centerwidth-title {
@@ -208,9 +209,15 @@ input[type=range].vertical {
   color: rgba(255,255,255,0.75);
   width: 480px;
   margin: auto;
+  padding: 16px 16px 16px 16px;
 }
 
 .image-navigation-control {
+}
+
+.image-navigation-title {
+    font-size: 18px;
+    margin: 8px;
 }
 
 .image-navigation-text {
