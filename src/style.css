@@ -173,8 +173,12 @@ input[type=range].vertical {
     width: 320px;
     text-align :center;
     font-size: 11px;
-    margin: auto;
+    margin: auto auto 62px auto;
     padding: 16px 16px 16px 16px;
+    position: inherit;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 .image-window-centerwidth-title {
