@@ -22,6 +22,14 @@ export default class ImageWindow extends React.Component {
 		};
 	}
 
+	componentWillUpdate(nextProps, nextState) {
+		let { dicomFile } = this.props;
+		if (dicomFile !== undefined && dicomFile !== null) {
+			dicomFile.windowWidth = nextState.windowWidth;
+			dicomFile.windowCenter = nextState.windowCenter;
+		}
+	}
+
 	render() {
 		let { dicomFile } = this.props;
 		let { imageIndex, windowCenter, windowWidth } = this.state;
