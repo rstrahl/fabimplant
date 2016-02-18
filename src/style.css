@@ -1,3 +1,5 @@
+/* === Element Styling === */
+
 body {
   margin: 0;
   top: 0;
@@ -15,6 +17,47 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
+}
+
+input[type=range]{
+    -webkit-appearance: none;
+    background: rgba(0,0,0,0);
+    width: 100%;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    height: 12px;
+    background: rgb(14, 45, 77);
+    border: 0px solid rgb(0, 0, 0);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+input[type=range]:hover::-webkit-slider-runnable-track {
+
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 10px;
+    width: 10px;
+    margin-top: 1px;
+    border-radius: 5px;
+    background: rgb(49, 143, 237);
+    cursor: pointer;
+}
+
+input[type=range]:hover::-webkit-slider-thumb {
+
+}
+
+input[type=range].vertical {
+    -webkit-transform:rotate(270deg);
 }
 
 /* === Header === */
@@ -48,11 +91,11 @@ main {
 .dicom-debug-window {
   position: relative;
   background: rgba(255,255,255,.85);
-  color: rgba(0,0,0,255);
+  color: rgba(0,0,0,1);
   box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.25);
   -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.25);
   -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.25);
-  border: 0px hidden #000000;
+  border: 0px hidden rgba(0,0,0,1);
   float: left;
   overflow: auto;
   width: 400px;
@@ -127,14 +170,58 @@ main {
 }
 
 .image-window-centerwidth-display {
-  text-align:center;
-  font-size: .7em;
+    width: 320px;
+    text-align :center;
+    font-size: 11px;
+    margin: auto auto 62px auto;
+    padding: 16px 16px 16px 16px;
+    position: inherit;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.image-window-centerwidth-title {
+    font-size: 18px;
+    margin: 8px;
+}
+
+.image-window-centerwidth-control {
+    margin-top: 16px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.image-window-centerwidth-text {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+
+.image-window-centerwidth-value {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.image-window-centerwidth-input {
+    width: 100%;
 }
 
 .image-navigation-bar {
   background: rgba(0,0,0,255);
   text-align: center;
   color: rgba(255,255,255,0.75);
+  width: 480px;
+  margin: auto;
+  padding: 16px 16px 16px 16px;
+}
+
+.image-navigation-control {
+}
+
+.image-navigation-title {
+    font-size: 18px;
+    margin: 8px;
 }
 
 .image-navigation-text {
@@ -147,8 +234,12 @@ main {
   display: inline-block;
   background: rgba(0,0,0,0);
   border: 0px;
-  padding: 2px;
-  width: auto;
+  width: 12px;
+}
+
+.image-navigation-input {
+    display: inline-block;
+    width: 450px;
 }
 
 /* Navigation Footer */
@@ -217,13 +308,17 @@ main {
     overflow: hidden;
 }
 
-.three-window-button-export {
+.three-window-button-panel {
     position: absolute;
+    width: 50px;
     top: 0;
     right: 0;
+    overflow: hidden;
 }
 
-.three-window-button-refresh {
+.three-window-button {
+    width: 50px;
+    height: 50px;
 }
 
 /* Workspace Window */

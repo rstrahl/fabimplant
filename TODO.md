@@ -1,29 +1,21 @@
 # TODO
 
-## BACKLOG
-- UI: Add slider controls:
-	- Create slider control
-	- ImageWindow.jsx:
-		- Image selection
-		- Window width/center
-	- ThreeWindow.jsx:
-		- Isolevel
-		- Resample factor
-- Return controls for moving Mesh
-	- Add toggle button to select between move scene and move mesh?
-- UI: Create button icons for Camera Mode
-- DEBT: Refactor out the THREE.js geometry creation/management code from jsx into module
-- DEBT: Clean up marchingCubes.js and marchingCubesTests.js
-- DEBT: Apply proper project structure (ie- js/, vendor/, etc.)
-- Refactor into a Flux architecture?
-- Add proper logging facility
-- DEBT: Refactor dicomFile out of using `class` and into Factory (constructor style)
-- Add unit tests for processor.js
-- UI: Add workflow transitions
-- UI: Add activity spinners
+current task: get sliders on image window working for WW/WC
+
+- Add sliders
+- Integrate sliders with modifying WW/WC
+- Updates WW/WC numbers accurately
+- Updates WW/WC value stored in DicomFile
+- ThreeWindow uses the minWidth as the isolevel, the maxWidth as the maximum pixel value
+	- re-threshold values from zero to max
+
 - Second draft smoothing (blocked by window width/center controls)
 	- Re-implement thresholding to allow wide range of values; windowMin becomes
 		isolevel, anything above windowMax is pinned to zero (black)?
+
+## BACKLOG
+
+- Refactor into a Flux architecture?
 
 ### Serializer
 - Add unit tests for STLSerializer

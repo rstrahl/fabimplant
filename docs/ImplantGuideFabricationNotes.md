@@ -9,3 +9,5 @@
 Misc:
 - Ensure that the _undercut_ of the tooth is not filled by the material
 - Form the implant guide to the contour of the surface of the mesh (teeth+bone)
+
+- Potentially add the patient name/date on the appliance itself (stencil?)

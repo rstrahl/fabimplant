@@ -5,12 +5,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { bind } from 'decko';
 import { prepareImageData, pixelValueToInterpretedValue } from '../dicom/processor';
 import DicomDebugWindow from './dicomDebugWindow.jsx';
 
-/**
- * A UI component that displays images from a DICOM file with image navigation
- * elements.
+/** A UI component that displays images from a DICOM file.
  */
 export default class ImageWindow extends React.Component {
 
@@ -18,9 +17,17 @@ export default class ImageWindow extends React.Component {
 		super(props);
 		this.state = {
 			imageIndex: 0,
-			windowWidth: 1, // TODO: Modify these to use HU-based values
-			windowCenter: 1550
+			windowWidth: 4096,
+			windowCenter: 2048
 		};
+	}
+
+	componentWillUpdate(nextProps, nextState) {
+		let { dicomFile } = this.props;
+		if (dicomFile !== undefined && dicomFile !== null) {
+			dicomFile.windowWidth = nextState.windowWidth;
+			dicomFile.windowCenter = nextState.windowCenter;
+		}
 	}
 
 	render() {
@@ -39,26 +46,30 @@ export default class ImageWindow extends React.Component {
 		let width = dicomFile.getImageWidth();
 		let imageData = prepareImageData(pixelArray, width, height, windowCenter, windowWidth);
 
-		let interpretedCenter = pixelValueToInterpretedValue(windowCenter, dicomFile.getImageSlope(), dicomFile.getImageIntercept());
-		let interpretedWidth =  pixelValueToInterpretedValue(windowWidth, dicomFile.getImageSlope(), dicomFile.getImageIntercept());
+		// let interpretedCenter = pixelValueToInterpretedValue(windowCenter, dicomFile.getImageSlope(), dicomFile.getImageIntercept());
+		// let interpretedWidth =  pixelValueToInterpretedValue(windowWidth, dicomFile.getImageSlope(), dicomFile.getImageIntercept());
 
-		// TODO: Add WL/WC controls
 		// TODO: Add debug toggle buttons
 		return (
 			<div id="image-window">
 				<div id="image-window-canvascontainer">
-					<ImageCanvas imageData={imageData}/>
 					<ImageNavigationBar
-						handleImageIndexChanged={this.handleImageIndexChanged.bind(this)}
+						handleImageIndexChanged={this.handleImageIndexChanged}
 						currentImageIndex={imageIndex}
 						imageIndexMax={dicomFile.pixelArrays.length} />
-					<ImageWindowCenterWidthDisplay windowCenter={interpretedCenter} windowWidth={interpretedWidth} />
+					<ImageCanvas imageData={imageData} />
+					<ImageWindowCenterWidthDisplay
+						windowCenter={windowCenter}
+						windowWidth={windowWidth}
+						handleWindowWidthChanged={this.handleWindowWidthChanged}
+						handleWindowCenterChanged={this.handleWindowCenterChanged} />
 				</div>
-				<DicomDebugWindow dataSet={dicomFile.getDicomMetadata()} title='Image Metadata'/>
+				<DicomDebugWindow dataSet={dicomFile.getDicomMetadata()} title='Image Metadata' />
 			</div>
 		);
 	}
 
+	@bind
 	handleImageIndexChanged(newIndex) {
 		let { dicomFile } = this.props;
 		if (newIndex < 0) {
@@ -70,20 +81,21 @@ export default class ImageWindow extends React.Component {
 		}
 	}
 
+	@bind
 	handleWindowWidthChanged(newWindowWidth) {
 		if (newWindowWidth > 1) {
 			this.setState({windowWidth: newWindowWidth});
 		}
 	}
 
+	@bind
 	handleWindowCenterChanged(newWindowCenter) {
 		this.setState({windowCenter: newWindowCenter});
 	}
 
 }
 
-/**
- * An HTML Canvas that renders an ImageData object.
+/** An HTML Canvas that renders an ImageData object.
  */
 export class ImageCanvas extends React.Component {
 
@@ -124,6 +136,8 @@ export class ImageCanvas extends React.Component {
 
 }
 
+/** A UI component that displays and controls DICOM Window Width and Center.
+ */
 class ImageWindowCenterWidthDisplay extends React.Component {
 
 	constructor(props) {
@@ -133,9 +147,45 @@ class ImageWindowCenterWidthDisplay extends React.Component {
 	render() {
 		return (
 			<div className="image-window-centerwidth-display">
-					Window Center: {this.props.windowCenter} / Window Width: {this.props.windowWidth}
+				<div className="image-window-centerwidth-title">
+					Window Level
+				</div>
+				<div className="image-window-centerwidth-control">
+					<div className="image-window-centerwidth-value">{this.props.windowCenter}</div>
+					<input
+						type="range"
+						className="image-window-centerwidth-input"
+						defaultValue={this.props.windowCenter}
+						min="0"
+						max="4096"
+						onChange={this.handleWindowCenterChanged}>
+					</input>
+					<div className="image-window-centerwidth-text">Center</div>
+				</div>
+				<div className="image-window-centerwidth-control">
+					<div className="image-window-centerwidth-value">{this.props.windowWidth}</div>
+					<input
+						type="range"
+						className="image-window-centerwidth-input"
+						defaultValue={this.props.windowWidth}
+						min="0"
+						max="4096"
+						onChange={this.handleWindowWidthChanged}>
+					</input>
+					<div className="image-window-centerwidth-text">Width</div>
+				</div>
 			</div>
 		);
+	}
+
+	@bind
+	handleWindowWidthChanged(event) {
+		this.props.handleWindowWidthChanged(event.target.valueAsNumber);
+	}
+
+	@bind
+	handleWindowCenterChanged(event) {
+		this.props.handleWindowCenterChanged(event.target.valueAsNumber);
 	}
 
 }
@@ -157,23 +207,36 @@ class ImageNavigationBar extends React.Component {
 	 render() {
 		 return (
 			 <div className="image-navigation-bar">
-				 <ImageNavigationButton label="&lt; Prev" handleButtonClick={this.handleButtonClick.bind(this)} indexModifier={-1} />
+				 <div className="image-navigation-title">
+					 Image Index
+				 </div>
 				 <div className="image-navigation-text">
 					 {this.props.currentImageIndex + 1} / {this.props.imageIndexMax}
 				 </div>
-				 <ImageNavigationButton label="Next &gt;" handleButtonClick={this.handleButtonClick.bind(this)} indexModifier={1} />
+				 <div className="image-navigation-controls">
+					 <ImageNavigationButton label="&lt;" handleButtonClick={this.handleButtonClick} indexModifier={-1} />
+					 <div className="image-navigation-input">
+						 <input type="range" defaultValue="0" min="0" max={this.props.imageIndexMax} onChange={this.handleChangeImageIndex}></input>
+					 </div>
+					 <ImageNavigationButton label="&gt;" handleButtonClick={this.handleButtonClick} indexModifier={1} />
+				 </div>
 			 </div>
 		 );
 	 }
 
+	 @bind
 	 handleButtonClick(indexModifier) {
 		 this.props.handleImageIndexChanged(this.props.currentImageIndex + indexModifier);
 	 }
 
+	 @bind
+	 handleChangeImageIndex(event) {
+		 this.props.handleImageIndexChanged(event.target.valueAsNumber);
+	 }
+
 }
 
-/**
- * A button that calls a callback in the ImageNavigationBar when clicked.
+/** A button that calls a callback in the ImageNavigationBar when clicked.
  */
 class ImageNavigationButton extends React.Component {
 
@@ -183,12 +246,13 @@ class ImageNavigationButton extends React.Component {
 
 	render() {
 		return (
-			<div className="image-navigation-button" onClick={this.handleButtonClick.bind(this)}>
+			<div className="image-navigation-button" onClick={this.handleButtonClick}>
 				{this.props.label}
 			</div>
 		);
 	}
 
+	@bind
 	handleButtonClick() {
 		this.props.handleButtonClick(this.props.indexModifier);
 	}
