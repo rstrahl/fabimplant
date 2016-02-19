@@ -6,6 +6,7 @@
 import React from 'react';
 import { dicomDataDictionary } from '../dicom/dataDictionary';
 import { uids } from '../dicom/uids';
+import { bind } from 'decko';
 
 export default class DicomDebugWindow extends React.Component {
 
@@ -34,8 +35,15 @@ export default class DicomDebugWindow extends React.Component {
 						{rows}
 					</tbody>
 				</table>
+				<button className="dicom-debug-window-button" id="dicom-debug-window-button-close" type="button"
+					onClick={this.handleCloseWindow}>X</button>
 			</div>
 		);
+	}
+
+	@bind
+	handleCloseWindow() {
+		this.props.handleCloseWindow();
 	}
 
 }
