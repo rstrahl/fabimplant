@@ -321,6 +321,12 @@ input[type=range].vertical {
     height: 50px;
 }
 
+.stats-render {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
 /* Workspace Window */
 
 .workspace-window {

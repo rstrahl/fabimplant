@@ -20,19 +20,15 @@ export default class ThreeWindow extends React.Component {
 		super(props);
 		this.state = {
 			width : 0,
-			height : 0
+			height : 0,
+			debugMode : false
 		};
 		this.renderingStage = new RenderingStage();
 		this.subdivision = 0;
 	}
 
-	shouldComponentUpdate(nextProps, nextState) {
-		// Should only update if the dimensions of the window changes
-		// This impacts the renderer canvas and the camera
-		return (nextState.width !== this.state.width || nextState.height !== this.state.height);
-	}
-
 	componentWillUpdate(nextProps, nextState) {
+		this.renderingStage.setDebugMode(nextState.debugMode);
 		this.renderingStage.updateSize(nextState.width, nextState.height);
 	}
 
@@ -60,6 +56,8 @@ export default class ThreeWindow extends React.Component {
 						onClick={this.handleExportSTL}>Export</button>
 					<button className="three-window-button" type="button"
 						onClick={this.handleRefresh}>Refresh</button>
+					<button className="three-window-button" type="button"
+						onClick={this.handleToggleDebug}>Debug {this.state.debugMode}</button>
 					<button className="three-window-button" type="button"
 						onClick={this.handleIncreaseSubdivision}>Increase</button>
 					<button className="three-window-button" type="button"
@@ -132,10 +130,15 @@ export default class ThreeWindow extends React.Component {
 		this.handleRefresh();
 	}
 
+	@bind
+	handleToggleDebug() {
+		this.setState({ debugMode: !this.state.debugMode });
+	}
+
 	// TODO: REFACTOR ALL THIS BELOW
 
 	loadMeshForDicom(dicomFile) {
-		let isolevel = 1600,
+		let isolevel = dicomFile.windowCenter - Math.ceil(dicomFile.windowWidth / 2),
 			factor = 8,
 			step = 1;
 		let volume = dicomVolume(dicomFile, factor);
