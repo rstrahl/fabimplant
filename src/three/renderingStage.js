@@ -45,10 +45,8 @@ export default class RenderingStage {
 
 		this.stats = new Stats();
 		this.stats.setMode(0);
-		// TODO: Move into style.css
-		this.stats.domElement.style.position = 'absolute';
-		this.stats.domElement.style.left = '0px';
-		this.stats.domElement.style.top = '0px';
+		this.stats.domElement.className = 'stats-render';
+		this.stats.domElement.style.display = 'none';
 
 		this.axisHelper = new THREE.AxisHelper(FAR/2);
 
@@ -137,9 +135,11 @@ export default class RenderingStage {
 		if (this.debugMode === true) {
 			this.scene.add(this.axisHelper);
 			this.scene.add(this.scaffoldMesh);
+			this.stats.domElement.style.display = 'none';
 		} else {
 			this.scene.remove(this.axisHelper);
 			this.scene.remove(this.scaffoldMesh);
+			this.stats.domElement.style.display = 'block';
 		}
 	}
 
