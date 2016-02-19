@@ -16,6 +16,7 @@ export default class ImageWindow extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			debugMode: false,
 			imageIndex: 0,
 			windowWidth: 4096,
 			windowCenter: 2048
@@ -32,7 +33,7 @@ export default class ImageWindow extends React.Component {
 
 	render() {
 		let { dicomFile } = this.props;
-		let { imageIndex, windowCenter, windowWidth } = this.state;
+		let { debugMode, imageIndex, windowCenter, windowWidth } = this.state;
 
 		if (dicomFile === undefined || dicomFile === null) {
 			return (
@@ -41,18 +42,19 @@ export default class ImageWindow extends React.Component {
 		}
 
 		// TODO: Seems like this could be refactored out into somewhere cleaner
-		let pixelArray = dicomFile.pixelArrays[imageIndex];
-		let height = dicomFile.getImageHeight();
-		let width = dicomFile.getImageWidth();
-		let imageData = prepareImageData(pixelArray, width, height, windowCenter, windowWidth);
+		let pixelArray = dicomFile.pixelArrays[imageIndex],
+			height = dicomFile.getImageHeight(),
+			width = dicomFile.getImageWidth(),
+			imageData = prepareImageData(pixelArray, width, height, windowCenter, windowWidth);
 
 		// let interpretedCenter = pixelValueToInterpretedValue(windowCenter, dicomFile.getImageSlope(), dicomFile.getImageIntercept());
 		// let interpretedWidth =  pixelValueToInterpretedValue(windowWidth, dicomFile.getImageSlope(), dicomFile.getImageIntercept());
 
-		// TODO: Add debug toggle buttons
 		return (
 			<div id="image-window">
 				<div id="image-window-canvascontainer">
+					<button className="image-window-button" id="image-window-button-debug" type="button"
+						onClick={this.handleToggleDebug}>Debug</button>
 					<ImageNavigationBar
 						handleImageIndexChanged={this.handleImageIndexChanged}
 						currentImageIndex={imageIndex}
@@ -64,7 +66,11 @@ export default class ImageWindow extends React.Component {
 						handleWindowWidthChanged={this.handleWindowWidthChanged}
 						handleWindowCenterChanged={this.handleWindowCenterChanged} />
 				</div>
-				<DicomDebugWindow dataSet={dicomFile.getDicomMetadata()} title='Image Metadata' />
+				{ debugMode === true
+					? <DicomDebugWindow dataSet={dicomFile.getDicomMetadata()} title="Image Metadata"
+						handleCloseWindow={this.handleCloseWindow} />
+					: null
+				}
 			</div>
 		);
 	}
@@ -91,6 +97,16 @@ export default class ImageWindow extends React.Component {
 	@bind
 	handleWindowCenterChanged(newWindowCenter) {
 		this.setState({windowCenter: newWindowCenter});
+	}
+
+	@bind
+	handleCloseWindow() {
+		this.handleToggleDebug();
+	}
+
+	@bind
+	handleToggleDebug() {
+		this.setState({ debugMode: !this.state.debugMode });
 	}
 
 }
