@@ -8,6 +8,7 @@ import ReactDOM from 'react-dom';
 import { bind } from 'decko';
 import { prepareImageData, pixelValueToInterpretedValue } from '../dicom/processor';
 import DicomDebugWindow from './dicomDebugWindow.jsx';
+import BoundedRangeInput from './boundedRangeInput.jsx';
 
 /** A UI component that displays images from a DICOM file.
  */
@@ -63,6 +64,8 @@ export default class ImageWindow extends React.Component {
 					<ImageWindowCenterWidthDisplay
 						windowCenter={windowCenter}
 						windowWidth={windowWidth}
+						maxWindowWidth={dicomFile.getWindowWidth()}
+						handleChange={this.handleChange}
 						handleWindowWidthChanged={this.handleWindowWidthChanged}
 						handleWindowCenterChanged={this.handleWindowCenterChanged} />
 				</div>
@@ -97,6 +100,13 @@ export default class ImageWindow extends React.Component {
 	@bind
 	handleWindowCenterChanged(newWindowCenter) {
 		this.setState({windowCenter: newWindowCenter});
+	}
+
+	@bind
+	handleChange({ center, width }) {
+		if (width > 1) {
+			this.setState({ windowWidth: width, windowCenter: center});
+		}
 	}
 
 	@bind
@@ -158,40 +168,43 @@ class ImageWindowCenterWidthDisplay extends React.Component {
 
 	constructor(props) {
 		super(props);
+		this.state = {
+			center: props.windowCenter,
+			width: props.windowWidth
+		};
 	}
 
 	render() {
+		let { center, width } = this.state;
+		let range = this.toRange({ center, width });
 		return (
 			<div className="image-window-centerwidth-display">
 				<div className="image-window-centerwidth-title">
 					Window Level
 				</div>
 				<div className="image-window-centerwidth-control">
-					<div className="image-window-centerwidth-value">{this.props.windowCenter}</div>
-					<input
-						type="range"
-						className="image-window-centerwidth-input"
-						defaultValue={this.props.windowCenter}
-						min="0"
-						max="4096"
-						onChange={this.handleWindowCenterChanged}>
-					</input>
-					<div className="image-window-centerwidth-text">Center</div>
-				</div>
-				<div className="image-window-centerwidth-control">
-					<div className="image-window-centerwidth-value">{this.props.windowWidth}</div>
-					<input
-						type="range"
-						className="image-window-centerwidth-input"
-						defaultValue={this.props.windowWidth}
-						min="0"
-						max="4096"
-						onChange={this.handleWindowWidthChanged}>
-					</input>
-					<div className="image-window-centerwidth-text">Width</div>
+					<BoundedRangeInput
+						vertical
+						value={range}
+						onInput={this.handleRangeChanged}>
+					</BoundedRangeInput>
+					<div className="image-window-centerwidth-value">
+						W: {this.props.windowCenter}
+					</div>
+					<div className="image-window-centerwidth-value">
+						C: {this.props.windowWidth}
+					</div>
 				</div>
 			</div>
 		);
+	}
+
+	@bind
+	handleRangeChanged({ value }) {
+		let { center, width } = this.toCenterWidth(value);
+		this.setState({ center, width });
+		console.log('min: '+ value.min + ' max: '+ value.max + ' C: '+center+' W: '+width);
+		this.props.handleChange({ center, width });
 	}
 
 	@bind
@@ -204,6 +217,21 @@ class ImageWindowCenterWidthDisplay extends React.Component {
 		this.props.handleWindowCenterChanged(event.target.valueAsNumber);
 	}
 
+	toCenterWidth({ min, max }) {
+		let { maxWindowWidth } = this.props;
+		return {
+			center: Math.round(((min + max) / 2) * maxWindowWidth),
+			width: Math.round((max - min) * maxWindowWidth)
+		};
+	}
+
+	toRange({ center, width }) {
+		let { maxWindowWidth } = this.props;
+		return {
+			min: (center - (width / 2)) / maxWindowWidth,
+			max: (center + (width / 2)) / maxWindowWidth
+		};
+	}
 }
 
 /**

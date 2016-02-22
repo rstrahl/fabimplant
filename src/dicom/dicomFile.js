@@ -45,4 +45,11 @@ export default class DicomFile {
 		return parseFloat(this.dataSet.string('x00281052'));
 	}
 
+	getWindowWidth() {
+		return Number(this.dataSet.string('x00281051'));
+	}
+
+	getWindowHeight() {
+		return Number(this.dataSet.string('x00281050'));
+	}
 }
