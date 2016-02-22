@@ -60,6 +60,108 @@ input[type=range].vertical {
     -webkit-transform:rotate(270deg);
 }
 
+/* === Bounded Range Input === */
+
+.pretty-range {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #FFF;
+  text-align: center;
+}
+
+.bounded-range {
+  position: relative;
+  overflow: visible;
+  width: 300px;
+  height: 60px;
+  background: rgba(49, 143, 237, 0.25);
+  border: 1px solid rgba(49, 143, 237, 0.9);
+}
+.bounded-range .inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  border: 0px;
+}
+.bounded-range .min,
+.bounded-range .max {
+  position: absolute;
+  left: -3px;
+  top: 0;
+  width: 10px;
+  height: 100%;
+  cursor: w-resize;
+  z-index: 5;
+  border: 0px;
+}
+.bounded-range .min:after,
+.bounded-range .max:after {
+  content: '';
+  display: block;
+  height: 100%;
+  width: 4px;
+  margin: 0 3px;
+  background: rgba(0, 0, 0, 0.5);
+}
+.bounded-range .min:hover:after,
+.bounded-range .max:hover:after,
+.bounded-range .min:active:after,
+.bounded-range .max:active:after {
+  background: rgba(49, 143, 237, 0.25);
+}
+.bounded-range .max {
+  left: auto;
+  right: -3px;
+  cursor: e-resize;
+}
+.bounded-range .content {
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+  background: rgba(49, 143, 237, 0.05);
+  cursor: move;
+  border: 0px;
+}
+.bounded-range .content:hover,
+.bounded-range .content:active {
+  background: rgba(49, 143, 237, 0.25);
+}
+.bounded-range[vertical] {
+  width: 60px;
+  height: 300px;
+  margin: auto;
+}
+.bounded-range[vertical] .inner {
+  top: auto;
+  bottom: 0;
+}
+.bounded-range[vertical] .min,
+.bounded-range[vertical] .max {
+  left: 0;
+  top: auto;
+  bottom: -3px;
+  width: 100%;
+  height: 10px;
+  cursor: s-resize;
+}
+.bounded-range[vertical] .min:after,
+.bounded-range[vertical] .max:after {
+  height: 4px;
+  width: 100%;
+  margin: 3px 0;
+}
+.bounded-range[vertical] .max {
+  bottom: auto;
+  top: -3px;
+  cursor: n-resize;
+}
+
 /* === Header === */
 
 .header {
@@ -186,19 +288,18 @@ input[type=range].vertical {
 }
 
 .image-window-centerwidth-display {
-    width: 320px;
+    width: 180px;
     text-align :center;
     font-size: 11px;
-    margin: auto auto 62px auto;
+    margin: auto;
     padding: 16px 16px 16px 16px;
     position: inherit;
-    bottom: 0;
-    left: 0;
+    left: -60%;
     right: 0;
 }
 
 .image-window-centerwidth-title {
-    font-size: 18px;
+    font-size: 16px;
     margin: 8px;
 }
 
