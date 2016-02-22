@@ -1,9 +1,6 @@
 # TODO
 
-- Finish debug button in ImageWindow
-	- Toggles display of debug window
-- Fix styling/layout for sliders in ImageWindow (use standard size display)
-- Re-add camera code to ThreeWindow and hookup to toggle (#16)
+- Create PointCloud stage for image data.
 
 - ThreeWindow uses the minWidth as the isolevel, the maxWidth as the maximum pixel value
 	- #31 Re-implement thresholding to allow wide range of values; windowMin becomes
