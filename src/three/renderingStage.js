@@ -50,6 +50,7 @@ export default class RenderingStage {
 		this.stats.domElement.style.display = 'none';
 
 		this.axisHelper = new THREE.AxisHelper(FAR/2);
+		this.gridHelper = new THREE.GridHelper(100, 10);
 
 		let OrbitControls = createOrbitControls(THREE);
 		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -143,11 +144,13 @@ export default class RenderingStage {
 			this.scene.add(this.axisHelper);
 			this.scene.add(this.scaffoldMesh);
 			this.scene.add(this.wireframeHelper);
+			this.scene.add(this.gridHelper);
 			this.stats.domElement.style.display = 'block';
 		} else {
 			this.scene.remove(this.axisHelper);
 			this.scene.remove(this.scaffoldMesh);
 			this.scene.remove(this.wireframeHelper);
+			this.scene.remove(this.gridHelper);
 			this.stats.domElement.style.display = 'none';
 		}
 	}

@@ -9,6 +9,7 @@
 	- Add vertex and faces display to threewindow
 
 - Implement componentDidUnmount for ThreeWindow to unload all renderer elements
+- Implement asynchronous marching of cubes ;)
 
 # Observed issues:
 - Apparently the full data set causes a crash - why??
