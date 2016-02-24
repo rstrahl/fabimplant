@@ -14,6 +14,7 @@ import THREE from 'three';
  */
 export default function(volume, step, isolevel, subdivision) {
 	let volumeGeometry = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, isolevel);
+	// TODO: externalize - should be able to modify geometry and regenerate mesh without re-marching
 	if (subdivision !== undefined) {
 		let modifier = new SubdivisionModifier(subdivision);
 		modifier.modify(volumeGeometry);

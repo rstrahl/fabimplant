@@ -10,6 +10,16 @@
 import THREE from 'three';
 import { getAxisRange } from './utils';
 
+/** Generates an Isosurface from the provided volumetric data.
+ *
+ * @param  {number} width    the width of the volume data
+ * @param  {number} height   the height of the volume data
+ * @param  {number} depth    the depth of the volume data
+ * @param  {number} step     the distance between volume data points
+ * @param  {Array}  values   a contiguous array representation of 3-dimensional volume data
+ * @param  {number} isolevel the isolevel to apply to the volume data
+ * @return {Object}          a THREE.Geometry object representing the Isosurface
+ */
 export default function (width, height, depth, step, values, isolevel) {
 	let points = generateScaffold(width, height, depth, step);
 	let geometry = new THREE.Geometry();
