@@ -8,7 +8,7 @@ import { bind } from 'decko';
 import THREE from 'three';
 import RenderingStage from '../three/renderingStage';
 import { default as volumeMesh, dicomVolume, sphereVolume } from '../three/modeler';
-import { generateScaffold, generateScaffoldGeometry } from '../three/marchingCubes';
+import { generateGridCellPoints, generateScaffoldGeometry } from '../three/marchingCubes';
 import Serializer from '../three/STLSerializer';
 
 /**
@@ -113,6 +113,7 @@ export default class ThreeWindow extends React.Component {
 
 	@bind
 	handleExportSTL() {
+		// TODO: FLUX refactor
 		if (this.volumeMesh !== undefined) {
 			let stl = Serializer(this.volumeMesh);
 			let textFile = null,
@@ -145,15 +146,14 @@ export default class ThreeWindow extends React.Component {
 		this.setState({ debugMode: !this.state.debugMode });
 	}
 
-	// TODO: REFACTOR ALL THIS BELOW INTO A LOADER (mesh vs. pointcloud)
-
 	loadMeshForDicom(dicomFile) {
+		// TODO: FLUX refactor
 		let isolevel = dicomFile.windowCenter - Math.ceil(dicomFile.windowWidth / 2),
 			factor = 2,
 			step = 1;
 		let volume = dicomVolume(dicomFile, factor);
 		this.volumeMesh = volumeMesh(volume, step, isolevel, this.subdivision);
-		let scaffold = generateScaffold(volume.width, volume.height, volume.depth, step);
+		let scaffold = generateGridCellPoints(volume.width, volume.height, volume.depth, step);
 		this.scaffoldMesh = new THREE.Mesh(
 			generateScaffoldGeometry(scaffold, volume.width, volume.height, volume.depth),
 			new THREE.MeshBasicMaterial({
@@ -171,7 +171,7 @@ export default class ThreeWindow extends React.Component {
 			step = 1;
 		let volume = sphereVolume(size, size, size, step);
 		this.volumeMesh = volumeMesh(volume, step, isolevel);
-		let scaffold = generateScaffold(volume.width, volume.height, volume.depth, step);
+		let scaffold = generateGridCellPoints(volume.width, volume.height, volume.depth, step);
 		this.scaffoldMesh = new THREE.Mesh(
 			generateScaffoldGeometry(scaffold, volume.width, volume.height, volume.depth),
 			new THREE.MeshBasicMaterial({
