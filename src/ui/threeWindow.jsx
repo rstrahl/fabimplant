@@ -5,10 +5,8 @@
 import React from 'react';
 import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
-import THREE from 'three';
 import RenderingStage from '../three/renderingStage';
 import { default as volumeMesh, dicomVolume, sphereVolume } from '../three/modeler';
-import { generateGridCellPoints, generateScaffoldGeometry } from '../three/marchingCubes';
 import Serializer from '../three/STLSerializer';
 
 /**
@@ -26,7 +24,6 @@ export default class ThreeWindow extends React.Component {
 		this.renderingStage = new RenderingStage();
 		this.subdivision = 0;
 		this.volumeMesh = null;
-		this.scaffoldMesh = null;
 	}
 
 	componentWillUpdate(nextProps, nextState) {
@@ -99,6 +96,7 @@ export default class ThreeWindow extends React.Component {
 
 	@bind
 	handleRefresh() {
+		// TODO: FLUX refactor
 		this.renderingStage.clearStage();
 		let { dicomFile } = this.props;
 		if (dicomFile !== undefined && dicomFile !== null) {
@@ -107,7 +105,6 @@ export default class ThreeWindow extends React.Component {
 			this.loadMeshForDefault();
 		}
 		this.renderingStage.volumeMesh = this.volumeMesh;
-		this.renderingStage.scaffoldMesh = this.scaffoldMesh;
 		this.renderingStage.loadStage();
 	}
 
@@ -153,16 +150,6 @@ export default class ThreeWindow extends React.Component {
 			step = 1;
 		let volume = dicomVolume(dicomFile, factor);
 		this.volumeMesh = volumeMesh(volume, step, isolevel, this.subdivision);
-		let scaffold = generateGridCellPoints(volume.width, volume.height, volume.depth, step);
-		this.scaffoldMesh = new THREE.Mesh(
-			generateScaffoldGeometry(scaffold, volume.width, volume.height, volume.depth),
-			new THREE.MeshBasicMaterial({
-				color : 0xAAAAFF,
-				transparent : true,
-				opacity : 0.5,
-				wireframe : true
-			})
-		);
 	}
 
 	loadMeshForDefault() {
@@ -171,16 +158,6 @@ export default class ThreeWindow extends React.Component {
 			step = 1;
 		let volume = sphereVolume(size, size, size, step);
 		this.volumeMesh = volumeMesh(volume, step, isolevel);
-		let scaffold = generateGridCellPoints(volume.width, volume.height, volume.depth, step);
-		this.scaffoldMesh = new THREE.Mesh(
-			generateScaffoldGeometry(scaffold, volume.width, volume.height, volume.depth),
-			new THREE.MeshBasicMaterial({
-				color : 0xAAAAFF,
-				transparent : true,
-				opacity : 0.5,
-				wireframe : true
-			})
-		);
 	}
 
 	// TODO: Refactor this into separate camera class in three/

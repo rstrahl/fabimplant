@@ -20,16 +20,9 @@ export default class SubdivisionModifier {
 		let repeats = this.subdivisions;
 
 		while ( repeats -- > 0 ) {
-
 			this.smooth( geometry );
-
 		}
-
 		delete geometry.__tmpVertices;
-
-		geometry.computeFaceNormals();
-		geometry.computeVertexNormals();
-
 	}
 
 	getEdge( a, b, map ) {

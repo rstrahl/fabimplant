@@ -24,10 +24,8 @@ import { getAxisRange } from './utils';
  * @return {Object}          a THREE.Geometry object representing the Isosurface
  */
 export default function (width, height, depth, step, values, isolevel) {
-	// 1. Generate grid cubes
 	let points = generateGridCellPoints(width, height, depth, step);
-	let geometry = new THREE.Geometry();
-	let vertexIndex = 0;
+	let triangles = [];
 
 	let size = width;
 	let size2 = width * height;
@@ -35,46 +33,29 @@ export default function (width, height, depth, step, values, isolevel) {
 		for (let y = 0; y < height-1; y++) {
 			for (let x = 0; x < width-1; x++) {
 
+				// Generate facets for current iterator
 				let result = polygonise(x, y, z, size, size2, points, values, isolevel);
 				if (result === undefined) continue;
 
-				// 6. Construct triangles via triTable lookup
+				// Construct triangles via triTable lookup
 				let { cubeindex, vlist } = result,
 					i = 0;
-
 				cubeindex <<= 4; // triTable offset; the original triTable was 2d array [256][16];
 				while (triTable[cubeindex + i] !== -1) {
 					let index1 = triTable[cubeindex + i],
 						index2 = triTable[cubeindex + i + 1],
 						index3 = triTable[cubeindex + i + 2];
-
-					// TODO: Don't create geometry here - just add to an array of triangles (3 vectors)
-					// Then iterate through triangles in the renderer.js to add to geometry
-					// add vertices to Geometry
-					geometry.vertices.push(vlist[index1].clone());
-					geometry.vertices.push(vlist[index2].clone());
-					geometry.vertices.push(vlist[index3].clone());
-
-					// add faces to Geometry
-					geometry.faces.push(new THREE.Face3(vertexIndex, vertexIndex+1, vertexIndex+2));
-					geometry.faceVertexUvs[0].push([
-						new THREE.Vector2(0,0),
-						new THREE.Vector2(0,1),
-						new THREE.Vector2(1,1)
+					triangles.push([
+						vlist[index1],
+						vlist[index2],
+						vlist[index3]
 					]);
-
-					vertexIndex += 3;
 					i += 3;
 				}
 			}
 		}
 	}
-
-	console.warn(geometry.mergeVertices());
-	// TODO: Move these out into the rendering stage as optionals
-	geometry.computeFaceNormals();
-	// geometry.computeVertexNormals();
-	return geometry;
+	return triangles;
 }
 
 /** Calculate the triangle faces required to represent the isosurface through the cell.
@@ -208,60 +189,11 @@ export function generateGridCellPoints(width, height, depth, step) {
 	for (let k = 0, z = minZ; k < depth; k++, z += step) {
 		for (let j = 0, y = minY; j < height; j++, y += step) {
 			for (let i = 0, x = minX; i < width; i++, x += step) {
-				vertices.push(new THREE.Vector3(x,y,z));
+				vertices.push(new THREE.Vector3(x,y,z)); // TODO: Evaluate requirements for vector3
 			}
 		}
 	}
 	return vertices;
-}
-
-/** Generates a THREE.Geometry box that outlines the scaffold area edge to edge.
- * Used typically for debugging purposes.
- *
- * @param  {Array} vertices the scaffold vertices
- * @param  {number} width the projected width of the scaffold
- * @param  {number} height the projected height of the scaffold
- * @param  {number} depth the projected depth of the scaffold
- * @return {Object} a THREE.Geometry object with vertices and faces
- */
-export function generateScaffoldGeometry(vertices, width, height, depth) {
-	let geometry = new THREE.Geometry();
-	vertices.forEach( (element) => {
-		geometry.vertices.push(element);
-	});
-	let vertex0 = 0,
-		vertex1 = width - 1,
-		vertex5 = width * height - 1,
-		vertex4 = width * (height - 1),
-		vertex6 = width * height * depth -1,
-		vertex7 = width * height * depth - width,
-		vertex3 = width * height * (depth - 1),
-		vertex2 = width * height * (depth - 1) + width - 1;
-
-	// Brute force create faces - because I suck at math.
-	//bottom
-	geometry.faces.push(new THREE.Face3(vertex0, vertex1, vertex2));
-	geometry.faces.push(new THREE.Face3(vertex0, vertex2, vertex3));
-	//top
-	geometry.faces.push(new THREE.Face3(vertex4, vertex6, vertex5));
-	geometry.faces.push(new THREE.Face3(vertex4, vertex7, vertex6));
-	//back
-	geometry.faces.push(new THREE.Face3(vertex0, vertex4, vertex1));
-	geometry.faces.push(new THREE.Face3(vertex1, vertex4, vertex5));
-	//right
-	geometry.faces.push(new THREE.Face3(vertex1, vertex6, vertex2));
-	geometry.faces.push(new THREE.Face3(vertex1, vertex5, vertex6));
-	//front
-	geometry.faces.push(new THREE.Face3(vertex2, vertex6, vertex7));
-	geometry.faces.push(new THREE.Face3(vertex2, vertex7, vertex3));
-	//left
-	geometry.faces.push(new THREE.Face3(vertex3, vertex4, vertex0));
-	geometry.faces.push(new THREE.Face3(vertex3, vertex7, vertex4));
-
-	geometry.mergeVertices();
-	geometry.computeFaceNormals();
-	geometry.computeVertexNormals();
-	return geometry;
 }
 
 /** Lookup table for determining which edges of the cube are intersected by the isosurface.
