@@ -43,12 +43,14 @@ export default class RenderingStage {
 		this.scene = new THREE.Scene();
 		this.renderer = new THREE.WebGLRenderer({antialias : true});
 
+		// Stats
 		this.stats = new Stats();
 		this.stats.setMode(0);
 		this.stats.domElement.className = 'stats-render';
 		this.stats.domElement.style.display = 'none';
 
 		this.axisHelper = new THREE.AxisHelper(FAR/2);
+		this.gridHelper = new THREE.GridHelper(100, 10);
 
 		let OrbitControls = createOrbitControls(THREE);
 		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -65,6 +67,10 @@ export default class RenderingStage {
 		// TODO: Move to using a group
 		if (this.volumeMesh !== undefined) {
 			this.scene.add(this.volumeMesh);
+			this.wireframeHelper = new THREE.WireframeHelper(this.volumeMesh, 0xAAAAFF);
+			if (this.debugMode) {
+				this.scene.add(this.wireframeHelper);
+			}
 		}
 		if (this.scaffoldMesh !== undefined) {
 			this.scene.add(this.scaffoldMesh);
@@ -74,6 +80,8 @@ export default class RenderingStage {
 	clearStage() {
 		this.scene.remove(this.volumeMesh);
 		this.scene.remove(this.scaffoldMesh);
+		this.scene.remove(this.wireframeHelper);
+		this.wireFrameHelper = null;
 	}
 
 	@bind
@@ -100,7 +108,7 @@ export default class RenderingStage {
 		}
 		this.updateVolumeMesh();
 		this.controls.update();
-		this.stats.update(); // TODO: Toggle on DEBUG
+		this.stats.update();
 		this.renderer.render(this.scene, this.camera);
 	}
 
@@ -135,11 +143,15 @@ export default class RenderingStage {
 		if (this.debugMode === true) {
 			this.scene.add(this.axisHelper);
 			this.scene.add(this.scaffoldMesh);
-			this.stats.domElement.style.display = 'none';
+			this.scene.add(this.wireframeHelper);
+			this.scene.add(this.gridHelper);
+			this.stats.domElement.style.display = 'block';
 		} else {
 			this.scene.remove(this.axisHelper);
 			this.scene.remove(this.scaffoldMesh);
-			this.stats.domElement.style.display = 'block';
+			this.scene.remove(this.wireframeHelper);
+			this.scene.remove(this.gridHelper);
+			this.stats.domElement.style.display = 'none';
 		}
 	}
 

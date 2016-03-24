@@ -25,6 +25,8 @@ export default class ThreeWindow extends React.Component {
 		};
 		this.renderingStage = new RenderingStage();
 		this.subdivision = 0;
+		this.volumeMesh = null;
+		this.scaffoldMesh = null;
 	}
 
 	componentWillUpdate(nextProps, nextState) {
@@ -49,6 +51,9 @@ export default class ThreeWindow extends React.Component {
 	}
 
 	render() {
+		let { debugMode } = this.state;
+		let vertices = (this.volumeMesh !== null) ? this.volumeMesh.geometry.vertices.length : 0;
+		let faces = (this.volumeMesh !== null) ? this.volumeMesh.geometry.faces.length : 0;
 		return (
 			<div className="three-window">
 				<div className="three-window-button-panel">
@@ -65,6 +70,13 @@ export default class ThreeWindow extends React.Component {
 					<button className="three-window-button" type="button"
 						onClick={this.handleToggleCamera}>{this.state.cameraMode}</button>
 				</div>
+				{ debugMode === true
+					? <div className='three-window-debug-panel'>
+						Vertices: {vertices}
+						Faces: {faces}
+						</div>
+					: null
+				}
 			</div>
 		);
 	}
@@ -119,14 +131,12 @@ export default class ThreeWindow extends React.Component {
 	@bind
 	handleIncreaseSubdivision() {
 		this.subdivision += 1;
-		console.log('subdivision: '+ this.subdivision);
 		this.handleRefresh();
 	}
 
 	@bind
 	handleDecreaseSubdivision() {
 		this.subdivision -= 1;
-		console.log('subdivision: '+ this.subdivision);
 		this.handleRefresh();
 	}
 
@@ -135,11 +145,11 @@ export default class ThreeWindow extends React.Component {
 		this.setState({ debugMode: !this.state.debugMode });
 	}
 
-	// TODO: REFACTOR ALL THIS BELOW
+	// TODO: REFACTOR ALL THIS BELOW INTO A LOADER (mesh vs. pointcloud)
 
 	loadMeshForDicom(dicomFile) {
 		let isolevel = dicomFile.windowCenter - Math.ceil(dicomFile.windowWidth / 2),
-			factor = 8,
+			factor = 2,
 			step = 1;
 		let volume = dicomVolume(dicomFile, factor);
 		this.volumeMesh = volumeMesh(volume, step, isolevel, this.subdivision);
@@ -191,7 +201,6 @@ export default class ThreeWindow extends React.Component {
 		this.lastX = mouseEvent.clientX;
 		this.lastY = mouseEvent.clientY;
 		this.renderThree();
-		console.log("mouse delta: "+xD+","+yD+" mesh delta: "+this.xDelta+","+this.yDelta);
 	}
 
 	@bind

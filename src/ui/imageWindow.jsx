@@ -203,7 +203,6 @@ class ImageWindowCenterWidthDisplay extends React.Component {
 	handleRangeChanged({ value }) {
 		let { center, width } = this.toCenterWidth(value);
 		this.setState({ center, width });
-		console.log('min: '+ value.min + ' max: '+ value.max + ' C: '+center+' W: '+width);
 		this.props.handleChange({ center, width });
 	}
 
