@@ -1,7 +1,12 @@
 
 # Concurrency Notes
 
-- modeler.js coordinates all the steps in generating a `Geometry`.
+- modeler.js coordinates all the steps in generating a `Geometry`
+	1. Flatten pixel arrays into single contiguous array
+	2. Threshold pixel values in array based on WW/WC
+	3. Generate triangle arrays via Marching Cubes
+	4. Generate `Geometry` object from triangle arrays
+	5. (OPTIONAL) Subdivide `Geometry`
 - each step is performed in sequence, worker passes a message back on completion
 	- these steps could use subworkers to report back to modeler.js
 - modeler.js will aggregate the results of all steps and produces a final `Geometry` object
