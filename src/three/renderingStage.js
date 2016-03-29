@@ -30,7 +30,6 @@ export default class RenderingStage {
 		this.cameraMode = CAMERA_MODE_MODEL;
 
 		this.volumeMesh = undefined;
-		this.scaffoldMesh = undefined;
 
 		this.lastX = 0;
 		this.lastY = 0;
@@ -72,14 +71,10 @@ export default class RenderingStage {
 				this.scene.add(this.wireframeHelper);
 			}
 		}
-		if (this.scaffoldMesh !== undefined) {
-			this.scene.add(this.scaffoldMesh);
-		}
 	}
 
 	clearStage() {
 		this.scene.remove(this.volumeMesh);
-		this.scene.remove(this.scaffoldMesh);
 		this.scene.remove(this.wireframeHelper);
 		this.wireFrameHelper = null;
 	}
@@ -127,8 +122,8 @@ export default class RenderingStage {
 	updateVolumeMesh() {
 		let rotationX = -this.yDelta*0.005 * Math.PI;
 		let rotationY = this.xDelta*0.005 * Math.PI;
-		this.scaffoldMesh.rotation.x = rotationX;
-		this.scaffoldMesh.rotation.y = rotationY;
+		this.volumeMesh.rotation.x = rotationX;
+		this.volumeMesh.rotation.y = rotationY;
 	}
 
 	@bind
@@ -142,13 +137,11 @@ export default class RenderingStage {
 		this.debugMode = debugMode;
 		if (this.debugMode === true) {
 			this.scene.add(this.axisHelper);
-			this.scene.add(this.scaffoldMesh);
 			this.scene.add(this.wireframeHelper);
 			this.scene.add(this.gridHelper);
 			this.stats.domElement.style.display = 'block';
 		} else {
 			this.scene.remove(this.axisHelper);
-			this.scene.remove(this.scaffoldMesh);
 			this.scene.remove(this.wireframeHelper);
 			this.scene.remove(this.gridHelper);
 			this.stats.domElement.style.display = 'none';

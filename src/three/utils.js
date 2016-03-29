@@ -24,6 +24,7 @@ export function getAxisRange(dim, step) {
 export function flattenPixelArrays(pixelArrays, width, height) {
 	let flatArray = [];
 
+	// TODO: Optimization required
 	for (let pixelArray of pixelArrays) {
 		flatArray = flatArray.concat(...pixelArray);
 	}
@@ -34,7 +35,7 @@ export function flattenPixelArrays(pixelArrays, width, height) {
  *
  * @see resamplePixelArray
  *
- * @param  {Array}  pixelArrays an array of arrays
+ * @param  {Array}  pixelArrays an Array of Arrays
  * @param  {number} width       the width of the array
  * @param  {number} height      the height of the array
  * @param  {number} factor      the resampling factor
@@ -46,7 +47,7 @@ export function resamplePixelArrays(pixelArrays, width, height, factor) {
 		newHeight;
 	for (let i = 0; pixelArrays.length - i >= factor; i += factor) {
 		let array = resamplePixelArray(pixelArrays[i], width, height, factor);
-		arrays.push(array.data);
+		arrays.push(array.data); // TODO: optimize by assignment not modification
 		if (newWidth === undefined) newWidth = array.width;
 		if (newHeight === undefined) newHeight = array.height;
 	}

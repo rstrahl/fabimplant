@@ -1,4 +1,5 @@
 import { default as marchingCubes } from './marchingCubes';
+import { default as buildGeometry } from './buildGeometry';
 import SubdivisionModifier from './LoopSubdivision';
 import { getThresholdPixelArray } from '../dicom/processor';
 import { getAxisRange, resamplePixelArrays, flattenPixelArrays } from './utils';
@@ -13,20 +14,36 @@ import THREE from 'three';
  * @return {Object}          a THREE.Mesh object
  */
 export default function(volume, step, isolevel, subdivision) {
-	let volumeGeometry = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, isolevel);
-	// TODO: externalize - should be able to modify geometry and regenerate mesh without re-marching
-	if (subdivision !== undefined) {
-		let modifier = new SubdivisionModifier(subdivision);
-		modifier.modify(volumeGeometry);
+	// TODO: SubWorker
+	let triangles = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, isolevel);
+
+	if (triangles.length > 0) {
+
+		// Build geometry
+		// TODO: SubWorker
+		let geometry = buildGeometry(triangles);
+
+		// Perform surface subdivision (optional)
+		// TODO: SubWorker
+		// Also - can this be within the buildGeometry script???
+		if (subdivision !== undefined && subdivision > 0) {
+			let modifier = new SubdivisionModifier(subdivision);
+			modifier.modify(geometry);
+		}
+
+		// Build mesh
+		let volumeMesh = new THREE.Mesh(
+			geometry,
+			new THREE.MeshLambertMaterial({
+				color : 0xF0F0F0,
+				side : THREE.DoubleSide
+			})
+		);
+		return volumeMesh;
 	}
-	let volumeMesh = new THREE.Mesh(
-		volumeGeometry,
-		new THREE.MeshLambertMaterial({
-			color : 0xF0F0F0,
-			side : THREE.DoubleSide
-		})
-	);
-	return volumeMesh;
+
+	console.warn("No triangles generated from volume");
+	return undefined;
 }
 
 /** Creates a Volume object from a DicomFile.
@@ -39,15 +56,21 @@ export function dicomVolume(dicomFile, factor) {
 	let width = dicomFile.getImageWidth(),
 		height = dicomFile.getImageHeight();
 
+	// TODO: Try to do all of this entirely with TypedArrays for maximum performance
 	// let pixelArrays = getThresholdPixelArray(dicomFile, 1500, 1);
-	// TODO: Necessary?
+
+	// Converts from TypedArray to Array
+	// We only do this because resampling impl requires Array not TypedArray
 	let pixelArrays = [];
 	dicomFile.pixelArrays.forEach( (value) => {
 		pixelArrays.push(Array.from(value));
 	});
 
-	// Downsample the file to a manageable size
+	// Downsample the file if requested
+	// TODO: This is a huge performance loss section - we're modifying arrays
+	// AND moving to/from typedarray/array
 	let resampledArrays = resamplePixelArrays(pixelArrays, width, height, factor);
+
 	// Generate a "Volume" from the downsampled data set
 	let volume = flattenPixelArrays(resampledArrays.data, resampledArrays.width, resampledArrays.height);
 	return volume;
