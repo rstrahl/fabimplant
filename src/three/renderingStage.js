@@ -2,14 +2,25 @@
 import THREE from 'three';
 import Stats from 'stats.js';
 import createOrbitControls from 'three-orbit-controls';
+import MeshControl from './meshControl';
 import { bind } from 'decko';
 
 const NEAR = -500;
 const FAR = 1000;
-const CAMERA_MODE_ORBIT = 0;
-const CAMERA_MODE_MODEL = 1;
 const CAMERA_DEFAULT_POSITION = new THREE.Vector3(100, 25, 100);
 
+export const CONTROL_MODE_ORBIT = 0;
+export const CONTROL_MODE_MODEL = 1;
+
+// TODO: Consider moving to react component
+// Props:
+// 	- Mesh
+// 	- width
+// 	- height
+// State:
+// 	- debugMode
+// 	- controlMode
+//
 export default class RenderingStage {
 
 	constructor() {
@@ -27,7 +38,7 @@ export default class RenderingStage {
 			zoom : 1.0,
 			position : CAMERA_DEFAULT_POSITION
 		};
-		this.cameraMode = CAMERA_MODE_MODEL;
+		this.controlMode = CONTROL_MODE_MODEL;
 
 		this.volumeMesh = undefined;
 
@@ -41,6 +52,8 @@ export default class RenderingStage {
 		this.camera.position.set(position.x, position.y, position.z);
 		this.scene = new THREE.Scene();
 		this.renderer = new THREE.WebGLRenderer({antialias : true});
+		this.renderer.domElement.onmousedown = this.handleMouseDown;
+		this.renderer.domElement.onmouseup = this.handleMouseUp;
 
 		// Stats
 		this.stats = new Stats();
@@ -48,11 +61,13 @@ export default class RenderingStage {
 		this.stats.domElement.className = 'stats-render';
 		this.stats.domElement.style.display = 'none';
 
+		// TODO: Move into loadStage?
 		this.axisHelper = new THREE.AxisHelper(FAR/2);
 		this.gridHelper = new THREE.GridHelper(100, 10);
 
 		let OrbitControls = createOrbitControls(THREE);
 		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+		this.meshControl = new MeshControl(this.volumeMesh, this.renderer.domElement);
 
 		this.ambientLight = new THREE.AmbientLight(0x404040);
 		this.directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.8);
@@ -65,9 +80,10 @@ export default class RenderingStage {
 	loadStage() {
 		// TODO: Move to using a group
 		if (this.volumeMesh !== undefined) {
+			this.meshControl.mesh = this.volumeMesh;
 			this.scene.add(this.volumeMesh);
-			this.wireframeHelper = new THREE.WireframeHelper(this.volumeMesh, 0xAAAAFF);
 			if (this.debugMode) {
+				this.wireframeHelper = new THREE.WireframeHelper(this.volumeMesh, 0xAAAAFF);
 				this.scene.add(this.wireframeHelper);
 			}
 		}
@@ -101,7 +117,7 @@ export default class RenderingStage {
 		if (this.dirtyProjection === true) {
 			this.cleanRender();
 		}
-		this.updateVolumeMesh();
+		// this.updateVolumeMesh();
 		this.controls.update();
 		this.stats.update();
 		this.renderer.render(this.scene, this.camera);
@@ -120,6 +136,7 @@ export default class RenderingStage {
 
 	@bind
 	updateVolumeMesh() {
+		// TODO: Use this instead as the callback provided to meshControl.
 		let rotationX = -this.yDelta*0.005 * Math.PI;
 		let rotationY = this.xDelta*0.005 * Math.PI;
 		this.volumeMesh.rotation.x = rotationX;
@@ -127,9 +144,28 @@ export default class RenderingStage {
 	}
 
 	@bind
-	setCameraMode(cameraMode) {
-		this.cameraMode = (cameraMode === CAMERA_MODE_MODEL) ? CAMERA_MODE_ORBIT : CAMERA_MODE_MODEL;
-		// TODO: Activate appropriate camera code
+	handleMouseDown(e) {
+		// TODO: assign meshControl methods directly to the domElement?
+		if (this.controlMode === CONTROL_MODE_MODEL) {
+			this.meshControl.handleMouseDown(e);
+		}
+	}
+
+	@bind
+	handleMouseUp(e) {
+		if (this.controlMode === CONTROL_MODE_MODEL) {
+			this.meshControl.handleMouseUp(e);
+		}
+	}
+
+	@bind
+	setControlMode(controlMode) {
+		this.controlMode = (controlMode !== CONTROL_MODE_ORBIT) ? CONTROL_MODE_MODEL : CONTROL_MODE_ORBIT;
+		if (this.controlMode === CONTROL_MODE_MODEL) {
+			console.log('ControlMode: MODEL');
+		} else {
+			console.log('ControlMode: ORBIT');
+		}
 	}
 
 	@bind

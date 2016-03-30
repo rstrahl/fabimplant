@@ -5,7 +5,7 @@
 import React from 'react';
 import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
-import RenderingStage from '../three/renderingStage';
+import { default as RenderingStage, CONTROL_MODE_ORBIT, CONTROL_MODE_MODEL } from '../three/renderingStage';
 import { default as volumeMesh, dicomVolume, sphereVolume } from '../three/modeler';
 import Serializer from '../three/STLSerializer';
 
@@ -19,7 +19,8 @@ export default class ThreeWindow extends React.Component {
 		this.state = {
 			width : 0,
 			height : 0,
-			debugMode : false
+			debugMode : false,
+			controlMode: 0
 		};
 		this.renderingStage = new RenderingStage();
 		this.subdivision = 0;
@@ -27,8 +28,10 @@ export default class ThreeWindow extends React.Component {
 	}
 
 	componentWillUpdate(nextProps, nextState) {
-		this.renderingStage.setDebugMode(nextState.debugMode);
-		this.renderingStage.updateSize(nextState.width, nextState.height);
+		let { debugMode, controlMode, width, height } = nextState;
+		this.renderingStage.setDebugMode(debugMode);
+		this.renderingStage.setControlMode(controlMode);
+		this.renderingStage.updateSize(width, height);
 	}
 
 	componentDidUpdate() {
@@ -65,7 +68,7 @@ export default class ThreeWindow extends React.Component {
 					<button className="three-window-button" type="button"
 						onClick={this.handleDecreaseSubdivision}>Decrease</button>
 					<button className="three-window-button" type="button"
-						onClick={this.handleToggleCamera}>{this.state.cameraMode}</button>
+						onClick={this.handleToggleControlMode}>{this.state.controlMode}</button>
 				</div>
 				{ debugMode === true
 					? <div className='three-window-debug-panel'>
@@ -89,9 +92,9 @@ export default class ThreeWindow extends React.Component {
 	}
 
 	@bind
-	handleToggleCamera() {
-		// TODO: Load camera and apply
-		// this.renderingStage.setCameraMode();
+	handleToggleControlMode() {
+		let controlMode = (this.state.controlMode === CONTROL_MODE_ORBIT) ? CONTROL_MODE_MODEL : CONTROL_MODE_ORBIT;
+		this.setState({ controlMode });
 	}
 
 	@bind
@@ -158,31 +161,6 @@ export default class ThreeWindow extends React.Component {
 			step = 1;
 		let volume = sphereVolume(size, size, size, step);
 		this.volumeMesh = volumeMesh(volume, step, isolevel);
-	}
-
-	// TODO: Refactor this into separate camera class in three/
-	@bind
-	handleMouseDown(mouseEvent) {
-		this.lastX = mouseEvent.clientX;
-		this.lastY = mouseEvent.clientY;
-		addEventListener('mousemove', this.handleMouseMove);
-	}
-
-	@bind
-	handleMouseMove(mouseEvent) {
-		mouseEvent.preventDefault();
-		let xD = mouseEvent.clientX - this.lastX;
-		let yD = this.lastY - mouseEvent.clientY;
-		this.xDelta += xD;
-		this.yDelta += yD;
-		this.lastX = mouseEvent.clientX;
-		this.lastY = mouseEvent.clientY;
-		this.renderThree();
-	}
-
-	@bind
-	handleMouseUp() {
-		removeEventListener('mousemove', this.handleMouseMove);
 	}
 
 }

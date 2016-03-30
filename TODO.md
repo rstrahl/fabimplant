@@ -36,6 +36,9 @@
 
 # FLUX Refactor Notes
 
+- Ensure that all JSX components rely on passing props downwards to children and
+rendering based on props.
+
 - FileReader -> FileStore
 	- Processes DICOM files and maintains File state
 - Modeler -> GeometryStore
