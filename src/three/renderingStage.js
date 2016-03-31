@@ -7,7 +7,7 @@ import { bind } from 'decko';
 
 const NEAR = -500;
 const FAR = 1000;
-const CAMERA_DEFAULT_POSITION = new THREE.Vector3(100, 25, 100);
+const CAMERA_DEFAULT_POSITION = new THREE.Vector3(0, 25, 100);
 
 export const CONTROL_MODE_ORBIT = 0;
 export const CONTROL_MODE_MODEL = 1;
@@ -38,14 +38,8 @@ export default class RenderingStage {
 			zoom : 1.0,
 			position : CAMERA_DEFAULT_POSITION
 		};
-		this.controlMode = CONTROL_MODE_MODEL;
 
 		this.volumeMesh = undefined;
-
-		this.lastX = 0;
-		this.lastY = 0;
-		this.xDelta = 0; // TODO: Move this into meshprops
-		this.yDelta = 0;
 
 		let { left, right, top, bottom, position } = this.cameraProps;
 		this.camera = new THREE.OrthographicCamera(left, right, top, bottom, NEAR, FAR);
@@ -55,44 +49,77 @@ export default class RenderingStage {
 		this.renderer.domElement.onmousedown = this.handleMouseDown;
 		this.renderer.domElement.onmouseup = this.handleMouseUp;
 
+		// Controls
+		this.meshControls = new MeshControl(this.volumeMesh, (transform) => {
+			this.volumeMesh.rotation.x = Math.min(Math.max(this.volumeMesh.rotation.x + transform.rotation.x, -Math.PI/2), Math.PI/2);
+			this.volumeMesh.rotation.y = Math.min(Math.max(this.volumeMesh.rotation.y + transform.rotation.y, -Math.PI), Math.PI);
+		});
+		let OrbitControls = createOrbitControls(THREE);
+		this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
+
 		// Stats
 		this.stats = new Stats();
 		this.stats.setMode(0);
 		this.stats.domElement.className = 'stats-render';
 		this.stats.domElement.style.display = 'none';
 
-		// TODO: Move into loadStage?
-		this.axisHelper = new THREE.AxisHelper(FAR/2);
-		this.gridHelper = new THREE.GridHelper(100, 10);
+		this.setControlMode(CONTROL_MODE_ORBIT);
+	}
 
-		let OrbitControls = createOrbitControls(THREE);
-		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-		this.meshControl = new MeshControl(this.volumeMesh, this.renderer.domElement);
-
+	@bind
+	loadStage() {
 		this.ambientLight = new THREE.AmbientLight(0x404040);
 		this.directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.8);
 		this.directionalLight.position.set(0,250,100);
 		this.scene.add(this.ambientLight);
 		this.scene.add(this.directionalLight);
-	}
-
-	@bind
-	loadStage() {
 		// TODO: Move to using a group
 		if (this.volumeMesh !== undefined) {
-			this.meshControl.mesh = this.volumeMesh;
 			this.scene.add(this.volumeMesh);
 			if (this.debugMode) {
 				this.wireframeHelper = new THREE.WireframeHelper(this.volumeMesh, 0xAAAAFF);
 				this.scene.add(this.wireframeHelper);
 			}
+			if (this.debugMode === true) {
+				this.loadStageDebug();
+			}
 		}
 	}
 
+	@bind
+	loadStageDebug() {
+		// Axis Helper
+		this.axisHelper = new THREE.AxisHelper(FAR/2);
+		this.scene.add(this.axisHelper);
+		// Wireframe Helper
+		this.wireframeHelper = new THREE.WireframeHelper(this.volumeMesh, 0xAAAAFF);
+		this.scene.add(this.wireframeHelper);
+		// Grid Helper
+		this.gridHelper = new THREE.GridHelper(100, 10);
+		this.scene.add(this.gridHelper);
+		// Stats
+		this.stats.domElement.style.display = 'block';
+	}
+
+	@bind
 	clearStage() {
+		this.scene.remove(this.ambientlight);
+		this.scene.remove(this.directionalLight);
 		this.scene.remove(this.volumeMesh);
+		if (this.debugMode === true) {
+			this.clearStageDebug();
+		}
+	}
+
+	@bind
+	clearStageDebug() {
+		this.scene.remove(this.axisHelper);
+		this.axisHelper = null;
 		this.scene.remove(this.wireframeHelper);
-		this.wireFrameHelper = null;
+		this.wireframeHelper = null;
+		this.scene.remove(this.gridHelper);
+		this.gridHelper = null;
+		this.stats.domElement.style.display = 'none';
 	}
 
 	@bind
@@ -117,9 +144,10 @@ export default class RenderingStage {
 		if (this.dirtyProjection === true) {
 			this.cleanRender();
 		}
-		// this.updateVolumeMesh();
+		if (this.debugMode === true) {
+			this.stats.update();
+		}
 		this.controls.update();
-		this.stats.update();
 		this.renderer.render(this.scene, this.camera);
 	}
 
@@ -135,26 +163,16 @@ export default class RenderingStage {
 	}
 
 	@bind
-	updateVolumeMesh() {
-		// TODO: Use this instead as the callback provided to meshControl.
-		let rotationX = -this.yDelta*0.005 * Math.PI;
-		let rotationY = this.xDelta*0.005 * Math.PI;
-		this.volumeMesh.rotation.x = rotationX;
-		this.volumeMesh.rotation.y = rotationY;
-	}
-
-	@bind
 	handleMouseDown(e) {
-		// TODO: assign meshControl methods directly to the domElement?
 		if (this.controlMode === CONTROL_MODE_MODEL) {
-			this.meshControl.handleMouseDown(e);
+			this.controls.handleMouseDown(e);
 		}
 	}
 
 	@bind
 	handleMouseUp(e) {
 		if (this.controlMode === CONTROL_MODE_MODEL) {
-			this.meshControl.handleMouseUp(e);
+			this.controls.handleMouseUp(e);
 		}
 	}
 
@@ -162,9 +180,11 @@ export default class RenderingStage {
 	setControlMode(controlMode) {
 		this.controlMode = (controlMode !== CONTROL_MODE_ORBIT) ? CONTROL_MODE_MODEL : CONTROL_MODE_ORBIT;
 		if (this.controlMode === CONTROL_MODE_MODEL) {
-			console.log('ControlMode: MODEL');
+			this.orbitControls.enabled = false;
+			this.controls = this.meshControls;
 		} else {
-			console.log('ControlMode: ORBIT');
+			this.orbitControls.enabled = true;
+			this.controls = this.orbitControls;
 		}
 	}
 
@@ -172,15 +192,9 @@ export default class RenderingStage {
 	setDebugMode(debugMode) {
 		this.debugMode = debugMode;
 		if (this.debugMode === true) {
-			this.scene.add(this.axisHelper);
-			this.scene.add(this.wireframeHelper);
-			this.scene.add(this.gridHelper);
-			this.stats.domElement.style.display = 'block';
+			this.loadStageDebug();
 		} else {
-			this.scene.remove(this.axisHelper);
-			this.scene.remove(this.wireframeHelper);
-			this.scene.remove(this.gridHelper);
-			this.stats.domElement.style.display = 'none';
+			this.clearStageDebug();
 		}
 	}
 

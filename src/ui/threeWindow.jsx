@@ -31,7 +31,9 @@ export default class ThreeWindow extends React.Component {
 		let { debugMode, controlMode, width, height } = nextState;
 		this.renderingStage.setDebugMode(debugMode);
 		this.renderingStage.setControlMode(controlMode);
-		this.renderingStage.updateSize(width, height);
+		if (width !== this.state.width || height !== this.state.height) {
+			this.renderingStage.updateSize(width, height);
+		}
 	}
 
 	componentDidUpdate() {
