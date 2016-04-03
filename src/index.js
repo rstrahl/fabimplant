@@ -9,9 +9,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import MainWindow from './ui/mainWindow.jsx';
 
-// UI
-let main = React.createElement(MainWindow, null);
-ReactDOM.render(
-	main,
-	document.querySelector('main')
-);
+let root = document.querySelector('main');
+ReactDOM.render(<MainWindow />, root);
+
+if (module.hot) {
+	module.hot.accept('./ui/mainWindow.jsx', () => {
+		let NextMain = require('./ui/mainWindow.jsx');
+		ReactDOM.render(<NextMain />, root);
+	});
+}

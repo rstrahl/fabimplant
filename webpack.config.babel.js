@@ -73,9 +73,9 @@ module.exports = {
 		port: process.env.PORT || 8080,
 		host: '0.0.0.0',
 		publicPath: '/',
-		quiet: true,
+		quiet: false,
 		contentBase: `${__dirname}/src`,
 		historyApiFallback: true
 	}
-	
+
 };
