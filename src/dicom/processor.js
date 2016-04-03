@@ -2,7 +2,7 @@
 //
 // Processes a DataSet object, extracting relevant dicom metadata and image pixel data.
 
-import jpeg from 'JPEGLosslessDecoderJS';
+import jpeg from 'jpeg-lossless-decoder-js';
 
 /**
  * Attempts to process a DataSet for an image and if successful returns the pixel values
