@@ -7,6 +7,7 @@ import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
 import { default as RenderingStage, CONTROL_MODE_ORBIT, CONTROL_MODE_MODEL } from '../three/renderingStage';
 import { default as volumeMesh, dicomVolume, sphereVolume } from '../three/modeler';
+import GeometryWorker from 'worker!../three/geometryWorker';
 import Serializer from '../three/STLSerializer';
 
 /**
@@ -25,6 +26,8 @@ export default class ThreeWindow extends React.Component {
 		this.renderingStage = new RenderingStage();
 		this.subdivision = 0;
 		this.volumeMesh = null;
+		this.volume = null;
+		this.workerTest = new GeometryWorker();
 	}
 
 	componentWillUpdate(nextProps, nextState) {
@@ -71,6 +74,8 @@ export default class ThreeWindow extends React.Component {
 						onClick={this.handleDecreaseSubdivision}>Decrease</button>
 					<button className="three-window-button" type="button"
 						onClick={this.handleToggleControlMode}>{this.state.controlMode}</button>
+					<button className="three-window-button" type="button"
+						onClick={this.handleWorkerTest}>Worker</button>
 				</div>
 				{ debugMode === true
 					? <div className='three-window-debug-panel'>
@@ -153,8 +158,8 @@ export default class ThreeWindow extends React.Component {
 		let isolevel = dicomFile.windowCenter - Math.ceil(dicomFile.windowWidth / 2),
 			factor = 2,
 			step = 1;
-		let volume = dicomVolume(dicomFile, factor);
-		this.volumeMesh = volumeMesh(volume, step, isolevel, this.subdivision);
+		this.volume = dicomVolume(dicomFile, factor);
+		this.volumeMesh = volumeMesh(this.volume, step, isolevel, this.subdivision);
 	}
 
 	loadMeshForDefault() {
@@ -163,6 +168,19 @@ export default class ThreeWindow extends React.Component {
 			step = 1;
 		let volume = sphereVolume(size, size, size, step);
 		this.volumeMesh = volumeMesh(volume, step, isolevel);
+	}
+
+	@bind
+	handleWorkerTest() {
+		let {volume} = this;
+		let {dicomFile} = this.props;
+		let handler = (e) => {
+			console.log('Worker replied: '+e.data);
+			this.workerTest.removeEventListener('message', handler);
+		};
+		this.workerTest.addEventListener('message', handler);
+		let isolevel = dicomFile.windowCenter - Math.ceil(dicomFile.windowWidth / 2);
+		this.workerTest.postMessage({ volume: volume.data, height: volume.height, width: volume.width, depth: volume.depth, step: 1, isolevel});
 	}
 
 }

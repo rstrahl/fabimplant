@@ -43,7 +43,7 @@ rendering based on props.
 	- Processes DICOM files and maintains File state
 - Modeler -> GeometryStore
 	- Processes and maintains `Geometry` instances for meshes
-	- ThreeWindow+Renderer would generate the mesh provided from the Store
+	- ThreeWindow+Renderer would generate the THREE.Mesh provided from the Store's Geometry
 - Processor -> ImageStore
 	- Processes and maintains images from DICOM files (from FileStore?)
 - CaseStore
