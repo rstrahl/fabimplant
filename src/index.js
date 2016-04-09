@@ -7,14 +7,16 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import MainWindow from './ui/mainWindow.jsx';
 
 let root = document.querySelector('main');
-ReactDOM.render(<MainWindow />, root);
+function init() {
+	let Main = require('./ui/mainWindow.jsx');
+	ReactDOM.render(<Main />, root);
+}
+init();
 
 if (module.hot) {
 	module.hot.accept('./ui/mainWindow.jsx', () => {
-		let NextMain = require('./ui/mainWindow.jsx');
-		ReactDOM.render(<NextMain />, root);
+		requestAnimationFrame(init);
 	});
 }

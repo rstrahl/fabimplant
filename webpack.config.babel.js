@@ -17,7 +17,6 @@ module.exports = {
 	},
 
 	module: {
-
 		loaders: [
 			{
 				test:		/\.jsx?$/,
@@ -68,6 +67,8 @@ module.exports = {
 			output: { comments:false }
 		})
 	] : []),
+
+	devtool: ENV==='production' ? 'source-map' : 'inline-source-map',
 
 	devServer: {
 		port: process.env.PORT || 8080,
