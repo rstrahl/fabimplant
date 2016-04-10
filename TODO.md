@@ -1,11 +1,12 @@
 # Concurrency
 
 **Next Steps:**
-- modeler.js now deprecated
-	- Move the mesh generation into renderingStage
-	- Move the "volumizer" functions out to another Worker
-	- 
+- in `polyonize()` can we remove the dependency on Vector3 and store primitive values?
+	- would require manual lerp function
+	- returns a typedarray of vertices? (sequenced per coordinate element: x,y,z,x2,y2,z2,...)
+- in `default` can we flatten the vertex array?
 
+- How to speed up the data transfer from the worker????
 
 ## Other Performance Issues
 

@@ -6,9 +6,10 @@ import React from 'react';
 import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
 import { default as RenderingStage, CONTROL_MODE_ORBIT, CONTROL_MODE_MODEL } from '../three/renderingStage';
-import { default as volumeMesh, dicomVolume, sphereVolume } from '../three/modeler';
+import { dicomVolume, sphereVolume } from '../three/modeler';
 import GeometryWorker from 'worker!../three/geometryWorker';
 import Serializer from '../three/STLSerializer';
+import THREE from 'three';
 
 /**
  * Displays a threejs scene inside a window component.
@@ -21,13 +22,14 @@ export default class ThreeWindow extends React.Component {
 			width : 0,
 			height : 0,
 			debugMode : false,
+			factor : 2,
+			subdivision : 0,
 			controlMode: 0
 		};
 		this.renderingStage = new RenderingStage();
 		this.subdivision = 0;
-		this.volumeMesh = null;
 		this.volume = null;
-		this.workerTest = new GeometryWorker();
+		this.geometryWorker = new GeometryWorker();
 	}
 
 	componentWillUpdate(nextProps, nextState) {
@@ -57,8 +59,7 @@ export default class ThreeWindow extends React.Component {
 
 	render() {
 		let { debugMode } = this.state;
-		let vertices = (this.volumeMesh !== null) ? this.volumeMesh.geometry.vertices.length : 0;
-		let faces = (this.volumeMesh !== null) ? this.volumeMesh.geometry.faces.length : 0;
+		let { vertices, faces } = this.renderingStage;
 		return (
 			<div className="three-window">
 				<div className="three-window-button-panel">
@@ -75,7 +76,7 @@ export default class ThreeWindow extends React.Component {
 					<button className="three-window-button" type="button"
 						onClick={this.handleToggleControlMode}>{this.state.controlMode}</button>
 					<button className="three-window-button" type="button"
-						onClick={this.handleWorkerTest}>Worker</button>
+						onClick={this.handleGeometryWorker}>Worker</button>
 				</div>
 				{ debugMode === true
 					? <div className='three-window-debug-panel'>
@@ -114,15 +115,14 @@ export default class ThreeWindow extends React.Component {
 		} else {
 			this.loadMeshForDefault();
 		}
-		this.renderingStage.volumeMesh = this.volumeMesh;
-		this.renderingStage.loadStage();
 	}
 
 	@bind
 	handleExportSTL() {
 		// TODO: FLUX refactor
-		if (this.volumeMesh !== undefined) {
-			let stl = Serializer(this.volumeMesh);
+		let { volumeMesh } = this.renderingStage;
+		if (volumeMesh !== undefined) {
+			let stl = Serializer(volumeMesh);
 			let textFile = null,
 				makeTextFile = function (text) {
 					let data = new Blob([text], {type: '{type: "octet/stream"}'});
@@ -153,34 +153,40 @@ export default class ThreeWindow extends React.Component {
 		this.setState({ debugMode: !this.state.debugMode });
 	}
 
+	@bind
 	loadMeshForDicom(dicomFile) {
 		// TODO: FLUX refactor
 		let isolevel = dicomFile.windowCenter - Math.ceil(dicomFile.windowWidth / 2),
-			factor = 2,
-			step = 1;
-		this.volume = dicomVolume(dicomFile, factor);
-		this.volumeMesh = volumeMesh(this.volume, step, isolevel, this.subdivision);
+			factor = 2;
+		let volume = dicomVolume(dicomFile, factor);
+		this.buildGeometry(volume, isolevel);
 	}
 
+	@bind
 	loadMeshForDefault() {
+		// TODO: FLUX refactor
 		let size = 10,
 			isolevel = 4.5,
 			step = 1;
 		let volume = sphereVolume(size, size, size, step);
-		this.volumeMesh = volumeMesh(volume, step, isolevel);
+		this.buildGeometry(volume, isolevel);
 	}
 
 	@bind
-	handleWorkerTest() {
-		let {volume} = this;
-		let {dicomFile} = this.props;
+	buildGeometry(volume, isolevel) {
 		let handler = (e) => {
-			console.log('Worker replied: '+e.data);
-			this.workerTest.removeEventListener('message', handler);
+			this.geometryWorker.removeEventListener('message', handler);
+			console.time('retypeGeometry');
+			let geometry = new THREE.Geometry();
+			geometry.vertices = e.data.vertices;
+			geometry.faces = e.data.faces;
+			geometry.faceVertexUvs = e.data.faceVertexUvs;
+			console.timeEnd('retypeGeometry');
+			this.renderingStage.geometry = geometry;
+			this.renderingStage.loadStage();
 		};
-		this.workerTest.addEventListener('message', handler);
-		let isolevel = dicomFile.windowCenter - Math.ceil(dicomFile.windowWidth / 2);
-		this.workerTest.postMessage({ volume: volume.data, height: volume.height, width: volume.width, depth: volume.depth, step: 1, isolevel});
+		this.geometryWorker.addEventListener('message', handler);
+		this.geometryWorker.postMessage({ volume: volume.data, height: volume.height, width: volume.width, depth: volume.depth, step: 1, isolevel});
 	}
 
 }

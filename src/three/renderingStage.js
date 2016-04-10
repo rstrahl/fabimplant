@@ -68,18 +68,15 @@ export default class RenderingStage {
 
 	@bind
 	loadStage() {
+		let { geometry } = this;
 		this.ambientLight = new THREE.AmbientLight(0x404040);
 		this.directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.8);
 		this.directionalLight.position.set(0,250,100);
 		this.scene.add(this.ambientLight);
 		this.scene.add(this.directionalLight);
-		// TODO: Move to using a group
-		if (this.volumeMesh !== undefined) {
+		if (geometry !== undefined) {
+			this.volumeMesh = this.createVolumeMesh(geometry);
 			this.scene.add(this.volumeMesh);
-			if (this.debugMode) {
-				this.wireframeHelper = new THREE.WireframeHelper(this.volumeMesh, 0xAAAAFF);
-				this.scene.add(this.wireframeHelper);
-			}
 			if (this.debugMode === true) {
 				this.loadStageDebug();
 			}
@@ -136,6 +133,17 @@ export default class RenderingStage {
 		this.camera.far = far;
 		this.camera.zoom = zoom;
 		this.camera.updateProjectionMatrix();
+	}
+
+	@bind
+	createVolumeMesh(geometry) {
+		return new THREE.Mesh(
+			geometry,
+			new THREE.MeshLambertMaterial({
+				color : 0xF0F0F0,
+				side : THREE.DoubleSide
+			})
+		);
 	}
 
 	@bind
@@ -204,6 +212,16 @@ export default class RenderingStage {
 
 	get statsElement() {
 		return this.stats.domElement;
+	}
+
+	get vertices() {
+		let { volumeMesh } = this;
+		return (volumeMesh !== undefined && volumeMesh.geometry !== undefined) ? volumeMesh.geometry.vertices.length : 0;
+	}
+
+	get faces() {
+		let { volumeMesh } = this;
+		return (volumeMesh !== undefined && volumeMesh.geometry !== undefined) ? volumeMesh.geometry.faces.length : 0;
 	}
 
 }

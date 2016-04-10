@@ -21,11 +21,12 @@ import { getAxisRange } from './utils';
  * @param  {number} step     the distance between volume data points
  * @param  {Array}  values   a contiguous array representation of 3-dimensional volume data
  * @param  {number} isolevel the isolevel to apply to the volume data
- * @return {Object}          a THREE.Geometry object representing the Isosurface
+ * @return {Array}           An Array containing triangle vertices, represented as [v1, v2, v3]
  */
 export default function (width, height, depth, step, values, isolevel) {
 	let points = generateGridCellPoints(width, height, depth, step);
-	let triangles = [];
+	let triangles = [],
+		t = 0;
 
 	let size = width;
 	let size2 = width * height;
@@ -45,7 +46,7 @@ export default function (width, height, depth, step, values, isolevel) {
 					let index1 = triTable[cubeindex + i],
 						index2 = triTable[cubeindex + i + 1],
 						index3 = triTable[cubeindex + i + 2];
-					triangles.push([
+					triangles[t]([
 						vlist[index1],
 						vlist[index2],
 						vlist[index3]
@@ -185,11 +186,12 @@ export function generateGridCellPoints(width, height, depth, step) {
 	let minZ = getAxisRange(depth, step)[0],
 		minY = getAxisRange(height, step)[0],
 		minX = getAxisRange(width, step)[0],
-		vertices = [];
+		vertices = [],
+		v = 0;
 	for (let k = 0, z = minZ; k < depth; k++, z += step) {
 		for (let j = 0, y = minY; j < height; j++, y += step) {
-			for (let i = 0, x = minX; i < width; i++, x += step) {
-				vertices.push(new THREE.Vector3(x,y,z)); // TODO: Evaluate requirements for vector3
+			for (let i = 0, x = minX; i < width; i++, x += step, v++) {
+				vertices[v] = [x,y,z];
 			}
 		}
 	}
