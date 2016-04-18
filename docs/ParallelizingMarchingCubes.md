@@ -21,7 +21,7 @@ The `Modeler` module is responsible for coordinating the construction of a `Mesh
 from the data contained in a DICOM file.  It performs the following operations
 in sequence:
 
-1. Pad pixel arrays to support a factor of downsampling
+1. Pad pixel arrays with zero values to support a given factor of downsampling
 2. Downsample pixel arrays to a size that does not hang/crash the browser
 3. Flatten pixel arrays into single contiguous array
 4. Threshold pixel values in array based on WW/WC
@@ -61,5 +61,10 @@ favourable as it moves away from the coherency of the module dependency graph.
 
 ## Conclusions
 
-1. Refactor marching cubes function to return an array of triangles
-2. Build `Geometry` from triangles array in separate function
+1. Create a Worker function that coordinates the assembly of a `Geometry` object
+2. Refactor marching cubes function to return an array of triangles
+3. Refactor out the building of a `Geometry` from triangles array into a separate
+	function
+4. Refactor the `Mesh` generation code into the `renderingStage` Component
+5. Return the `Geometry` from the Worker and pass the `Geometry` to the `renderingStage`
+	on completion

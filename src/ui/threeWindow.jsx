@@ -8,8 +8,8 @@ import { bind } from 'decko';
 import { default as RenderingStage, CONTROL_MODE_ORBIT, CONTROL_MODE_MODEL } from '../three/renderingStage';
 import { dicomVolume, sphereVolume } from '../three/modeler';
 import GeometryWorker from 'worker!../three/geometryWorker';
+import { default as buildGeometry } from '../three/buildGeometry';
 import Serializer from '../three/STLSerializer';
-import THREE from 'three';
 
 /**
  * Displays a threejs scene inside a window component.
@@ -176,12 +176,7 @@ export default class ThreeWindow extends React.Component {
 	buildGeometry(volume, isolevel) {
 		let handler = (e) => {
 			this.geometryWorker.removeEventListener('message', handler);
-			console.time('retypeGeometry');
-			let geometry = new THREE.Geometry();
-			geometry.vertices = e.data.vertices;
-			geometry.faces = e.data.faces;
-			geometry.faceVertexUvs = e.data.faceVertexUvs;
-			console.timeEnd('retypeGeometry');
+			let geometry = buildGeometry(e.data);
 			this.renderingStage.geometry = geometry;
 			this.renderingStage.loadStage();
 		};

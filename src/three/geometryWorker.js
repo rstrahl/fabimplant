@@ -1,25 +1,18 @@
 // geometryWorker.js
 //
-// Generates a THREE.Geometry object from a given Volume in a Worker
+// A Worker that coordinates the Marching Cubes algorithm.
 
-import { default as marchingCubes } from './marchingCubes';
-import { default as buildGeometry } from './buildGeometry';
+import { default as marchingCubes, flattenTriangles } from './marchingCubes';
 
 addEventListener('message', (e) => {
 	let { volume, width, height, depth, step, isolevel } = e.data;
 
 	// Generate triangle vertices
-	console.time('marchingCubes');
 	let triangles = marchingCubes(width, height, depth, step, volume, isolevel);
-	console.timeEnd('marchingCubes');
 
-	// Build geometry
-	let geometry;
-	if (triangles.length > 0) {
-		console.time('buildGeometry');
-		geometry = buildGeometry(triangles);
-		console.timeEnd('buildGeometry');
-	}
+	// Flatten triangle array to TypedArray of coordinates for return to Caller
+	// triangles = Array of Arrays with 3 {x,y,z} objects
+	let flatVertices = flattenTriangles(triangles);
 
-	postMessage(geometry);
+	postMessage(flatVertices);
 });
