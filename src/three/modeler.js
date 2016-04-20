@@ -14,23 +14,23 @@ import THREE from 'three';
  * @return {Object}          a THREE.Mesh object
  */
 export default function(volume, step, isolevel, subdivision) {
-	// TODO: SubWorker
+	console.profile("marchingCubes");
 	let triangles = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, isolevel);
-
+	console.profileEnd();
 	if (triangles.length > 0) {
-
+		console.profile("buildGeometry");
 		// Build geometry
-		// TODO: SubWorker
 		let geometry = buildGeometry(triangles);
+		console.profileEnd();
 
 		// Perform surface subdivision (optional)
-		// TODO: SubWorker
 		// Also - can this be within the buildGeometry script???
 		if (subdivision !== undefined && subdivision > 0) {
 			let modifier = new SubdivisionModifier(subdivision);
 			modifier.modify(geometry);
 		}
 
+		console.profile("Mesh");
 		// Build mesh
 		let volumeMesh = new THREE.Mesh(
 			geometry,
@@ -39,6 +39,7 @@ export default function(volume, step, isolevel, subdivision) {
 				side : THREE.DoubleSide
 			})
 		);
+		console.profileEnd();
 		return volumeMesh;
 	}
 
@@ -69,7 +70,9 @@ export function dicomVolume(dicomFile, factor) {
 	// Downsample the file if requested
 	// TODO: This is a huge performance loss section - we're modifying arrays
 	// AND moving to/from typedarray/array
-	let resampledArrays = resamplePixelArrays(pixelArrays, width, height, factor);
+	let resampledArrays = (factor > 1)
+		? resamplePixelArrays(pixelArrays, width, height, factor)
+		: { data: pixelArrays, width, height };
 
 	// Generate a "Volume" from the downsampled data set
 	let volume = flattenPixelArrays(resampledArrays.data, resampledArrays.width, resampledArrays.height);

@@ -1,4 +1,5 @@
 import webpack from 'webpack';
+import path from 'path';
 import ProgressBarPlugin from 'progress-bar-webpack-plugin';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -7,21 +8,20 @@ const ENV = process.env.NODE_ENV || 'development';
 const CSS_MAPS = ENV !== 'production';
 
 module.exports = {
-	context:	`${__dirname}/src`,
+	context:	path.resolve(__dirname, 'src'),
 	entry:		'./index.js',
 
 	output: {
-		path:		`${__dirname}/build`,
+		path:		path.resolve(__dirname, 'build'),
 		publicPath:	'/',
 		filename:	'bundle.js'
 	},
 
 	module: {
-
 		loaders: [
 			{
 				test:		/\.jsx?$/,
-				include:	`${__dirname}/src/`,
+				include:	path.resolve(__dirname, 'src'),
 				loader:		'babel'
 			},
 			{
@@ -69,12 +69,14 @@ module.exports = {
 		})
 	] : []),
 
+	devtool: ENV==='production' ? 'source-map' : 'inline-source-map',
+
 	devServer: {
 		port: process.env.PORT || 8080,
 		host: '0.0.0.0',
 		publicPath: '/',
 		quiet: false,
-		contentBase: `${__dirname}/src`,
+		contentBase: path.resolve(__dirname, 'src'),
 		historyApiFallback: true
 	}
 

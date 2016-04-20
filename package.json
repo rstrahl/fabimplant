@@ -5,9 +5,9 @@
   "main": "webpack.config.babel.js",
   "scripts": {
     "test": "mocha --compilers js:babel-core/register",
-    "dev": "NODE_ENV=development webpack-dev-server --inline --hot",
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --inline --hot",
     "prebuild": "rm -rf build && mkdir -p build && cp src/style.css build",
-    "build": "NODE_ENV=production webpack",
+    "build": "cross-env NODE_ENV=production webpack",
     "start": "http-server build --cors --port ${PORT:-8080}"
   },
   "dependencies": {
@@ -33,6 +33,7 @@
     "babel-cli": "^6.4.5",
     "babel-eslint": "^4.1.6",
     "babel-loader": "^6.2.4",
+    "babel-plugin-add-module-exports": "^0.1.2",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-es2015-minimal": "^1.0.0",
@@ -41,6 +42,7 @@
     "babelify": "^7.0.0",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
+    "cross-env": "^1.0.7",
     "eslint": "^1.10.3",
     "eslint-plugin-react": "^3.15.0",
     "extract-text-webpack-plugin": "^1.0.1",
@@ -48,7 +50,9 @@
     "http-server": "^0.9.0",
     "mocha": "^2.4.5",
     "progress-bar-webpack-plugin": "^1.6.0",
+    "raw-loader": "^0.5.1",
     "webpack": "^1.12.14",
-    "webpack-dev-server": "^1.14.1"
+    "webpack-dev-server": "^1.14.1",
+    "worker-loader": "^0.7.0"
   }
 }

@@ -6,7 +6,9 @@ import React from 'react';
 import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
 import { default as RenderingStage, CONTROL_MODE_ORBIT, CONTROL_MODE_MODEL } from '../three/renderingStage';
-import { default as volumeMesh, dicomVolume, sphereVolume } from '../three/modeler';
+import { dicomVolume, sphereVolume } from '../three/modeler';
+import GeometryWorker from 'worker!../three/geometryWorker';
+import { default as buildGeometry } from '../three/buildGeometry';
 import Serializer from '../three/STLSerializer';
 
 /**
@@ -20,11 +22,14 @@ export default class ThreeWindow extends React.Component {
 			width : 0,
 			height : 0,
 			debugMode : false,
+			factor : 2,
+			subdivision : 0,
 			controlMode: 0
 		};
 		this.renderingStage = new RenderingStage();
 		this.subdivision = 0;
-		this.volumeMesh = null;
+		this.volume = null;
+		this.geometryWorker = new GeometryWorker();
 	}
 
 	componentWillUpdate(nextProps, nextState) {
@@ -54,8 +59,7 @@ export default class ThreeWindow extends React.Component {
 
 	render() {
 		let { debugMode } = this.state;
-		let vertices = (this.volumeMesh !== null) ? this.volumeMesh.geometry.vertices.length : 0;
-		let faces = (this.volumeMesh !== null) ? this.volumeMesh.geometry.faces.length : 0;
+		let { vertices, faces } = this.renderingStage;
 		return (
 			<div className="three-window">
 				<div className="three-window-button-panel">
@@ -71,6 +75,8 @@ export default class ThreeWindow extends React.Component {
 						onClick={this.handleDecreaseSubdivision}>Decrease</button>
 					<button className="three-window-button" type="button"
 						onClick={this.handleToggleControlMode}>{this.state.controlMode}</button>
+					<button className="three-window-button" type="button"
+						onClick={this.handleGeometryWorker}>Worker</button>
 				</div>
 				{ debugMode === true
 					? <div className='three-window-debug-panel'>
@@ -109,15 +115,14 @@ export default class ThreeWindow extends React.Component {
 		} else {
 			this.loadMeshForDefault();
 		}
-		this.renderingStage.volumeMesh = this.volumeMesh;
-		this.renderingStage.loadStage();
 	}
 
 	@bind
 	handleExportSTL() {
 		// TODO: FLUX refactor
-		if (this.volumeMesh !== undefined) {
-			let stl = Serializer(this.volumeMesh);
+		let { volumeMesh } = this.renderingStage;
+		if (volumeMesh !== undefined) {
+			let stl = Serializer(volumeMesh);
 			let textFile = null,
 				makeTextFile = function (text) {
 					let data = new Blob([text], {type: '{type: "octet/stream"}'});
@@ -148,21 +153,35 @@ export default class ThreeWindow extends React.Component {
 		this.setState({ debugMode: !this.state.debugMode });
 	}
 
+	@bind
 	loadMeshForDicom(dicomFile) {
 		// TODO: FLUX refactor
 		let isolevel = dicomFile.windowCenter - Math.ceil(dicomFile.windowWidth / 2),
-			factor = 2,
-			step = 1;
+			factor = 2;
 		let volume = dicomVolume(dicomFile, factor);
-		this.volumeMesh = volumeMesh(volume, step, isolevel, this.subdivision);
+		this.buildGeometry(volume, isolevel);
 	}
 
+	@bind
 	loadMeshForDefault() {
+		// TODO: FLUX refactor
 		let size = 10,
 			isolevel = 4.5,
 			step = 1;
 		let volume = sphereVolume(size, size, size, step);
-		this.volumeMesh = volumeMesh(volume, step, isolevel);
+		this.buildGeometry(volume, isolevel);
+	}
+
+	@bind
+	buildGeometry(volume, isolevel) {
+		let handler = (e) => {
+			this.geometryWorker.removeEventListener('message', handler);
+			let geometry = buildGeometry(e.data);
+			this.renderingStage.geometry = geometry;
+			this.renderingStage.loadStage();
+		};
+		this.geometryWorker.addEventListener('message', handler);
+		this.geometryWorker.postMessage({ volume: volume.data, height: volume.height, width: volume.width, depth: volume.depth, step: 1, isolevel});
 	}
 
 }

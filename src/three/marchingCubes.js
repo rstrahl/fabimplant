@@ -7,7 +7,6 @@
 
 'use-strict';
 
-import THREE from 'three';
 import { getAxisRange } from './utils';
 
 /** Generates an Isosurface from the provided volumetric data.
@@ -21,11 +20,13 @@ import { getAxisRange } from './utils';
  * @param  {number} step     the distance between volume data points
  * @param  {Array}  values   a contiguous array representation of 3-dimensional volume data
  * @param  {number} isolevel the isolevel to apply to the volume data
- * @return {Object}          a THREE.Geometry object representing the Isosurface
+ * @return {Array}           An Array containing Arrays of 3 vertices, represented as { x, y, z }
  */
 export default function (width, height, depth, step, values, isolevel) {
+	console.time('marchingCubes');
 	let points = generateGridCellPoints(width, height, depth, step);
-	let triangles = [];
+	let triangles = [], // an array, each element an array of 3 { x, y, z } objects
+		t = 0;
 
 	let size = width;
 	let size2 = width * height;
@@ -45,16 +46,18 @@ export default function (width, height, depth, step, values, isolevel) {
 					let index1 = triTable[cubeindex + i],
 						index2 = triTable[cubeindex + i + 1],
 						index3 = triTable[cubeindex + i + 2];
-					triangles.push([
+					triangles[t] = [
 						vlist[index1],
 						vlist[index2],
 						vlist[index3]
-					]);
+					];
 					i += 3;
+					t += 1;
 				}
 			}
 		}
 	}
+	console.timeEnd('marchingCubes');
 	return triangles;
 }
 
@@ -121,75 +124,114 @@ export function polygonise(x, y, z, size, size2, points, values, isolevel) {
 	// bottom of the cube
 	if ( edges & 1 )	{
 		mu = ( isolevel - value0 ) / ( value1 - value0 );
-		vlist[0] = points[p].clone().lerp( points[px], mu );
+		vlist[0] = lerp(points[p], points[px], mu);
 	}
 	if ( edges & 2 )	{
 		mu = ( isolevel - value1 ) / ( value3 - value1 );
-		vlist[1] = points[px].clone().lerp( points[pxy], mu );
+		vlist[1] = lerp(points[px], points[pxy], mu);
 	}
 	if ( edges & 4 )	{
 		mu = ( isolevel - value2 ) / ( value3 - value2 );
-		vlist[2] = points[py].clone().lerp( points[pxy], mu );
+		vlist[2] = lerp(points[py], points[pxy], mu);
 	}
 	if ( edges & 8 )	{
 		mu = ( isolevel - value0 ) / ( value2 - value0 );
-		vlist[3] = points[p].clone().lerp( points[py], mu );
+		vlist[3] = lerp(points[p], points[py], mu);
 	}
 	// top of the cube
 	if ( edges & 16 ) {
 		mu = ( isolevel - value4 ) / ( value5 - value4 );
-		vlist[4] = points[pz].clone().lerp( points[pxz], mu );
+		vlist[4] = lerp(points[pz], points[pxz], mu);
 	}
 	if ( edges & 32 ) {
 		mu = ( isolevel - value5 ) / ( value7 - value5 );
-		vlist[5] = points[pxz].clone().lerp( points[pxyz], mu );
+		vlist[5] = lerp(points[pxz], points[pxyz], mu);
 	}
 	if ( edges & 64 ) {
 		mu = ( isolevel - value6 ) / ( value7 - value6 );
-		vlist[6] = points[pyz].clone().lerp( points[pxyz], mu );
+		vlist[6] = lerp(points[pyz], points[pxyz], mu);
 	}
 	if ( edges & 128 ) {
 		mu = ( isolevel - value4 ) / ( value6 - value4 );
-		vlist[7] = points[pz].clone().lerp( points[pyz], mu );
+		vlist[7] = lerp(points[pz], points[pyz], mu);
 	}
 	// vertical lines of the cube
 	if ( edges & 256 ) {
 		mu = ( isolevel - value0 ) / ( value4 - value0 );
-		vlist[8] = points[p].clone().lerp( points[pz], mu );
+		vlist[8] = lerp(points[p], points[pz], mu);
 	}
 	if ( edges & 512 ) {
 		mu = ( isolevel - value1 ) / ( value5 - value1 );
-		vlist[9] = points[px].clone().lerp( points[pxz], mu );
+		vlist[9] = lerp(points[px], points[pxz], mu);
 	}
 	if ( edges & 1024 ) {
 		mu = ( isolevel - value3 ) / ( value7 - value3 );
-		vlist[10] = points[pxy].clone().lerp( points[pxyz], mu );
+		vlist[10] = lerp(points[pxy], points[pxyz], mu);
 	}
 	if ( edges & 2048 ) {
 		mu = ( isolevel - value2 ) / ( value6 - value2 );
-		vlist[11] = points[py].clone().lerp( points[pyz], mu );
+		vlist[11] = lerp(points[py], points[pyz], mu);
 	}
 	return { cubeindex, vlist };
 }
 
-/** Generates a "scaffold" of vertices with the given dimensions.
- * Used in the Marching Cubes algorithm when mapping values to vertices.
+/** Performs a linear interpolation on two coordinates.
+ *
+ * @param  {Object} v0    the coordinate to interpolate from { x, y, z }
+ * @param  {Object} v1    the coordinate to interpolate to { x, y, z }
+ * @param  {number} t     the interpolation alpha/amount
+ * @return {Object}       the interpolated coordinate { x, y, z }
+ */
+export function lerp(v0, v1, t) {
+	let x = v0.x + t * (v1.x - v0.x);
+	let y = v0.y + t * (v1.y - v0.y);
+	let z = v0.z + t * (v1.z - v0.z);
+	return { x, y, z };
+}
+
+/** Flattens the array returned by the Marching Cubes implementation into an array of vertices.
+ *
+ * @param  {Array} triangles An Array containing Arrays of 3 vertices, represented as { x, y, z }
+ * @return {Array}           A TypedArray of floats, each element representing vertex coordinates
+ */
+export function flattenTriangles(triangles) {
+	console.time('trianglesFlattening');
+	const length = triangles.length * 3 * 3;
+	let flatVertices = new Float32Array(length);
+	for (let i = 0, v = 0; i < triangles.length; i+=1) {
+		let j = 0;
+		while (j < 3) {
+			let { x, y, z } = triangles[i][j];
+			flatVertices[v] = x;
+			flatVertices[v + 1] = y;
+			flatVertices[v + 2] = z;
+			j += 1;
+			v += 3;
+		}
+	}
+	console.timeEnd('trianglesFlattening');
+	return flatVertices;
+}
+
+/** Generates a 3-dimensional set of vertices with the given dimensions.
+ * Used in the Marching Cubes algorithm when mapping isovalues to vertices.
  *
  * @param  {number} width  the width of the scaffold
  * @param  {number} height the height of the scaffold
  * @param  {number} depth  the depth of the scaffold
  * @param  {number} step   the distance between vertices
- * @return {Array}         an array of THREE.Vector3 objects
+ * @return {Array}         an array of objects {x,y,z}
  */
 export function generateGridCellPoints(width, height, depth, step) {
 	let minZ = getAxisRange(depth, step)[0],
 		minY = getAxisRange(height, step)[0],
 		minX = getAxisRange(width, step)[0],
-		vertices = [];
+		vertices = [],
+		v = 0;
 	for (let k = 0, z = minZ; k < depth; k++, z += step) {
 		for (let j = 0, y = minY; j < height; j++, y += step) {
-			for (let i = 0, x = minX; i < width; i++, x += step) {
-				vertices.push(new THREE.Vector3(x,y,z)); // TODO: Evaluate requirements for vector3
+			for (let i = 0, x = minX; i < width; i++, x += step, v++) {
+				vertices[v] = { x, y, z };
 			}
 		}
 	}
