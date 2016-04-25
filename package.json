@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha --compilers js:babel-core/register",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --inline --hot",
-    "prebuild": "rm -rf build && mkdir -p build && cp src/style.css build",
+    "prebuild": "rm -rf build && mkdir build && cp src/style.css build",
     "build": "cross-env NODE_ENV=production webpack",
     "start": "http-server build --cors --port ${PORT:-8080}"
   },
