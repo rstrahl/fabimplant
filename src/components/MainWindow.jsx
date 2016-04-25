@@ -3,8 +3,8 @@
 // The main application window for FabImplant.
 
 import React from 'react';
-import Header from './header.jsx';
-import WorkspaceWindow from './workspaceWindow.jsx';
+import Header from './Header.jsx';
+import WorkspaceWindow from './WorkspaceWindow.jsx';
 
 export default class MainWindow extends React.Component {
 

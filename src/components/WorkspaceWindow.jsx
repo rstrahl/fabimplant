@@ -5,10 +5,10 @@
 
 import React from 'react';
 import { bind } from 'decko';
-import NavigationFooter from './navigationFooter.jsx';
-import ImageWindow from './imageWindow.jsx';
-import ThreeWindow from './threeWindow.jsx';
-import TestWindow from './testWindow.jsx';
+import NavigationFooter from './NavigationFooter.jsx';
+import ImageWindow from './ImageWindow.jsx';
+import ThreeWindow from './ThreeWindow.jsx';
+import TestWindow from './TestWindow.jsx';
 
 import * as fileLoader from '../dicom/fileLoader';
 import DicomFile from '../dicom/dicomFile';

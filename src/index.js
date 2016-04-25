@@ -10,13 +10,13 @@ import ReactDOM from 'react-dom';
 
 let root = document.querySelector('main');
 function init() {
-	let Main = require('./ui/mainWindow.jsx');
+	let Main = require('./components/MainWindow.jsx');
 	ReactDOM.render(<Main />, root);
 }
 init();
 
 if (module.hot) {
-	module.hot.accept('./ui/mainWindow.jsx', () => {
+	module.hot.accept('./components/MainWindow.jsx', () => {
 		requestAnimationFrame(init);
 	});
 }
