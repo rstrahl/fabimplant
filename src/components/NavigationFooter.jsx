@@ -1,9 +1,6 @@
-// navigationFooter.jsx
-//
-// A UI component that displays a forward/backward-style navigation control.
-
 import React from 'react';
 import { bind } from 'decko';
+import { default as NavigationButton, BUTTON_ALIGNMENT } from './NavigationButton.jsx';
 
 /**
  * A UI component that displays a forward/backward-style navigation control.
@@ -17,9 +14,9 @@ export default class NavigationFooter extends React.Component {
 	render() {
 		return (
 			<div id="navigation-footer" className="navigation-footer">
-				<div className="navigation-footer-left" onClick={this.handleLeftClick}>left</div>
-				<div className="navigation-footer-right" onClick={this.handleRightClick}>right</div>
-				<div className="navigation-footer-middle" onClick={this.handleMiddleClick}>middle</div>
+				<NavigationButton align={BUTTON_ALIGNMENT.LEFT} label="left" onClick={this.handleLeftClick} />
+				<NavigationButton align={BUTTON_ALIGNMENT.RIGHT} label="right" onClick={this.handleRightClick} />
+				<NavigationButton align={BUTTON_ALIGNMENT.MIDDLE} label="middle" onClick={this.handleMiddleClick} />
 			</div>
 		);
 	}
