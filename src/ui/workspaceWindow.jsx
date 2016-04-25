@@ -4,6 +4,7 @@
 // moving between workspace stages.
 
 import React from 'react';
+import { bind } from 'decko';
 import NavigationFooter from './navigationFooter.jsx';
 import ImageWindow from './imageWindow.jsx';
 import ThreeWindow from './threeWindow.jsx';
@@ -34,17 +35,18 @@ export default class WorkspaceWindow extends React.Component {
 		let StageWindow = stageWindows[index];
 
 		return (
-			<div className="workspace-window" onDragOver={this.handleDragOver.bind(this)} onDrop={this.handleDrop.bind(this)}>
+			<div className="workspace-window" onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
 				<div className="workspace-window-main">
 					<StageWindow dicomFile={this.state.dicomFile}/>
 				</div>
 				<div className="workspace-window-nav">
-					<NavigationFooter handleNavigationUpdate={this.handleNavigationDidChange.bind(this)}/>
+					<NavigationFooter handleNavigationUpdate={this.handleNavigationDidChange}/>
 				</div>
 			</div>
 		);
 	}
 
+	@bind
 	/**
 	 * Callback that handles when the NavigationFooter changes the
 	 * current workspace stage.
@@ -60,12 +62,14 @@ export default class WorkspaceWindow extends React.Component {
 	}
 
 	// TODO: file loading should eventually be moved into its own stage with file browser (possible?)
+	@bind
 	handleDragOver(event) {
 		event.stopPropagation();
 		event.preventDefault();
 		event.dataTransfer.dropEffect = 'copy';
 	}
 
+	@bind
 	handleDrop(event) {
 		event.stopPropagation();
 		event.preventDefault();
