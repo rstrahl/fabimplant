@@ -1,9 +1,10 @@
 import React from 'react';
 import { bind } from 'decko';
-import { default as NavigationButton, BUTTON_ALIGNMENT } from './NavigationButton.jsx';
+import { default as NavigationButton, BUTTON_ALIGNMENT } from './NavigationButton';
 
 /**
- * A UI component that displays a forward/backward-style navigation control.
+ * A footer-style component that presents two buttons for navigating the Workspace
+ * forward and backward.
  */
 export default class NavigationFooter extends React.Component {
 
@@ -37,3 +38,11 @@ export default class NavigationFooter extends React.Component {
 	}
 
 }
+
+NavigationFooter.propTypes = {
+	handleNavigationUpdate : React.PropTypes.func
+};
+
+NavigationFooter.defaultProps = {
+	handleNavigationUpdate : null
+};

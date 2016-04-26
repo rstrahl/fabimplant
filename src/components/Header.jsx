@@ -1,10 +1,8 @@
-// header.js
-//
-// The main header bar.
-//
-
 import React from 'react';
 
+/**
+ * A component that presents a header bar.
+ */
 export default class Header extends React.Component {
 
 	constructor(props) {
@@ -12,11 +10,12 @@ export default class Header extends React.Component {
 	}
 
 	render() {
-		return (
+		let { title } = this.props;
 
+		return (
 			<div className="header">
 				<span className="header-title">
-					FABIMPLANT
+					{title}
 				</span>
 				<span className="header-button-container">
 					<span className="header-button">
@@ -27,7 +26,13 @@ export default class Header extends React.Component {
 					</span>
 				</span>
 			</div>
-
 		);
 	}
 }
+
+Header.propTypes = {
+	title : React.PropTypes.string
+};
+Header.defaultProps = {
+	title : "(undefined)"
+};

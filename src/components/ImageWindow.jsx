@@ -7,8 +7,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { bind } from 'decko';
 import { prepareImageData, pixelValueToInterpretedValue } from '../dicom/processor';
-import DicomDebugWindow from './DicomDebugWindow.jsx';
-import BoundedRangeInput from './BoundedRangeInput.jsx';
+import DicomDebugWindow from './DicomDebugWindow';
+import BoundedRangeInput from './BoundedRangeInput';
 
 /** A UI component that displays images from a DICOM file.
  */

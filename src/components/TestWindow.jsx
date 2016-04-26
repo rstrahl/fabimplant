@@ -19,3 +19,6 @@ export default class TestWindow extends React.Component {
 	}
 
 }
+
+TestWindow.propTypes = {};
+TestWindow.defaultProps = {};

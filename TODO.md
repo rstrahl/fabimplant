@@ -2,15 +2,19 @@
 
 Start with UI cleanup and readiness
 
-- Issue #33
 - Refactor project structure to adhere to standard (ui/components, etc.)
 	- Refactor all components into individual items
 	 	- Workspace Button
 		- Stage Navigation Button
 		- Header Button
 		- DropArea Div
+
+- Issue #33
 - Issue #34
+
+- Issue #26
 - Issue #29
+- Issue #25
 
 Then move to analysis file parsing
 

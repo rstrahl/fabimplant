@@ -185,3 +185,10 @@ export default class ThreeWindow extends React.Component {
 	}
 
 }
+
+ThreeWindow.propTypes = {
+	dicomFile : React.PropTypes.object
+};
+ThreeWindow.defaultProps = {
+	dicomFile : null
+};
