@@ -2,6 +2,10 @@ import React from 'react';
 import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
 
+/**
+ * A component that presents a ranged-input control for selecting a range between
+ * a minimum value and a maximum value.
+ */
 export default class BoundedRangeInput extends React.Component {
 
 	constructor(props) {
@@ -103,6 +107,15 @@ export default class BoundedRangeInput extends React.Component {
 
 }
 
+BoundedRangeInput.propTypes = {
+	vertical : React.PropTypes.bool,
+	value : React.PropTypes.number
+};
+BoundedRangeInput.defaultProps = {
+	vertical : false,
+	value : 0.5
+};
+
 class Hooker extends React.Component {
 
 	render() {
@@ -147,3 +160,16 @@ class Hooker extends React.Component {
 	}
 
 }
+
+Hooker.propTypes = {
+	onDragging : React.PropTypes.func,
+	onDrag : React.PropTypes.func,
+	onDragStart : React.PropTypes.func,
+	onDragEnd : React.PropTypes.func
+};
+Hooker.defaultProps = {
+	onDragging : null,
+	onDrag : null,
+	onDragStart : null,
+	onDragEnd : null
+};

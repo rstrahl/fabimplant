@@ -1,22 +1,15 @@
-// workspaceWindow.js
-//
-// A UI container that displays a workspace area and navigation controls for
-// moving between workspace stages.
-
 import React from 'react';
 import { bind } from 'decko';
-import NavigationFooter from './navigationFooter.jsx';
-import ImageWindow from './imageWindow.jsx';
-import ThreeWindow from './threeWindow.jsx';
-import TestWindow from './testWindow.jsx';
-
+import NavigationFooter from './NavigationFooter';
+import ImageWindow from './ImageWindow';
+import ThreeWindow from './ThreeWindow';
+import TestWindow from './TestWindow';
 import * as fileLoader from '../dicom/fileLoader';
 import DicomFile from '../dicom/dicomFile';
 import * as processor from '../dicom/processor';
 
-
 /**
- * A UI container that displays a workspace area and navigation controls for
+ * A container component that presents a workspace stage, and navigation controls for
  * moving between workspace stages.
  */
 export default class WorkspaceWindow extends React.Component {
@@ -47,10 +40,6 @@ export default class WorkspaceWindow extends React.Component {
 	}
 
 	@bind
-	/**
-	 * Callback that handles when the NavigationFooter changes the
-	 * current workspace stage.
-	 */
 	handleNavigationDidChange(newIndex) {
 		if (newIndex < 0) {
 			this.setState({index: 0});
@@ -89,3 +78,9 @@ export default class WorkspaceWindow extends React.Component {
 		}
 	}
 }
+
+WorkspaceWindow.propTypes = {
+};
+
+WorkspaceWindow.defaultProps = {
+};

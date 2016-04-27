@@ -6,10 +6,6 @@ import React from 'react';
 
 export default class TestWindow extends React.Component {
 
-	constructor(props) {
-		super(props);
-	}
-
 	render() {
 		return (
 			<div className="test-window">
@@ -19,3 +15,6 @@ export default class TestWindow extends React.Component {
 	}
 
 }
+
+TestWindow.propTypes = {};
+TestWindow.defaultProps = {};
