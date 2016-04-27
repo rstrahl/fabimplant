@@ -8,10 +8,6 @@ import { bind } from 'decko';
  */
 export default class DicomDebugWindow extends React.Component {
 
-	constructor(props) {
-		super(props);
-	}
-
 	render() {
 		let { dataSet } = this.props;
 

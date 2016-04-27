@@ -18,12 +18,6 @@ export const BUTTON_ALIGNMENT = {
  */
 export default class NavigationButton extends React.Component {
 
-	constructor(props) {
-		super(props);
-		this.state = {
-		};
-	}
-
 	render() {
 		let { label, align } = this.props;
 		return (

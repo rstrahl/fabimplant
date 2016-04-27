@@ -8,10 +8,6 @@ import { default as NavigationButton, BUTTON_ALIGNMENT } from './NavigationButto
  */
 export default class NavigationFooter extends React.Component {
 
-	constructor(props) {
-		super(props);
-	}
-
 	render() {
 		return (
 			<div id="navigation-footer" className="navigation-footer">

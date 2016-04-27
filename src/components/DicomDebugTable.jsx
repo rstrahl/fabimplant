@@ -8,10 +8,6 @@ import { uids } from '../dicom/uids';
  */
 export default class DicomDebugTable extends React.Component {
 
-	constructor(props) {
-		super(props);
-	}
-
 	render() {
 		let rows = [];
 		Object.keys(this.props.dataSet).forEach( key => {

@@ -6,10 +6,6 @@ import React from 'react';
  */
 export default class DicomDebugTableItem extends React.Component {
 
-	constructor(props) {
-		super(props);
-	}
-
 	render() {
 		return (
 			<tr>
