@@ -1,14 +1,9 @@
-// threeWindow.jsx
-//
-// Displays a threejs scene
-
 import React from 'react';
 import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
-import { default as RenderingStage, CONTROL_MODE_ORBIT, CONTROL_MODE_MODEL } from '../three/renderingStage';
+import MeshRenderer, { CAMERA_CONTROLS_MODE } from './MeshRenderer';
 import { dicomVolume, sphereVolume } from '../three/modeler';
 import GeometryWorker from 'worker!../three/geometryWorker';
-import { default as buildGeometry } from '../three/buildGeometry';
 import Serializer from '../three/STLSerializer';
 
 /**
@@ -21,35 +16,21 @@ export default class ThreeWindow extends React.Component {
 		this.state = {
 			width : 0,
 			height : 0,
+			geometryData : null,
 			debugMode : false,
 			factor : 2,
 			subdivision : 0,
-			controlMode: 0
+			controlsMode: CAMERA_CONTROLS_MODE.ORBIT
 		};
-		this.renderingStage = new RenderingStage();
+		// this.renderingStage = new RenderingStage();
 		this.subdivision = 0;
 		this.volume = null;
 		this.geometryWorker = new GeometryWorker();
 	}
 
-	componentWillUpdate(nextProps, nextState) {
-		let { debugMode, controlMode, width, height } = nextState;
-		this.renderingStage.setDebugMode(debugMode);
-		this.renderingStage.setControlMode(controlMode);
-		if (width !== this.state.width || height !== this.state.height) {
-			this.renderingStage.updateSize(width, height);
-		}
-	}
-
-	componentDidUpdate() {
-	}
-
 	componentDidMount() {
 		addEventListener('resize', this.updateSize);
-		findDOMNode(this).appendChild(this.renderingStage.rendererElement);
-		findDOMNode(this).appendChild(this.renderingStage.statsElement);
 		this.handleRefresh();
-		this.renderingStage.animate();
 		this.updateSize();
 	}
 
@@ -58,23 +39,26 @@ export default class ThreeWindow extends React.Component {
 	}
 
 	render() {
-		let { debugMode } = this.state;
-		let { vertices, faces } = this.renderingStage;
+		let { width, height, debugMode, controlsMode, geometryData } = this.state;
+		let controlsModeString = (controlsMode === CAMERA_CONTROLS_MODE.ORBIT) ? 'Orbit' : 'Model';
+		let debugModeString = (debugMode === true) ? 'On' : 'Off';
+		let vertices, faces = 0;
 		return (
 			<div className="three-window">
+				<MeshRenderer width={width} height={height} debugMode={debugMode} controlsMode={controlsMode} geometryData={geometryData} />
 				<div className="three-window-button-panel">
 					<button className="three-window-button" type="button"
 						onClick={this.handleExportSTL}>Export</button>
 					<button className="three-window-button" type="button"
 						onClick={this.handleRefresh}>Refresh</button>
 					<button className="three-window-button" type="button"
-						onClick={this.handleToggleDebug}>Debug {this.state.debugMode}</button>
+						onClick={this.handleToggleDebug}>Debug {debugModeString}</button>
 					<button className="three-window-button" type="button"
 						onClick={this.handleIncreaseSubdivision}>Increase</button>
 					<button className="three-window-button" type="button"
 						onClick={this.handleDecreaseSubdivision}>Decrease</button>
 					<button className="three-window-button" type="button"
-						onClick={this.handleToggleControlMode}>{this.state.controlMode}</button>
+						onClick={this.handleToggleControlsMode}>{controlsModeString}</button>
 					<button className="three-window-button" type="button"
 						onClick={this.handleGeometryWorker}>Worker</button>
 				</div>
@@ -100,15 +84,15 @@ export default class ThreeWindow extends React.Component {
 	}
 
 	@bind
-	handleToggleControlMode() {
-		let controlMode = (this.state.controlMode === CONTROL_MODE_ORBIT) ? CONTROL_MODE_MODEL : CONTROL_MODE_ORBIT;
-		this.setState({ controlMode });
+	handleToggleControlsMode() {
+		let controlsMode = (this.state.controlsMode === CAMERA_CONTROLS_MODE.ORBIT) ? CAMERA_CONTROLS_MODE.MODEL : CAMERA_CONTROLS_MODE.ORBIT;
+		this.setState({ controlsMode });
 	}
 
 	@bind
 	handleRefresh() {
 		// TODO: FLUX refactor
-		this.renderingStage.clearStage();
+		// this.renderingStage.clearStage();
 		let { dicomFile } = this.props;
 		if (dicomFile !== undefined && dicomFile !== null) {
 			this.loadMeshForDicom(dicomFile);
@@ -120,20 +104,21 @@ export default class ThreeWindow extends React.Component {
 	@bind
 	handleExportSTL() {
 		// TODO: FLUX refactor
-		let { volumeMesh } = this.renderingStage;
-		if (volumeMesh !== undefined) {
-			let stl = Serializer(volumeMesh);
-			let textFile = null,
-				makeTextFile = function (text) {
-					let data = new Blob([text], {type: '{type: "octet/stream"}'});
-					if (textFile !== null) {
-						window.URL.revokeObjectURL(textFile);
-					}
-					textFile = window.URL.createObjectURL(data);
-					return textFile;
-				  };
-			window.open(makeTextFile(stl));
-		}
+		// TODO: Fix after MeshRenderer implementation
+		// let { volumeMesh } = this.renderingStage;
+		// if (volumeMesh !== undefined) {
+		// 	let stl = Serializer(volumeMesh);
+		// 	let textFile = null,
+		// 		makeTextFile = function (text) {
+		// 			let data = new Blob([text], {type: '{type: "octet/stream"}'});
+		// 			if (textFile !== null) {
+		// 				window.URL.revokeObjectURL(textFile);
+		// 			}
+		// 			textFile = window.URL.createObjectURL(data);
+		// 			return textFile;
+		// 		  };
+		// 	window.open(makeTextFile(stl));
+		// }
 	}
 
 	@bind
@@ -176,9 +161,7 @@ export default class ThreeWindow extends React.Component {
 	buildGeometry(volume, isolevel) {
 		let handler = (e) => {
 			this.geometryWorker.removeEventListener('message', handler);
-			let geometry = buildGeometry(e.data);
-			this.renderingStage.geometry = geometry;
-			this.renderingStage.loadStage();
+			this.setState({ geometryData : e.data });
 		};
 		this.geometryWorker.addEventListener('message', handler);
 		this.geometryWorker.postMessage({ volume: volume.data, height: volume.height, width: volume.width, depth: volume.depth, step: 1, isolevel});

@@ -10,12 +10,11 @@ import { bind } from 'decko';
  */
 export default class MeshControl {
 
-	constructor(mesh, callback) {
+	constructor(callback) {
 		this.lastX = 0;
 		this.lastY = 0;
 		// this.xDelta = 0;
 		// this.yDelta = 0;
-		this.mesh = mesh;
 		this.callback = callback;
 	}
 
