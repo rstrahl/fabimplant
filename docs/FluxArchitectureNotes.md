@@ -1,7 +1,9 @@
-# FLUX Refactor Notes
+# Flux Architecture
 
-- Ensure that all JSX components rely on passing props downwards to children and
-rendering based on props.
+
+
+
+## Eligible Candidates
 
 - FileReader -> FileStore
 	- Processes DICOM files and maintains File state
