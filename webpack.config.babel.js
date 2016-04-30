@@ -32,7 +32,7 @@ module.exports = {
 				test: /\.(less|css)$/,
 				// include: /src\//,
 				loader: ExtractTextPlugin.extract('style', [
-					`css?sourceMap=${CSS_MAPS}&importLoaders=1&localIdentName=[local]${process.env.CSS_MODULES_IDENT || '_[hash:base64:5]'}`,
+					`css?sourceMap=${CSS_MAPS}&modules&importLoaders=1&localIdentName=[local]${process.env.CSS_MODULES_IDENT || '_[hash:base64:5]'}`,
 					// 'postcss',
 					`less?sourceMap=${CSS_MAPS}`
 				].join('!'))

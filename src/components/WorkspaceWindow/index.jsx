@@ -1,12 +1,13 @@
 import React from 'react';
 import { bind } from 'decko';
-import NavigationFooter from './NavigationFooter';
-import ImageWindow from './ImageWindow';
-import ThreeWindow from './ThreeWindow';
-import TestWindow from './TestWindow';
-import * as fileLoader from '../dicom/fileLoader';
-import DicomFile from '../dicom/dicomFile';
-import * as processor from '../dicom/processor';
+import styles from './style.less';
+import NavigationFooter from '../NavigationFooter';
+import ImageWindow from '../ImageWindow';
+import ThreeWindow from '../ThreeWindow';
+import TestWindow from '../TestWindow';
+import * as fileLoader from '../../dicom/fileLoader';
+import DicomFile from '../../dicom/dicomFile';
+import * as processor from '../../dicom/processor';
 
 /**
  * A container component that presents a workspace stage, and navigation controls for
@@ -28,11 +29,11 @@ export default class WorkspaceWindow extends React.Component {
 		let StageWindow = stageWindows[index];
 
 		return (
-			<div className="workspace-window" onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
-				<div className="workspace-window-main">
+			<div className={styles.window} onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
+				<div className={styles.main}>
 					<StageWindow dicomFile={this.state.dicomFile}/>
 				</div>
-				<div className="workspace-window-nav">
+				<div className={styles.nav}>
 					<NavigationFooter handleNavigationUpdate={this.handleNavigationDidChange}/>
 				</div>
 			</div>

@@ -1,11 +1,12 @@
 import React from 'react';
 import { findDOMNode } from 'react-dom';
+import styles from './style.less';
 import THREE from 'three';
 import Stats from 'stats.js';
 import createOrbitControls from 'three-orbit-controls';
-import MeshControl from '../three/meshControl';
+import MeshControl from '../../three/meshControl';
 import { bind } from 'decko';
-import buildGeometry from '../three/buildGeometry';
+import buildGeometry from '../../three/buildGeometry';
 
 const NEAR = -500;
 const FAR = 1000;
@@ -71,18 +72,14 @@ export default class MeshRenderer extends React.Component {
 
 		this.stats = new Stats();
 		this.stats.setMode(0);
-		this.stats.domElement.className = 'stats-render';
+		this.stats.domElement.className = styles.statsPanel;
 	}
 
 	render() {
 		return (
-			<div className="mesh-renderer">
+			<div className={styles.meshRenderer}>
 			</div>
 		);
-	}
-
-	componentWillMount() {
-
 	}
 
 	componentDidMount() {

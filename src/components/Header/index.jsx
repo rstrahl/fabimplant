@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './style.less';
 
 /**
  * A component that presents a header bar.
@@ -9,15 +10,15 @@ export default class Header extends React.Component {
 		let { title } = this.props;
 
 		return (
-			<div className="header">
-				<span className="header-title">
+			<div className={styles.header}>
+				<span className={styles.title}>
 					{title}
 				</span>
-				<span className="header-button-container">
-					<span className="header-button">
+				<span className={styles.buttonContainer}>
+					<span className={styles.button}>
 						Account
 					</span>
-					<span className="header-button">
+					<span className={styles.button}>
 						Help
 					</span>
 				</span>

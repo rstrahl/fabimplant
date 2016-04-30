@@ -11,13 +11,13 @@ import './style.css';
 
 let root = document.querySelector('main');
 function init() {
-	let Main = require('./components/MainWindow.jsx');
-	ReactDOM.render(<Main />, root);
+	let App = require('./components/App');
+	ReactDOM.render(<App />, root);
 }
 init();
 
 if (module.hot) {
-	module.hot.accept('./components/MainWindow.jsx', () => {
+	module.hot.accept('./components/App', () => {
 		requestAnimationFrame(init);
 	});
 }

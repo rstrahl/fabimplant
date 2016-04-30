@@ -1,5 +1,6 @@
 import React from 'react';
 import { bind } from 'decko';
+import styles from './style.less';
 
 /**
  * Dictates the styling of the button div in terms of its alignment within the
@@ -8,9 +9,9 @@ import { bind } from 'decko';
  * @type {Object}
  */
 export const BUTTON_ALIGNMENT = {
-	MIDDLE : 'navigation-footer-middle',
-	LEFT : 'navigation-footer-left',
-	RIGHT : 'navigation-footer-right'
+	MIDDLE : 'middle',
+	LEFT : 'left',
+	RIGHT : 'right'
 };
 
 /** A button component used in the NavigationFooter.
@@ -21,7 +22,7 @@ export default class NavigationButton extends React.Component {
 	render() {
 		let { label, align } = this.props;
 		return (
-			<div className={align} onClick={this.handleOnClick}>{label}</div>
+			<div className={styles[align]} onClick={this.handleOnClick}>{label}</div>
 		);
 	}
 

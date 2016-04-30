@@ -61,7 +61,7 @@ input[type=range].vertical {
 }
 
 /* === Bounded Range Input === */
-
+/*
 .pretty-range {
   position: absolute;
   left: 50%;
@@ -160,10 +160,10 @@ input[type=range].vertical {
   bottom: auto;
   top: -3px;
   cursor: n-resize;
-}
+}*/
 
 /* === Header === */
-
+/*
 .header {
   background-color: rgb(255,255,255);
   position: absolute;
@@ -187,9 +187,10 @@ input[type=range].vertical {
 .header-button {
   padding: 0px 10px 0px 10px;
 }
+*/
 
 /* === DicomDebugWindow === */
-
+/*
 .dicom-debug-window {
   position: relative;
   background: rgba(255,255,255,.85);
@@ -237,9 +238,9 @@ input[type=range].vertical {
   font-weight: normal;
   text-align: left;
 }
-
+*/
 /* ImageWindow */
-
+/*
 #image-window {
   display: block;
   width: 100%;
@@ -364,7 +365,7 @@ input[type=range].vertical {
 }
 
 /* Navigation Footer */
-
+/*
 #navigation-footer {
   width: 100%;
   color: rgba(255,255,255,0.75);
@@ -391,10 +392,10 @@ input[type=range].vertical {
   float: right;
   width: 100px;
   text-align: right;
-}
+}*/
 
 /* Main Window */
-
+/*
 .main-window {
   position: absolute;
   top: 0;
@@ -419,10 +420,10 @@ input[type=range].vertical {
   left: 0;
   right: 0;
   bottom: 0;
-}
+}*/
 
 /* Three Window */
-
+/*
 .three-window {
     width: 100%;
     height: 100%;
@@ -457,11 +458,11 @@ input[type=range].vertical {
     top: 0px;
     left: 0px;
     display: none;
-}
+}*/
 
 /* Workspace Window */
 
-.workspace-window {
+/*.workspace-window {
   width: 100%;
   height: 100%;
 }
@@ -475,9 +476,11 @@ input[type=range].vertical {
     position: absolute;
     width: 100%;
     bottom: 0;
-}
+}*/
 
-.test-window {
+/* Test Window */
+
+/*.test-window {
   position: absolute;
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue",
     Helvetica, Arial, "Lucida Grande", sans-serif;
@@ -491,4 +494,4 @@ input[type=range].vertical {
   left: 0;
   right: 0;
   bottom: 0;
-}
+}*/
