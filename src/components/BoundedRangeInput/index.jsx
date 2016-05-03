@@ -1,6 +1,7 @@
 import React from 'react';
 import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
+import styles from './style.less';
 
 /**
  * A component that presents a ranged-input control for selecting a range between
@@ -43,23 +44,24 @@ export default class BoundedRangeInput extends React.Component {
 				[width]: (max - min) * 100 + '%'
 			};
 		return (
-			<div className="bounded-range">
-				<div className="bounded-range inner" style={innerStyle}>
-					<Hooker className="bounded-range min" onDrag={this.startChange} onDragStart={this.dragStart} />
-					<Hooker className="bounded range content" onDrag={this.move} onDragStart={this.dragStart}>
+			<div className={styles.boundedRange}>
+				<div className={styles.boundedRange+' '+styles.inner} style={innerStyle}>
+					<Hooker className={styles.boundedRange+' '+styles.min} onDrag={this.startChange} onDragStart={this.dragStart} />
+					<Hooker className={styles.boundedRange+' '+styles.content} onDrag={this.move} onDragStart={this.dragStart}>
 					</Hooker>
-					<Hooker className="bounded-range max" onDrag={this.endChange} onDragStart={this.dragStart} />
+					<Hooker className={styles.boundedRange+' '+styles.max} onDrag={this.endChange} onDragStart={this.dragStart} />
 				</div>
 			</div>
 		);
 	}
 
+	@bind
 	updateSize() {
 		let vert = this.props.vertical,
 			w = vert ? 'offsetHeight' : 'offsetWidth',
 			l = vert ? 'offsetTop' : 'offsetLeft';
 		this.size = findDOMNode(this)[w];
-		let min = findDOMNode(this).querySelector(vert?'.max':'.min');
+		let min = findDOMNode(this).querySelector(vert ? '.'+styles.max : '.'+styles.min);
 		this.handleSize = min[w] + min[l];
 	}
 
@@ -109,11 +111,11 @@ export default class BoundedRangeInput extends React.Component {
 
 BoundedRangeInput.propTypes = {
 	vertical : React.PropTypes.bool,
-	value : React.PropTypes.number
+	value : React.PropTypes.object
 };
 BoundedRangeInput.defaultProps = {
 	vertical : false,
-	value : 0.5
+	value : { min : 0, max : 0 }
 };
 
 class Hooker extends React.Component {

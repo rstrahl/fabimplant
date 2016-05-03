@@ -1,7 +1,8 @@
 import React from 'react';
-import DicomDebugTableItem from './DicomDebugTableItem';
-import { dicomDataDictionary } from '../dicom/dataDictionary';
-import { uids } from '../dicom/uids';
+import styles from './style.less';
+import DicomDebugTableItem from '../DicomDebugTableItem';
+import { dicomDataDictionary } from '../../dicom/dataDictionary';
+import { uids } from '../../dicom/uids';
 
 /**
  * A component that presents DICOM metadata in a table structure.
@@ -17,8 +18,8 @@ export default class DicomDebugTable extends React.Component {
 		});
 
 		return (
-			<table className="dicom-debug-window-table">
-				<tbody className="dicom-debug-window-body">
+			<table className={styles.table}>
+				<tbody className={styles.body}>
 					{rows}
 				</tbody>
 			</table>

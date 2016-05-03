@@ -1,10 +1,11 @@
 import React from 'react';
 import { findDOMNode } from 'react-dom';
 import { bind } from 'decko';
-import MeshRenderer, { CAMERA_CONTROLS_MODE } from './MeshRenderer';
-import { dicomVolume, sphereVolume } from '../three/modeler';
-import GeometryWorker from 'worker!../three/geometryWorker';
-import Serializer from '../three/STLSerializer';
+import styles from './style.less';
+import MeshRenderer, { CAMERA_CONTROLS_MODE } from '../MeshRenderer';
+import { dicomVolume, sphereVolume } from '../../three/modeler';
+import GeometryWorker from 'worker!../../three/geometryWorker';
+import Serializer from '../../three/STLSerializer';
 
 /**
  * Displays a threejs scene inside a window component.
@@ -44,26 +45,26 @@ export default class ThreeWindow extends React.Component {
 		let debugModeString = (debugMode === true) ? 'On' : 'Off';
 		let vertices, faces = 0;
 		return (
-			<div className="three-window">
+			<div className={styles.window}>
 				<MeshRenderer width={width} height={height} debugMode={debugMode} controlsMode={controlsMode} geometryData={geometryData} />
-				<div className="three-window-button-panel">
-					<button className="three-window-button" type="button"
+				<div className={styles.buttonPanel}>
+					<button className={styles.button} type="button"
 						onClick={this.handleExportSTL}>Export</button>
-					<button className="three-window-button" type="button"
+					<button className={styles.button} type="button"
 						onClick={this.handleRefresh}>Refresh</button>
-					<button className="three-window-button" type="button"
+					<button className={styles.button} type="button"
 						onClick={this.handleToggleDebug}>Debug {debugModeString}</button>
-					<button className="three-window-button" type="button"
+					<button className={styles.button} type="button"
 						onClick={this.handleIncreaseSubdivision}>Increase</button>
-					<button className="three-window-button" type="button"
+					<button className={styles.button} type="button"
 						onClick={this.handleDecreaseSubdivision}>Decrease</button>
-					<button className="three-window-button" type="button"
+					<button className={styles.button} type="button"
 						onClick={this.handleToggleControlsMode}>{controlsModeString}</button>
-					<button className="three-window-button" type="button"
+					<button className={styles.button} type="button"
 						onClick={this.handleGeometryWorker}>Worker</button>
 				</div>
 				{ debugMode === true
-					? <div className='three-window-debug-panel'>
+					? <div className={styles.debugPanel}>
 						Vertices: {vertices}
 						Faces: {faces}
 						</div>
