@@ -2,8 +2,6 @@
 
 Start with UI cleanup and readiness
 
-- Issue #34
-
 - Issue #26
 - Issue #29
 - Issue #25
