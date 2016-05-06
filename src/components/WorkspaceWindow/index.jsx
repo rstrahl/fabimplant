@@ -29,13 +29,9 @@ export default class WorkspaceWindow extends React.Component {
 		let StageWindow = stageWindows[index];
 
 		return (
-			<div className={styles.window} onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
-				<div className={styles.main}>
-					<StageWindow dicomFile={this.state.dicomFile}/>
-				</div>
-				<div className={styles.nav}>
-					<NavigationFooter handleNavigationUpdate={this.handleNavigationDidChange}/>
-				</div>
+			<div className={styles.workspace} onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
+				<StageWindow dicomFile={this.state.dicomFile}/>
+				<NavigationFooter handleNavigationUpdate={this.handleNavigationDidChange}/>
 			</div>
 		);
 	}
