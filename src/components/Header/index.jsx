@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './style.less';
+import IconButton from '../IconButton';
 
 /**
  * A component that presents a header bar.
@@ -7,29 +8,20 @@ import styles from './style.less';
 export default class Header extends React.Component {
 
 	render() {
-		let { title } = this.props;
-
 		return (
 			<div className={styles.header}>
-				<span className={styles.title}>
-					{title}
-				</span>
-				<span className={styles.buttonContainer}>
-					<span className={styles.button}>
-						Account
-					</span>
-					<span className={styles.button}>
-						Help
-					</span>
-				</span>
+				<div className={styles.title}>
+					FAB<span className={styles.pipe}>|</span>IMPLANT
+				</div>
+				<div className={styles.buttonContainer}>
+					<IconButton icon="smile" />
+				</div>
 			</div>
 		);
 	}
 }
 
 Header.propTypes = {
-	title : React.PropTypes.string
 };
 Header.defaultProps = {
-	title : "(undefined)"
 };

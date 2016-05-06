@@ -1,6 +1,7 @@
 import React from 'react';
 import { bind } from 'decko';
 import styles from './style.less';
+import Icon from '../Icon';
 
 /**
  * Dictates the styling of the button div in terms of its alignment within the
@@ -9,7 +10,6 @@ import styles from './style.less';
  * @type {Object}
  */
 export const BUTTON_ALIGNMENT = {
-	MIDDLE : 'middle',
 	LEFT : 'left',
 	RIGHT : 'right'
 };
@@ -21,8 +21,15 @@ export default class NavigationButton extends React.Component {
 
 	render() {
 		let { label, align } = this.props;
+		let icon = (align === BUTTON_ALIGNMENT.LEFT) ? 'circle-left' : 'circle-right';
+		let float = { float: align };
 		return (
-			<div className={styles[align]} onClick={this.handleOnClick}>{label}</div>
+			<div className={styles[align]} onClick={this.handleOnClick}>
+				<div className={styles.icon} style={float}>
+					<Icon name={icon} />
+				</div>
+				<span>{label}</span>
+			</div>
 		);
 	}
 
@@ -44,6 +51,6 @@ NavigationButton.propTypes = {
 NavigationButton.defaultProps = {
 	label : '',
 	icon : '',
-	align: 0,
+	align: BUTTON_ALIGNMENT.LEFT,
 	onClick: null
 };

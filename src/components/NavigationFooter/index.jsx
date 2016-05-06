@@ -1,7 +1,8 @@
 import React from 'react';
 import { bind } from 'decko';
 import styles from './style.less';
-import { default as NavigationButton, BUTTON_ALIGNMENT } from '../NavigationButton';
+import NavigationInfo from '../NavigationInfo';
+import NavigationButton, { BUTTON_ALIGNMENT } from '../NavigationButton';
 
 /**
  * A footer-style component that presents two buttons for navigating the Workspace
@@ -13,8 +14,8 @@ export default class NavigationFooter extends React.Component {
 		return (
 			<div id="navigationFooter" className={styles.navigationFooter}>
 				<NavigationButton align={BUTTON_ALIGNMENT.LEFT} label="left" onClick={this.handleLeftClick} />
+				<NavigationInfo title="Title" />
 				<NavigationButton align={BUTTON_ALIGNMENT.RIGHT} label="right" onClick={this.handleRightClick} />
-				<NavigationButton align={BUTTON_ALIGNMENT.MIDDLE} label="middle" onClick={this.handleMiddleClick} />
 			</div>
 		);
 	}
