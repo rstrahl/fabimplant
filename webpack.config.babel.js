@@ -41,6 +41,10 @@ module.exports = {
 				test: /\.(xml|html|txt|md)$/,
 				exclude: [/src\/index\.html$/],
 				loader: 'raw'
+			},
+			{
+				test: /\.(svg|woff2?|ttf|eot|jpe?g|png|gif)(\?.*)?$/i,
+				loader: ENV==='production' ? 'file?name=[path][name]_[hash:base64:5].[ext]' : 'url'
 			}
 		]
 	},
