@@ -1,11 +1,4 @@
 # TODO
-
-## UI Work
-
-- Issue #29 (add styling to navigation bar)
-- Issue #38 (stage title/position indicator)
-- Issue #25 (add activity/progress indicators)
-
 ## Analysis File Parsing
 
 - Issue #9 (file parser)

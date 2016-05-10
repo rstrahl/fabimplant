@@ -2,6 +2,7 @@ import React from 'react';
 import { bind } from 'decko';
 import styles from './style.less';
 import NavigationFooter from '../NavigationFooter';
+import FileWindow from '../FileWindow';
 import ImageWindow from '../ImageWindow';
 import ThreeWindow from '../ThreeWindow';
 import TestWindow from '../TestWindow';
@@ -19,7 +20,7 @@ export default class WorkspaceWindow extends React.Component {
 		super(props);
 		this.state = {
 			index: 0,
-			stageWindows: [ImageWindow, ThreeWindow, TestWindow],
+			stageWindows: [FileWindow, ImageWindow, ThreeWindow, TestWindow],
 			dicomFile: null
 		};
 	}
