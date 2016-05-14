@@ -37,6 +37,10 @@ export default class DicomFile {
 		return this.dataSet.uint16('x00280010');
 	}
 
+	getPixelSpacing() {
+		return this.dataSet.string('x00280030');
+	}
+
 	getImageSlope() {
 		return parseFloat(this.dataSet.string('x00281053'));
 	}

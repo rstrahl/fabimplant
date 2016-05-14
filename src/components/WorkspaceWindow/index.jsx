@@ -6,9 +6,6 @@ import FileWindow from '../FileWindow';
 import ImageWindow from '../ImageWindow';
 import ThreeWindow from '../ThreeWindow';
 import TestWindow from '../TestWindow';
-import * as fileLoader from '../../dicom/fileLoader';
-import DicomFile from '../../dicom/dicomFile';
-import * as processor from '../../dicom/processor';
 
 /**
  * A container component that presents a workspace stage, and navigation controls for
@@ -31,7 +28,7 @@ export default class WorkspaceWindow extends React.Component {
 
 		return (
 			<div className={styles.workspace} onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
-				<StageWindow dicomFile={this.state.dicomFile}/>
+				<StageWindow dicomFile={this.state.dicomFile} handleFileLoaded={this.handleFileLoaded}/>
 				<NavigationFooter handleNavigationUpdate={this.handleNavigationDidChange}/>
 			</div>
 		);
@@ -48,33 +45,12 @@ export default class WorkspaceWindow extends React.Component {
 		}
 	}
 
-	// TODO: file loading should eventually be moved into its own stage with file browser (possible?)
+	// TODO: Refactor this into the magical redux framework/architecture
 	@bind
-	handleDragOver(event) {
-		event.stopPropagation();
-		event.preventDefault();
-		event.dataTransfer.dropEffect = 'copy';
+	handleFileLoaded(dicomFile) {
+		this.setState({ dicomFile });
 	}
 
-	@bind
-	handleDrop(event) {
-		event.stopPropagation();
-		event.preventDefault();
-		let files = event.dataTransfer.files;
-		if (files.length > 0) {
-			fileLoader.loadFiles(Array.from(files))
-			.then( dataSets => {
-				Promise.all(dataSets.map( dataSet => processor.processDataSet(dataSet) ))
-				.then( pixelDataArrays => {
-					let file = new DicomFile(dataSets[0], pixelDataArrays);
-					this.setState({
-						dicomFile: file}
-					);
-				})
-				.catch( err => console.log('Error processing image data: ' + err));
-			});
-		}
-	}
 }
 
 WorkspaceWindow.propTypes = {
