@@ -1,22 +1,24 @@
-@textColor : rgb(192, 192, 192);
-table {
+@textColor: rgb(192, 192, 192);
+.fileInputDetails {
+	margin-left: auto;
+	margin-right: auto;
+	display: table;
+	position: relative;
+	transform: translateY(-50%);
+	top: 50%;
+	max-width: 80%;
+	min-width: 25%;
+}
+.fileInputDetailsTable {
+	margin: 0.5rem auto;
 	color: @textColor;
-	border: 0px;
-}
-thead {
-	font-size: 1.5rem;
-	text-align: center;
-}
-thead td {
-	padding: 0.25rem 0;
-	border-bottom: 1px solid @textColor;
-}
-tbody {
-}
-tbody th {
-	text-align: right;
-	padding: 0.25rem;
-}
-tbody td {
-	padding: 0.25rem;
+	border: 0;
+	& thead {
+		font-size: 1.25rem;
+		text-align: center;
+		& td {
+			padding: 0.25rem 0;
+			border-bottom: 1px solid @textColor;
+		}
+	}
 }

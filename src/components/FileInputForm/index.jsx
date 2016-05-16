@@ -3,9 +3,6 @@ import styles from './style.less';
 import FileInputButton from '../FileInputButton';
 import { bind } from 'decko';
 import classNames from 'classnames/bind';
-import * as fileLoader from '../../dicom/fileLoader';
-import DicomFile from '../../dicom/dicomFile';
-import * as processor from '../../dicom/processor';
 
 let cx = classNames.bind(styles);
 
@@ -21,9 +18,9 @@ export default class FileInputForm extends React.Component {
 	}
 
 	render() {
-		const boxClassName = cx( { dragging : this.state.dragging, fileInputBox : true});
+		const fileInputBoxClassName = cx( { dragging : this.state.dragging, fileInputBox : true});
 		return (
-			<div className={boxClassName} onDragEnter={this.handleDragEnter} onDragOver={this.handleDragEnter} onDragLeave={this.handleDragLeave} onDrop={this.handleDrop}>
+			<div className={fileInputBoxClassName} onDragEnter={this.handleDragEnter} onDragOver={this.handleDragEnter} onDragLeave={this.handleDragLeave} onDrop={this.handleDrop}>
 				<input className={styles.fileInputForm} type="file" id="file" multiple onChange={this.handleFileChange} />
 				<div className={styles.fileInputButtonBox}>
 					<FileInputButton formId="file"/>
@@ -53,38 +50,13 @@ export default class FileInputForm extends React.Component {
 		e.preventDefault();
 		this.setState({ dragging: false });
 		const fileList = e.dataTransfer.files;
-		this.loadFiles(fileList);
+		this.props.onFileLoaded(fileList);
 	}
 
 	@bind
 	handleFileChange(e) {
 		const fileList = e.target.files;
-		this.loadFiles(fileList);
-	}
-
-	@bind
-	loadFiles(fileList) {
-		// TODO: Move this code into a worker?
-		if (fileList.length > 0) {
-			console.log(`Selected ${fileList.length} files...`);
-			fileLoader.loadFiles(Array.from(fileList))
-			.then( dataSets => {
-				Promise.all(dataSets.map( dataSet => processor.processDataSet(dataSet) ))
-				.then( pixelDataArrays => {
-					// For worker refactor we will be forced to work with ArrayBuffers directly,
-					// requiring the DicomFile object to simply be a set of properties over
-					// a collection of array buffers.  Ugh.
-					let file = new DicomFile(dataSets[0], pixelDataArrays);
-					this.handleFileLoaded(file);
-				})
-				.catch( err => console.log('Error processing image data: ' + err));
-			});
-		}
-	}
-
-	@bind
-	handleFileLoaded(dicomFile) {
-		this.props.onFileLoaded(dicomFile);
+		this.props.onFileLoaded(fileList);
 	}
 
 }

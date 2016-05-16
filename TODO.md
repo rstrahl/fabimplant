@@ -1,20 +1,17 @@
 # TODO
-## Analysis File Parsing
 
-- Issue #9 (file parser)
-	- Strategy pattern?
-		- Loader for dicom
-		- Loader for Analysis
-			- XML based?
-			- Implementation based on machine?
-			- What if other formats are not XML?
-				- This is an internal implementation detail
-- Add new stage for file-loading;
-	- drop zones for two files?
-		- one drop zone, parse depending on contents?
-	- State for dicom collection
-	- State for analysis file/data
-	- Indicates which state is present?
+## ISSUE 9: Analysis File Parsing
+
+- Revise file loading UX; display table with patient info and implants
+	- Present option to "add analysis file"
+	- Need button to "start over" (garbage can? close/X in corner?)
+
+- Refactor file loading code into FileWindow
+	- Sub-components return their "loaded" file back to FileWindow
+	- FileWindow should call its own loadDicomFileList() and loadAnalysisFile()
+
+- Implement analysis file Parsing
+	- Need XML parse
 
 ## Next Steps
 

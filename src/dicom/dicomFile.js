@@ -29,6 +29,14 @@ export default class DicomFile {
 		return dicomParser.explicitDataSetToJS(this.dataSet);
 	}
 
+	getPatientName() {
+		return this.dataSet.string('x00100010');
+	}
+
+	getAcquisitionDate() {
+		return this.dataSet.string('x00080022');
+	}
+
 	getImageWidth() {
 		return this.dataSet.uint16('x00280011');
 	}
