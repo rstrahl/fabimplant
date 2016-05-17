@@ -4,21 +4,19 @@
 	white-space: nowrap;
 	cursor: pointer;
 	font-size: 1.25rem;
-	color: @buttonColor;
+	color: rgba(255, 255, 255, 0.65);
 	display: inline-block;
 	overflow: hidden;
-}
-.fileInputIcon {
-	width: 4rem;
-	height: 4rem;
-	border-radius: 50%;
-	color: @buttonColor;
-	display: block;
-	margin: 0 auto 1rem;
+	padding: 0.5rem;
+	top: 50%;
+	position: relative;
+	transform: translateY(-50%);
 	svg {
-		width: 100%;
-		height: 100%;
+		width: 1.5rem;
+		height: 1.5rem;
 		fill: @buttonColor;
-		margin-top: -0.25rem;
+		vertical-align: middle;
+		margin-top: -0.5rem;
+		margin-right: 0.75rem;
 	}
 }

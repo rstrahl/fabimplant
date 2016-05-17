@@ -37,6 +37,10 @@ export default class DicomFile {
 		return this.dataSet.string('x00080022');
 	}
 
+	getSOPInstanceUID() {
+		return this.dataSet.string('x00080018');
+	}
+
 	getImageWidth() {
 		return this.dataSet.uint16('x00280011');
 	}

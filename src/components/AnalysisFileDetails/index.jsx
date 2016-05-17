@@ -26,11 +26,6 @@ export default class AnalysisFileDetails extends React.Component {
 			: this.buildImplantRows(implantsFile.implants);
 		return (
 			<table className={styles.implantTable}>
-				<thead>
-					<tr>
-						<td colSpan={COLUMNS}>Implants</td>
-					</tr>
-				</thead>
 				{tableContents}
 			</table>
 		);

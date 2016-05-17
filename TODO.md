@@ -2,16 +2,17 @@
 
 ## ISSUE 9: Analysis File Parsing
 
-- Revise file loading UX; display table with patient info and implants
-	- Present option to "add analysis file"
-	- Need button to "start over" (garbage can? close/X in corner?)
-
-- Refactor file loading code into FileWindow
-	- Sub-components return their "loaded" file back to FileWindow
-	- FileWindow should call its own loadDicomFileList() and loadAnalysisFile()
-
 - Implement analysis file Parsing
 	- Need XML parse
+	- Parse nodes:
+		- FilesManager (need UID attribute value)
+		- Implant
+	- Store values in Implant data objects
+	- Store Implant objects in ImplantFile object
+		- Include UID
+
+- Add check to compare the SOPInstanceUID with the UID found in the analysis file
+	- If they don't match, throw a warning in FileInputResults
 
 ## Next Steps
 

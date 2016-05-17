@@ -11,18 +11,13 @@ export default class DicomFileDetails extends React.Component {
 		 */
 		return (
 			<table className={styles.dicomTable}>
-				<thead>
+				<tbody className={styles.body}>
 					<tr>
-						<td colSpan="2">Patient</td>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<th>Name</th>
+						<th>Patient</th>
 						<td>{dicomFile.getPatientName()}</td>
 					</tr>
 					<tr>
-						<th>Date</th>
+						<th>Scan Date</th>
 						<td>{dicomFile.getAcquisitionDate()}</td>
 					</tr>
 					<tr>
