@@ -2,9 +2,11 @@ import React from 'react';
 import styles from './style.less';
 import {bind} from 'decko';
 import FileInputResults from '../FileInputResults';
-import * as fileLoader from '../../dicom/fileLoader';
-import DicomFile from '../../dicom/dicomFile';
-import * as processor from '../../dicom/processor';
+import * as fileLoader from '../../lib/fileLoader/fileLoader';
+import DicomFile from '../../lib/dicom/dicomFile';
+import * as processor from '../../lib/dicom/processor';
+import implantParserPromise from '../../lib/implant/implantParserPromise';
+import carestreamParserStrategy from '../../lib/implant/carestreamParserStrategy';
 
 /** A UI component that presents and coordinates all file-loading stage components.
  *
@@ -42,7 +44,16 @@ export default class FileWindow extends React.Component {
 	@bind
 	loadImplantFiles(fileList) {
 		console.log('Loading implant data...');
-		// TODO: Implement loading/parsing of analysis file
+		if (fileList.length > 0) {
+			console.log(`Selected ${fileList.length} files...`);
+			console.dir(fileList);
+			fileLoader.loadFiles(Array.from(fileList)).then(arrayBuffers => {
+				implantParserPromise(arrayBuffers[0]).then(result => {
+					let implantFile = carestreamParserStrategy(result);
+					console.log(implantFile);
+				}).catch(err => console.log('Error parsing implants data: ' + err));
+			});
+		}
 	}
 
 }

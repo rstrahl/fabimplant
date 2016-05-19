@@ -1,7 +1,7 @@
 import { default as marchingCubes } from './marchingCubes';
 import { default as buildGeometry } from './buildGeometry';
 import SubdivisionModifier from './LoopSubdivision';
-import { getThresholdPixelArray } from '../dicom/processor';
+import { getThresholdPixelArray } from '../lib/dicom/processor';
 import { getAxisRange, resamplePixelArrays, flattenPixelArrays } from './utils';
 import Volume from './volume';
 import THREE from 'three';

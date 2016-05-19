@@ -2,15 +2,12 @@
 
 ## ISSUE 9: Analysis File Parsing
 
-- Implement analysis file Parsing
-	- Need XML parse
-	- Parse nodes:
-		- FilesManager (need UID attribute value)
-		- Implant
-	- Store values in Implant data objects
-	- Store Implant objects in ImplantFile object
-		- Include UID
-
+- Modify FileWindow to accept a Session data object
+	- Create Session object; initial properties for dicomFile and implantsFile
+	- FileWindow notifies workspace of updates to dicomFile and implantsFile
+	- Repair DICOM file loading sequence; refactor loading into separate components that
+		leverage fileLoader individually; (will eventually become REDUX functions)
+	
 - Add check to compare the SOPInstanceUID with the UID found in the analysis file
 	- If they don't match, throw a warning in FileInputResults
 

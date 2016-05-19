@@ -5,7 +5,7 @@
 'use-strict';
 
 import Promise from 'promise';
-import dicomParser from 'dicom-parser';
+// import dicomParser from 'dicom-parser';
 
 /**
  * Attempts to load a dicom File object and parse it, returning the parsed DataSet.
@@ -18,14 +18,14 @@ export function loadFile(file) {
 		let reader = new FileReader();
 		reader.onload = () => {
 			let arrayBuffer = reader.result;
-			let byteArray = new Uint8Array(arrayBuffer);
-			let dataSet = dicomParser.parseDicom(byteArray);
-			resolve(dataSet);
+			// let byteArray = new Uint8Array(arrayBuffer);
+			// let dataSet = dicomParser.parseDicom(byteArray);
+			resolve(arrayBuffer);
 		};
 		reader.onerror = () => {
 			reject(reader.error);
 		};
-		reader.readAsArrayBuffer(file);
+		reader.readAsText(file);
 	});
 }
 
@@ -38,8 +38,11 @@ export function loadFile(file) {
  */
 export function loadFiles(files) {
 	return Promise.all(files.map( file => loadFile(file) ))
-	.then( dataSets => {
-		return dataSets;
+	// .then( dataSets => {
+	// 	return dataSets;
+	// })
+	.then ( arrayBuffers => {
+		return arrayBuffers;
 	})
 	.catch( err => console.error('Error loading file set: ' + err) );
 }
