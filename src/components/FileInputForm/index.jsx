@@ -53,13 +53,13 @@ export default class FileInputForm extends React.Component {
 		e.stopPropagation();
 		e.preventDefault();
 		this.setState({dragging: false});
-		const fileList = e.dataTransfer.files;
+		const fileList = Array.from(e.dataTransfer.files);
 		this.props.onFileLoaded(fileList);
 	}
 
 	@bind
 	handleFileChange(e) {
-		const fileList = e.target.files;
+		const fileList = Array.from(e.target.files);
 		this.props.onFileLoaded(fileList);
 	}
 

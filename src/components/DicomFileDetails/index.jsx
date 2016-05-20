@@ -14,7 +14,7 @@ export default class DicomFileDetails extends React.Component {
 				<tbody className={styles.body}>
 					<tr>
 						<th>Patient</th>
-						<td>{dicomFile.getPatientName()}</td>
+						<td>{dicomFile.getPatientName().replace(/[^a-zA-Z0-9\,\'\-\.]/g,' ')}</td>
 					</tr>
 					<tr>
 						<th>Scan Date</th>

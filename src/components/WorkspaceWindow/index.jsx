@@ -7,9 +7,7 @@ import ImageWindow from '../ImageWindow';
 import ThreeWindow from '../ThreeWindow';
 import TestWindow from '../TestWindow';
 
-/**
- * A container component that presents a workspace stage, and navigation controls for
- * moving between workspace stages.
+/** A UI component that presents a workspace stage and navigation controls.
  */
 export default class WorkspaceWindow extends React.Component {
 
@@ -18,17 +16,17 @@ export default class WorkspaceWindow extends React.Component {
 		this.state = {
 			index: 0,
 			stageWindows: [FileWindow, ImageWindow, ThreeWindow, TestWindow],
-			dicomFile: null
+			session: props.session
 		};
 	}
 
 	render() {
-		let { stageWindows, index } = this.state;
+		let { stageWindows, index, session } = this.state;
 		let StageWindow = stageWindows[index];
 
 		return (
 			<div className={styles.workspace} onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
-				<StageWindow dicomFile={this.state.dicomFile} handleFileLoaded={this.handleFileLoaded}/>
+				<StageWindow session={session} handleSessionChanged={this.handleSessionChanged}/>
 				<NavigationFooter handleNavigationUpdate={this.handleNavigationDidChange}/>
 			</div>
 		);
@@ -47,14 +45,16 @@ export default class WorkspaceWindow extends React.Component {
 
 	// TODO: Refactor this into the magical redux framework/architecture
 	@bind
-	handleFileLoaded(dicomFile) {
-		this.setState({ dicomFile });
+	handleSessionChanged(session) {
+		this.setState({ session });
 	}
 
 }
 
 WorkspaceWindow.propTypes = {
+	session: React.PropTypes.object
 };
 
 WorkspaceWindow.defaultProps = {
+	session: null
 };

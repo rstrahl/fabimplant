@@ -1,31 +1,41 @@
-// fileLoader.js
-//
-// Provides a lightweight loader for DICOM files via the FileReader API.
-
-'use-strict';
-
 import Promise from 'promise';
-// import dicomParser from 'dicom-parser';
 
-/**
- * Attempts to load a dicom File object and parse it, returning the parsed DataSet.
- *
- * @param  {File} file a File object from a .DCM file
- * @return {Promise<DataSet>} A promise to the DataSet
+/** Sets the mode for the FileReader when loading files.
+ * @type {Object}
  */
-export function loadFile(file) {
-	return new Promise( (resolve, reject) => {
+export const FILE_READER_MODE = {
+	ARRAYBUFFER: 0,
+	TEXT: 1
+};
+
+/** Attempts to read a File object using a FileReader.
+ * By default this method will attempt to read the File as text, unless the
+ * readerMode parameter specifies otherwise.
+ *
+ * @see FILE_READER_MODE
+ * @param  {Object} file       a File object
+ * @param  {number} readerMode the mode used by the FileReader when reading a file
+ * @return {Object}            A Promise to read the File and return an ArrayBuffer
+ */
+export function loadFile(file, readerMode = FILE_READER_MODE.TEXT) {
+	return new Promise((resolve, reject) => {
 		let reader = new FileReader();
 		reader.onload = () => {
 			let arrayBuffer = reader.result;
-			// let byteArray = new Uint8Array(arrayBuffer);
-			// let dataSet = dicomParser.parseDicom(byteArray);
 			resolve(arrayBuffer);
 		};
 		reader.onerror = () => {
 			reject(reader.error);
 		};
-		reader.readAsText(file);
+		switch(readerMode) {
+			case FILE_READER_MODE.ARRAYBUFFER:
+				reader.readAsArrayBuffer(file);
+				break;
+			case FILE_READER_MODE.TEXT:
+			default:
+				reader.readAsText(file);
+				break;
+		}
 	});
 }
 
@@ -33,16 +43,14 @@ export function loadFile(file) {
  * Attempts to load an array of File objects and parse them as DICOM files,
  * returning an Array of DataSet objects.
  *
- * @param  {Array} files an Array of File objects
- * @return {Promise} a Promise returning an Array of DataSets
+ * @param  {Array}  files      an Array of File objects
+ * @param  {number} readerMode the mode used by the FileReader when reading a file
+ * @return {Object}            a Promise returning an Array of DataSets
  */
-export function loadFiles(files) {
-	return Promise.all(files.map( file => loadFile(file) ))
-	// .then( dataSets => {
-	// 	return dataSets;
-	// })
-	.then ( arrayBuffers => {
-		return arrayBuffers;
-	})
-	.catch( err => console.error('Error loading file set: ' + err) );
+export function loadFiles(files, readerMode) {
+	return Promise.all(files.map(file => loadFile(file, readerMode)))
+		.then(arrayBuffers => {
+			return arrayBuffers;
+		})
+		.catch(err => console.error('Error loading file set: ' + err));
 }

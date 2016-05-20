@@ -4,14 +4,6 @@ import FileInputForm from '../FileInputForm';
 import DicomFileDetails from '../DicomFileDetails';
 import AnalysisFileDetails from '../AnalysisFileDetails';
 
-/** Defines the file type being processed by the results UI component.
- * @type {Object}
- */
-export const FILE_TYPE = {
-	DICOM: 1,
-	IMPLANT: 2
-};
-
 /** A UI component that manages the state of a FileInputForm.
  *
  * The state of the component is either no file has been loaded, wherein it

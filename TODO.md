@@ -4,12 +4,17 @@
 
 - Modify FileWindow to accept a Session data object
 	- Create Session object; initial properties for dicomFile and implantsFile
-	- FileWindow notifies workspace of updates to dicomFile and implantsFile
+	- FileWindow notifies workspace of updates to dicomFile and implantsFile from session
 	- Repair DICOM file loading sequence; refactor loading into separate components that
 		leverage fileLoader individually; (will eventually become REDUX functions)
-	
+
 - Add check to compare the SOPInstanceUID with the UID found in the analysis file
 	- If they don't match, throw a warning in FileInputResults
+
+## Side project: Atom tweaking
+
+- Look into autocomplete+ providers like atom-ternjs
+- Configure beautify rules for HTML, CSS, JS/ES6
 
 ## Next Steps
 
