@@ -1,11 +1,12 @@
-@textColor : rgb(192, 192, 192);
+@textColor: rgb(192, 192, 192);
 .implantTable {
 	width: 100%;
-	margin: .5rem auto;
+	margin: 0.5rem auto;
 	color: @textColor;
+	font-size: .75rem;
 	border: 0;
 	& thead {
-		font-size: 1.25rem;
+		font-size: 1rem;
 		text-align: left;
 		& td {
 			padding: 0.25rem 0;
@@ -14,11 +15,15 @@
 	}
 	& tbody {
 		& th {
-			text-align: right;
+			font-size: .75rem;
+			text-align: center;
 			padding: 0.25rem;
+			vertical-align: top;
 		}
 		& td {
-			padding: 0.25rem;
+			padding: 0 0.25rem;
+			text-align: center;
+			vertical-align: top;
 		}
 	}
 }

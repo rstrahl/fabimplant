@@ -14,7 +14,7 @@ import AnalysisFileDetails from '../AnalysisFileDetails';
 export default class FileInputResults extends React.Component {
 
 	render() {
-		const {dicomFile, implantsFile} = this.props;
+		const {dicomFile, implantFile} = this.props;
 		const warnings = null;
 		return (
 			<div className={styles.fileInputResults}>
@@ -33,9 +33,9 @@ export default class FileInputResults extends React.Component {
 						</tr>
 						<tr>
 							<th>Implants</th>
-							<td>{implantsFile === null
+							<td>{implantFile === null
 									? <FileInputForm formId="implants" onFileLoaded={this.props.onLoadImplantFiles}/>
-									: <AnalysisFileDetails implantsFile={implantsFile}/>}</td>
+									: <AnalysisFileDetails implantFile={implantFile}/>}</td>
 							<td>X</td>
 						</tr>
 					</tbody>
@@ -52,13 +52,13 @@ export default class FileInputResults extends React.Component {
 
 FileInputResults.propTypes = {
 	dicomFile: React.PropTypes.object,
-	implantsFile: React.PropTypes.object,
+	implantFile: React.PropTypes.object,
 	onLoadDicomFiles: React.PropTypes.func,
 	onLoadImplantFiles: React.PropTypes.func
 };
 FileInputResults.defaultProps = {
 	dicomFile: null,
-	implantsFile: null,
+	implantFile: null,
 	onLoadDicomFiles: null,
 	onLoadImplantFiles: null
 };

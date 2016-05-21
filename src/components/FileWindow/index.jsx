@@ -76,7 +76,7 @@ export default class FileWindow extends React.Component {
 					let implantFile = carestreamParserStrategy(result);
 					this.handleImplantFileChanged(implantFile);
 				})
-				.catch(err => console.log(`Error parsing implants data: #{err}`));
+				.catch(err => console.log(`Error parsing implants data: ${err}`));
 			})
 			.catch(err => console.log(`Error loading files: ${err}`));
 		}
