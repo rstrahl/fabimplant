@@ -21,8 +21,6 @@ export default class DicomFile {
 	constructor(dataSet, pixelArrays) {
 		this.dataSet = dataSet;
 		this.pixelArrays = pixelArrays;
-		this.windowWidth = 4096;
-		this.windowCenter = 2048;
 	}
 
 	getDicomMetadata() {

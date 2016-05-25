@@ -33,13 +33,14 @@ export default class WorkspaceWindow extends React.Component {
 	}
 
 	@bind
-	handleNavigationDidChange(newIndex) {
-		if (newIndex < 0) {
+	handleNavigationDidChange(delta) {
+		let { index } = this.state;
+		if (index+delta < 0) {
 			this.setState({index: 0});
-		} else if (newIndex >= this.state.stageWindows.length) {
+		} else if (index+delta >= this.state.stageWindows.length) {
 			this.setState({index:this.state.stageWindows.length - 1});
 		} else {
-			this.setState({index: newIndex});
+			this.setState({index: index+delta});
 		}
 	}
 

@@ -13,27 +13,29 @@ export default class ImageWindow extends React.Component {
 
 	constructor(props) {
 		super(props);
+		let { session } = props;
 		this.state = {
 			debugMode: false,
 			imageIndex: 0,
-			windowWidth: 4096,
-			windowCenter: 2048
+			windowWidth: session.windowWidth,
+			windowCenter: session.windowCenter
 		};
 	}
 
 	componentWillUpdate(nextProps, nextState) {
-		let { dicomFile } = this.props;
-		if (dicomFile !== undefined && dicomFile !== null) {
-			dicomFile.windowWidth = nextState.windowWidth;
-			dicomFile.windowCenter = nextState.windowCenter;
+		let { session } = this.props;
+		if (session !== null) {
+			session.windowWidth = nextState.windowWidth;
+			session.windowCenter = nextState.windowCenter;
 		}
 	}
 
 	render() {
-		let { dicomFile } = this.props;
+		let { session } = this.props;
 		let { debugMode, imageIndex, windowCenter, windowWidth } = this.state;
 
-		if (dicomFile === undefined || dicomFile === null) {
+		let dicomFile = session.dicomFile;
+		if (dicomFile === null) {
 			return (
 				<div className={styles.window} id="image-window"></div>
 			);
@@ -77,7 +79,7 @@ export default class ImageWindow extends React.Component {
 
 	@bind
 	handleImageIndexChanged(newIndex) {
-		let { dicomFile } = this.props;
+		let { dicomFile } = this.props.session;
 		if (newIndex < 0) {
 			this.setState({imageIndex: 0});
 		} else if (newIndex >= dicomFile.pixelArrays.length) {
@@ -89,6 +91,7 @@ export default class ImageWindow extends React.Component {
 
 	@bind
 	handleWindowWidthChanged(newWindowWidth) {
+		// TODO: Redux refactor
 		if (newWindowWidth > 1) {
 			this.setState({windowWidth: newWindowWidth});
 		}
@@ -96,6 +99,7 @@ export default class ImageWindow extends React.Component {
 
 	@bind
 	handleWindowCenterChanged(newWindowCenter) {
+		// TODO: Redux refactor
 		this.setState({windowCenter: newWindowCenter});
 	}
 
@@ -119,8 +123,8 @@ export default class ImageWindow extends React.Component {
 }
 
 ImageWindow.propTypes = {
-	dicomFile : React.PropTypes.object
+	session: React.PropTypes.object
 };
 ImageWindow.defaultProps = {
-	dicomFile : null
+	session: null
 };

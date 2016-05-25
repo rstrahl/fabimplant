@@ -92,11 +92,12 @@ export default class ThreeWindow extends React.Component {
 
 	@bind
 	handleRefresh() {
-		// TODO: FLUX refactor
 		// this.renderingStage.clearStage();
-		let { dicomFile } = this.props;
-		if (dicomFile !== undefined && dicomFile !== null) {
-			this.loadMeshForDicom(dicomFile);
+		let { session } = this.props;
+		let { dicomFile } = session;
+		if (dicomFile !== null) {
+			let isolevel = session.windowCenter - Math.ceil(session.windowWidth / 2);
+			this.loadMeshForDicom(dicomFile, isolevel);
 		} else {
 			this.loadMeshForDefault();
 		}
@@ -104,7 +105,7 @@ export default class ThreeWindow extends React.Component {
 
 	@bind
 	handleExportSTL() {
-		// TODO: FLUX refactor
+		// TODO: Redux refactor
 		// TODO: Fix after MeshRenderer implementation
 		// let { volumeMesh } = this.renderingStage;
 		// if (volumeMesh !== undefined) {
@@ -140,17 +141,16 @@ export default class ThreeWindow extends React.Component {
 	}
 
 	@bind
-	loadMeshForDicom(dicomFile) {
-		// TODO: FLUX refactor
-		let isolevel = dicomFile.windowCenter - Math.ceil(dicomFile.windowWidth / 2),
-			factor = 2;
+	loadMeshForDicom(dicomFile, isolevel) {
+		// TODO: Redux refactor
+		let factor = 2;
 		let volume = dicomVolume(dicomFile, factor);
 		this.buildGeometry(volume, isolevel);
 	}
 
 	@bind
 	loadMeshForDefault() {
-		// TODO: FLUX refactor
+		// TODO: Redux refactor
 		let size = 10,
 			isolevel = 4.5,
 			step = 1;
@@ -160,6 +160,7 @@ export default class ThreeWindow extends React.Component {
 
 	@bind
 	buildGeometry(volume, isolevel) {
+		// TODO: Redux refactor
 		let handler = (e) => {
 			this.geometryWorker.removeEventListener('message', handler);
 			this.setState({ geometryData : e.data });
@@ -171,8 +172,8 @@ export default class ThreeWindow extends React.Component {
 }
 
 ThreeWindow.propTypes = {
-	dicomFile : React.PropTypes.object
+	session: React.PropTypes.object
 };
 ThreeWindow.defaultProps = {
-	dicomFile : null
+	session: null
 };

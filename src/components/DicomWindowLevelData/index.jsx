@@ -30,10 +30,10 @@ export default class DicomWindowLevelData extends React.Component {
 						onInput={this.handleRangeChanged}>
 					</BoundedRangeInput>
 					<div className={styles.value}>
-						W: {this.props.windowCenter}
+						W: {center}
 					</div>
 					<div className={styles.value}>
-						C: {this.props.windowWidth}
+						C: {width}
 					</div>
 				</div>
 			</div>
