@@ -1,14 +1,6 @@
 # TODO
 
-## ISSUE 9: Analysis File Parsing
 
-- Add check to compare the SOPInstanceUID with the UID found in the analysis file
-	- If they don't match, throw a warning in FileInputResults
-
-## Side project: Atom tweaking
-
-- Look into autocomplete+ providers like atom-ternjs
-- Configure beautify rules for HTML, CSS, JS/ES6
 
 ## Next Steps
 
