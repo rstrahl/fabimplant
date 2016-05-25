@@ -1,27 +1,6 @@
 # TODO
 
-## UI Work
 
-- Issue #29 (add styling to navigation bar)
-- Issue #38 (stage title/position indicator)
-- Issue #25 (add activity/progress indicators)
-
-## Analysis File Parsing
-
-- Issue #9 (file parser)
-	- Strategy pattern?
-		- Loader for dicom
-		- Loader for Analysis
-			- XML based?
-			- Implementation based on machine?
-			- What if other formats are not XML?
-				- This is an internal implementation detail
-- Add new stage for file-loading;
-	- drop zones for two files?
-		- one drop zone, parse depending on contents?
-	- State for dicom collection
-	- State for analysis file/data
-	- Indicates which state is present?
 
 ## Next Steps
 

@@ -8,7 +8,7 @@ export default class IconButton extends React.Component {
 	render() {
 		let { icon } = this.props;
 		return (
-			<div className={styles.iconButton} onClick={this.handleOnClick}>
+			<div style={this.props.styling} className={styles.iconButton} onClick={this.handleOnClick}>
 				<Icon name={icon} />
 			</div>
 		);
@@ -24,9 +24,11 @@ export default class IconButton extends React.Component {
 
 IconButton.propTypes = {
 	icon: React.PropTypes.string,
+	styling : React.PropTypes.object,
 	onClick: React.PropTypes.func
 };
 IconButton.defaultProps = {
 	icon: '',
+	styling: null,
 	onClick: null
 };

@@ -21,12 +21,22 @@ export default class DicomFile {
 	constructor(dataSet, pixelArrays) {
 		this.dataSet = dataSet;
 		this.pixelArrays = pixelArrays;
-		this.windowWidth = 4096;
-		this.windowCenter = 2048;
 	}
 
 	getDicomMetadata() {
 		return dicomParser.explicitDataSetToJS(this.dataSet);
+	}
+
+	getPatientName() {
+		return this.dataSet.string('x00100010');
+	}
+
+	getAcquisitionDate() {
+		return this.dataSet.string('x00080022');
+	}
+
+	getSOPInstanceUID() {
+		return this.dataSet.string('x00080018');
 	}
 
 	getImageWidth() {
@@ -35,6 +45,10 @@ export default class DicomFile {
 
 	getImageHeight() {
 		return this.dataSet.uint16('x00280010');
+	}
+
+	getPixelSpacing() {
+		return this.dataSet.string('x00280030');
 	}
 
 	getImageSlope() {

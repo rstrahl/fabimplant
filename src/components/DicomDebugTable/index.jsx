@@ -1,8 +1,8 @@
 import React from 'react';
 import styles from './style.less';
 import DicomDebugTableItem from '../DicomDebugTableItem';
-import { dicomDataDictionary } from '../../dicom/dataDictionary';
-import { uids } from '../../dicom/uids';
+import { dicomDataDictionary } from '../../lib/dicom/dataDictionary';
+import { uids } from '../../lib/dicom/uids';
 
 /**
  * A component that presents DICOM metadata in a table structure.
