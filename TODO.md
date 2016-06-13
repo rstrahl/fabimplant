@@ -1,19 +1,22 @@
 # TODO
 
+## Issue 10: Generate implants
 
+- Create geometry from implants
+	- cylinder geometries based on length, radius top/bottom
+- Add meshes from geometry to ThreeJS scene
+- Determine how to apply matrix values
+- Ensure placement of implants is correct
+- Ensure camera controls rotate all objects
+	- Object Group?  Rotate group?
 
-## Next Steps
+### Extra fixes:
 
-Two major design components that need to be implemented
+- Determine how to store as much geometry information in Session as possible
+- Optimize the "re-loading" of the ThreeWindow Scene objects
 
-1. Pub/Sub stores architecture
-	- Lightweight, open-source flux-y style of store that isn't religiously rigid
-	- Pub/Sub design, event-driven, pluggable from the app.js
-	- Drives state change back into UI
+## Future Considerations
 
-2. Analysis File Loading
-	- New File Loader stage window
-		- Two drag-n-drop regions
-		- Two information panes
-		- "Next" moves to image stage
-	- Will be deprecated during electron by "study browser" (file browser component)
+- Can we use LUT to eliminate the Window-Level modification steps?
+	- CS uses LUT ranges, stored in their analysis files
+	- How can we use LUT in the 3d display?
