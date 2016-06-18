@@ -8,8 +8,8 @@ import MeshControl from '../../three/meshControl';
 import { bind } from 'decko';
 import buildGeometry from '../../three/buildGeometry';
 
-const NEAR = -500;
-const FAR = 1000;
+const NEAR = -5000;
+const FAR = 10000;
 const DEFAULT_CAMERA_POSITION = new THREE.Vector3(1, 1, 1);
 const DEFAULT_CAMERA_PROPS = {
 	left : 0,
@@ -54,10 +54,7 @@ export default class MeshRenderer extends React.Component {
 		let camera = new THREE.OrthographicCamera(left, right, top, bottom, near, far);
 		camera.position.set(position.x, position.y, position.z);
 		this.state = {
-			camera,
-			subjectGeometry : null,
-			implantGeometries : [],
-			meshGroup : null
+			camera
 		};
 
 		this.scene = new THREE.Scene();
@@ -102,7 +99,7 @@ export default class MeshRenderer extends React.Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		let { width, height, controlsMode, geometryData, implants } = nextProps;
+		let { width, height, controlsMode } = nextProps;
 
 		if (width !== this.props.width || height !== this.props.height) {
 			this.cleanProjection(width, height);
@@ -112,21 +109,17 @@ export default class MeshRenderer extends React.Component {
 			this.updateControls(controlsMode);
 		}
 
-		const implantGeometries = (implants !== this.props.implants) ? this.buildImplantGeometries(implants) : this.state.implantGeometries;
-		const subjectGeometry = (geometryData !== this.props.geometryData) ? buildGeometry(geometryData) : this.state.subjectGeometry;
+		// const implantGeometries = (implants !== this.props.implants) ? this.buildImplantGeometries(implants) : this.state.implantGeometries;
+		// const subjectGeometry = (geometryData !== this.props.geometryData) ? buildGeometry(geometryData) : this.state.subjectGeometry;
 
-		this.setState({ subjectGeometry, implantGeometries });
+		// this.setState({ subjectGeometry, implantGeometries });
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
-		const { subjectGeometry, implantGeometries } = nextState;
-		const { debugMode } = nextProps;
-		if (subjectGeometry !== this.state.subjectGeometry || implantGeometries !== this.state.implantGeometries || debugMode !== this.props.debugMode) {
-			// this.clearScene();
-			// this.initScene(debugMode);
-			return true;
-		}
-		return false;
+		// const { subjectGeometry, implantGeometries } = nextState;
+		const { implants, geometryData, debugMode } = nextProps;
+		// return (subjectGeometry !== this.state.subjectGeometry || implantGeometries !== this.state.implantGeometries || debugMode !== this.props.debugMode);
+		return (implants !== this.props.implants || geometryData !== this.props.geometryData || debugMode !== this.props.debugMode);
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -161,7 +154,7 @@ export default class MeshRenderer extends React.Component {
 		directionalLight.position.set(0,250,100);
 		this.scene.add(ambientLight);
 		this.scene.add(directionalLight);
-		const meshGroup = this.loadMeshGroup(debugMode);
+		const meshGroup = this.loadMeshGroup();
 		this.scene.add(meshGroup);
 		if (debugMode === true) {
 			this.initSceneDebug();
@@ -174,7 +167,7 @@ export default class MeshRenderer extends React.Component {
 	initSceneDebug() {
 		let axisHelper = new THREE.AxisHelper(FAR/2);
 		this.scene.add(axisHelper);
-		let gridHelper = new THREE.GridHelper(100, 10);
+		let gridHelper = new THREE.GridHelper(500, 10);
 		this.scene.add(gridHelper);
 		this.stats.domElement.style.display = 'block';
 	}
@@ -201,22 +194,30 @@ export default class MeshRenderer extends React.Component {
 		this.stats.domElement.style.display = 'none';
 	}
 
-	@bind
-	buildImplantGeometries(implants) {
-		let implantGeometries = [];
-		for (const implant of implants) {
-			const { topRadius, bottomRadius, height } = implant;
-			const implantGeometry = new THREE.CylinderGeometry(topRadius, bottomRadius, height, DEFAULT_IMPLANT_RADIUS_SEGMENTS);
-			// TODO: set position of implant
-			implantGeometries.Add(implantGeometry);
-		}
-		return implantGeometries;
-	}
+	// @bind
+	// buildImplantGeometries(implants) {
+	// 	let implantGeometries = [];
+	// 	for (const implant of implants) {
+	// 		const { radiusTop, radiusBottom, length, x, y, z } = implant;
+	// 		const implantGeometry = new THREE.CylinderGeometry(radiusTop*10, radiusBottom*10, length*10, DEFAULT_IMPLANT_RADIUS_SEGMENTS);
+	// 		let implantMesh = new THREE.Mesh(
+	// 			implantGeometry,
+	// 			new THREE.MeshPhongMaterial({
+	// 				color : 0x009B9B,
+	// 				shininess : 100
+	// 			})
+	// 		);
+	// 		implantMesh.position.set(x, y, z);
+	// 		implantGeometries.push(implantGeometry);
+	// 	}
+	// 	return implantGeometries;
+	// }
 
 	@bind
-	buildSubjectMesh(geometry) {
+	buildSubjectMesh(geometryData) {
+		const subjectGeometry = buildGeometry(geometryData);
 		let subjectMesh = new THREE.Mesh(
-			geometry,
+			subjectGeometry,
 			new THREE.MeshLambertMaterial({
 				color : 0xF0F0F0,
 				side : THREE.DoubleSide
@@ -226,28 +227,33 @@ export default class MeshRenderer extends React.Component {
 	}
 
 	@bind
-	buildImplantMesh(geometry) {
+	buildImplantMesh(implant) {
+		const { radiusTop, radiusBottom, length, x, y, z } = implant;
+		const implantGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, DEFAULT_IMPLANT_RADIUS_SEGMENTS);
+		// const implantGeometry = new THREE.CylinderGeometry(1.9, 1.4, 11.99, 20);
 		let implantMesh = new THREE.Mesh(
-			geometry,
+			implantGeometry,
 			new THREE.MeshPhongMaterial({
 				color : 0x009B9B,
 				shininess : 100
 			})
 		);
+		implantMesh.position.set(x, y, z);
 		return implantMesh;
 	}
 
 	@bind
-	loadMeshGroup(debugMode) {
-		const { subjectGeometry, implantGeometries } = this.state;
+	loadMeshGroup() {
+		// const { subjectGeometry, implantGeometries } = this.state;
+		const { geometryData, implants } = this.props;
 		const meshGroup = new THREE.Group();
 
-		if (subjectGeometry !== null) {
-			const subjectMesh = this.buildSubjectMesh(subjectGeometry);
+		if (geometryData !== null) {
+			const subjectMesh = this.buildSubjectMesh(geometryData);
 			meshGroup.add(subjectMesh);
 		}
 
-		for (const implant of implantGeometries) {
+		for (const implant of implants) {
 			const implantMesh = this.buildImplantMesh(implant);
 			meshGroup.add(implantMesh);
 		}

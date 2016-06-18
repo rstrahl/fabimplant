@@ -2,13 +2,18 @@
 
 ## Issue 10: Generate implants
 
-- Create geometry from implants
-	- cylinder geometries based on length, radius top/bottom
-- Add meshes from geometry to ThreeJS scene
 - Determine how to apply matrix values
-- Ensure placement of implants is correct
+- Determine how to apply scale to volume
 - Ensure camera controls rotate all objects
 	- Object Group?  Rotate group?
+- For superior performance, lets ditch animation; will mean ditching orbit control?
+
+### Progress
+
+- Implants are being displayed, but position is incorrect.
+	- Likely need to normalize the coordinate space between the generated volume and implant file
+	- Will need to do this before applying the matrix (would be totally fucked looking)
+
 
 ### Extra fixes:
 

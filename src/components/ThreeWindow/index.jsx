@@ -41,12 +41,14 @@ export default class ThreeWindow extends React.Component {
 
 	render() {
 		let { width, height, debugMode, controlsMode, geometryData } = this.state;
+		let { implantFile } = this.props.session;
+		let implants = implantFile !== null ? implantFile.implants : [];
 		let controlsModeString = (controlsMode === CAMERA_CONTROLS_MODE.ORBIT) ? 'Orbit' : 'Model';
 		let debugModeString = (debugMode === true) ? 'On' : 'Off';
 		let vertices, faces = 0;
 		return (
 			<div className={styles.window}>
-				<MeshRenderer width={width} height={height} debugMode={debugMode} controlsMode={controlsMode} geometryData={geometryData} />
+				<MeshRenderer width={width} height={height} debugMode={debugMode} controlsMode={controlsMode} geometryData={geometryData} implants={implants} />
 				<div className={styles.buttonPanel}>
 					<button className={styles.button} type="button"
 						onClick={this.handleExportSTL}>Export</button>

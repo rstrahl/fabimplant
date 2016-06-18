@@ -7,7 +7,7 @@ import styles from './style.less';
 export default class AnalysisFileTableRow extends React.Component {
 
 	render() {
-		let { id, manufacturerName, modelName, length, topRadius, bottomRadius } = this.props.implant;
+		let { id, manufacturerName, modelName, length, radiusTop, radiusBottom } = this.props.implant;
 		return (
 			<tr className={styles.row}>
 				<td>
@@ -20,10 +20,10 @@ export default class AnalysisFileTableRow extends React.Component {
 					{length}
 				</td>
 				<td>
-					{topRadius}
+					{radiusTop}
 				</td>
 				<td>
-					{bottomRadius}
+					{radiusBottom}
 				</td>
 			</tr>
 		);
