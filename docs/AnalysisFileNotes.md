@@ -54,3 +54,14 @@ good way to find all Study collections on a given machine/network.
 		<Point x="100.146" y="100.182" z="5.55611"/>
 	</Canal>
 	```
+### Relevant Data
+
+Within each `<Implant>` tag the following data elements can be used:
+- height (mm)
+- topradius (mm)
+- bottomradius (mm)
+
+There are 16 numeric fields labelled `matN` where N is 0..15.  After trial/error, these fields
+are believed to be a matrix transformation:
+- Values 3, 7, 12 represent the X, Y, Z position coordinates of the implant
+- Values [0..2], [4..6], [8..10] represent the 3x3 matrix values (cols 0, 1, 2 respectively)
