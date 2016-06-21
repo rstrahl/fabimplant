@@ -76,6 +76,7 @@ export function dicomVolume(dicomFile, factor) {
 
 	// Generate a "Volume" from the downsampled data set
 	let volume = flattenPixelArrays(resampledArrays.data, resampledArrays.width, resampledArrays.height);
+	volume.step = 1;
 	return volume;
 }
 
@@ -100,7 +101,7 @@ export function makeVolume(width, height, depth, step, f) {
 			for (let i = 0, x = minX; i < width; ++i, x += step, ++n) {
 				volume[n] = f(x,y,z);
 			}
-	return new Volume(volume, width, height, depth);
+	return new Volume(volume, width, height, depth, step);
 }
 
 /** Creates a Sphere volume.

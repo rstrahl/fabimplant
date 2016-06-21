@@ -167,7 +167,7 @@ export default class MeshRenderer extends React.Component {
 	initSceneDebug() {
 		let axisHelper = new THREE.AxisHelper(FAR/2);
 		this.scene.add(axisHelper);
-		let gridHelper = new THREE.GridHelper(500, 10);
+		let gridHelper = new THREE.GridHelper(500, 50);
 		this.scene.add(gridHelper);
 		this.stats.domElement.style.display = 'block';
 	}

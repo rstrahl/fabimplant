@@ -154,8 +154,8 @@ export default class ThreeWindow extends React.Component {
 	loadMeshForDefault() {
 		// TODO: Redux refactor
 		let size = 10,
-			isolevel = 4.5,
-			step = 1;
+			isolevel = 45,
+			step = 10;
 		let volume = sphereVolume(size, size, size, step);
 		this.buildGeometry(volume, isolevel);
 	}
@@ -168,7 +168,7 @@ export default class ThreeWindow extends React.Component {
 			this.setState({ geometryData : e.data });
 		};
 		this.geometryWorker.addEventListener('message', handler);
-		this.geometryWorker.postMessage({ volume: volume.data, height: volume.height, width: volume.width, depth: volume.depth, step: 1, isolevel});
+		this.geometryWorker.postMessage({ volume: volume.data, height: volume.height, width: volume.width, depth: volume.depth, step: volume.step || 1, isolevel});
 	}
 
 }

@@ -6,9 +6,10 @@
  * @param {number} height the height of the volume
  * @param {number} depth  the depth of the volume
  */
-export default function Volume(data, width, height, depth) {
+export default function Volume(data, width, height, depth, step) {
 	this.data = data;
 	this.width = width;
 	this.height = height;
 	this.depth = depth;
+	this.step = step;
 }
