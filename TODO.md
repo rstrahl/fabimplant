@@ -2,17 +2,22 @@
 
 ## Issue 10: Generate implants
 
-- Determine how to apply matrix values
+- Ensure scale for implants and volume is normalized
 - Determine how to apply scale to volume
+- Determine how to apply matrix values
 - Ensure camera controls rotate all objects
 	- Object Group?  Rotate group?
 - For superior performance, lets ditch animation; will mean ditching orbit control?
 
 ### Progress
 
-- Implants are being displayed, but position is incorrect.
+- Implants are being displayed, but position and/or rotation angle is incorrect
 	- Likely need to normalize the coordinate space between the generated volume and implant file
 	- Will need to do this before applying the matrix (would be totally fucked looking)
+
+- Carestream app sets initial implant position looking at image slices (y-axis = image slice index)
+	- Implant positions appear to be pixel values on image?
+
 
 
 ### Extra fixes:
