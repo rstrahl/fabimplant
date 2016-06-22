@@ -7,6 +7,8 @@ import { dicomVolume, sphereVolume } from '../../three/modeler';
 import GeometryWorker from 'worker!../../three/geometryWorker';
 import Serializer from '../../three/STLSerializer';
 
+const DEFAULT_DOWNSAMPLE_FACTOR = 2;
+
 /**
  * Displays a threejs scene inside a window component.
  */
@@ -19,12 +21,9 @@ export default class ThreeWindow extends React.Component {
 			height : 0,
 			geometryData : null,
 			debugMode : false,
-			factor : 2,
-			subdivision : 0,
+			factor : DEFAULT_DOWNSAMPLE_FACTOR,
 			controlsMode: CAMERA_CONTROLS_MODE.ORBIT
 		};
-		// this.renderingStage = new RenderingStage();
-		this.subdivision = 0;
 		this.volume = null;
 		this.geometryWorker = new GeometryWorker();
 	}
@@ -45,33 +44,19 @@ export default class ThreeWindow extends React.Component {
 		let implants = implantFile !== null ? implantFile.implants : [];
 		let controlsModeString = (controlsMode === CAMERA_CONTROLS_MODE.ORBIT) ? 'Orbit' : 'Model';
 		let debugModeString = (debugMode === true) ? 'On' : 'Off';
-		let vertices, faces = 0;
 		return (
 			<div className={styles.window}>
 				<MeshRenderer width={width} height={height} debugMode={debugMode} controlsMode={controlsMode} geometryData={geometryData} implants={implants} />
 				<div className={styles.buttonPanel}>
 					<button className={styles.button} type="button"
-						onClick={this.handleExportSTL}>Export</button>
+						onClick={this.handleExportSTL}>STL Export</button>
 					<button className={styles.button} type="button"
 						onClick={this.handleRefresh}>Refresh</button>
 					<button className={styles.button} type="button"
 						onClick={this.handleToggleDebug}>Debug {debugModeString}</button>
 					<button className={styles.button} type="button"
-						onClick={this.handleIncreaseSubdivision}>Increase</button>
-					<button className={styles.button} type="button"
-						onClick={this.handleDecreaseSubdivision}>Decrease</button>
-					<button className={styles.button} type="button"
 						onClick={this.handleToggleControlsMode}>{controlsModeString}</button>
-					<button className={styles.button} type="button"
-						onClick={this.handleGeometryWorker}>Worker</button>
 				</div>
-				{ debugMode === true
-					? <div className={styles.debugPanel}>
-						Vertices: {vertices}
-						Faces: {faces}
-						</div>
-					: null
-				}
 			</div>
 		);
 	}
@@ -126,18 +111,6 @@ export default class ThreeWindow extends React.Component {
 	}
 
 	@bind
-	handleIncreaseSubdivision() {
-		this.subdivision += 1;
-		this.handleRefresh();
-	}
-
-	@bind
-	handleDecreaseSubdivision() {
-		this.subdivision -= 1;
-		this.handleRefresh();
-	}
-
-	@bind
 	handleToggleDebug() {
 		this.setState({ debugMode: !this.state.debugMode });
 	}
@@ -145,7 +118,7 @@ export default class ThreeWindow extends React.Component {
 	@bind
 	loadMeshForDicom(dicomFile, isolevel) {
 		// TODO: Redux refactor
-		let factor = 2;
+		let { factor } = this.state;
 		let volume = dicomVolume(dicomFile, factor);
 		this.buildGeometry(volume, isolevel);
 	}

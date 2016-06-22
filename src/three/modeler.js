@@ -76,7 +76,9 @@ export function dicomVolume(dicomFile, factor) {
 
 	// Generate a "Volume" from the downsampled data set
 	let volume = flattenPixelArrays(resampledArrays.data, resampledArrays.width, resampledArrays.height);
-	volume.step = 1;
+
+	// Downsampling also impacts image size - account for that by adjusting the step size
+	volume.step = factor;
 	return volume;
 }
 
