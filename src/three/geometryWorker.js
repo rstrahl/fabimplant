@@ -2,7 +2,8 @@
 //
 // A Worker that coordinates the Marching Cubes algorithm.
 
-import { default as marchingCubes, flattenTriangles } from './marchingCubes';
+// TODO: Rename to marchingCubesWorker
+import marchingCubes, { flattenTriangles } from './marchingCubes';
 
 addEventListener('message', (e) => {
 	let { volume, width, height, depth, step, isolevel } = e.data;

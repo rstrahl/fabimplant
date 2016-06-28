@@ -1,16 +1,6 @@
-// marchingCubes.js
-//
-// Creates a 3d geometry from volumetric data.
-//
-// Original algorithm by Paul Bourke:
-// http://paulbourke.net/geometry/polygonise/
-
-'use-strict';
-
-import { getAxisRange } from './utils';
-
 /** Generates an Isosurface from the provided volumetric data.
  *
+ * Original algorithm by Paul Bourke: http://paulbourke.net/geometry/polygonise/
  * This implementation differs from Paul Bourke's in that Bourke's
  * cell processing moves in xzy order, this moves in xyz order.
  *
@@ -223,9 +213,9 @@ export function flattenTriangles(triangles) {
  * @return {Array}         an array of objects {x,y,z}
  */
 export function generateGridCellPoints(width, height, depth, step) {
-	let minZ = getAxisRange(depth, step)[0],
-		minY = getAxisRange(height, step)[0],
-		minX = getAxisRange(width, step)[0],
+	let minZ = 0,
+		minY = 0,
+		minX = 0,
 		vertices = [],
 		v = 0;
 	for (let k = 0, z = minZ; k < depth; k++, z += step) {

@@ -108,17 +108,10 @@ export default class MeshRenderer extends React.Component {
 		if (controlsMode !== this.props.controlsMode) {
 			this.updateControls(controlsMode);
 		}
-
-		// const implantGeometries = (implants !== this.props.implants) ? this.buildImplantGeometries(implants) : this.state.implantGeometries;
-		// const subjectGeometry = (geometryData !== this.props.geometryData) ? buildGeometry(geometryData) : this.state.subjectGeometry;
-
-		// this.setState({ subjectGeometry, implantGeometries });
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
-		// const { subjectGeometry, implantGeometries } = nextState;
 		const { implants, geometryData, debugMode } = nextProps;
-		// return (subjectGeometry !== this.state.subjectGeometry || implantGeometries !== this.state.implantGeometries || debugMode !== this.props.debugMode);
 		return (implants !== this.props.implants || geometryData !== this.props.geometryData || debugMode !== this.props.debugMode);
 	}
 
@@ -215,12 +208,17 @@ export default class MeshRenderer extends React.Component {
 
 	@bind
 	buildSubjectMesh(geometryData) {
+		// TODO: Redux refactor
 		const subjectGeometry = buildGeometry(geometryData);
+		const scale = 267/134; // TODO: Hardcoded test values
+		subjectGeometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3(scale, scale, scale)));
 		let subjectMesh = new THREE.Mesh(
 			subjectGeometry,
 			new THREE.MeshLambertMaterial({
 				color : 0xF0F0F0,
-				side : THREE.DoubleSide
+				side : THREE.DoubleSide,
+				transparent : true,
+				opacity : 0.6
 			})
 		);
 		return subjectMesh;
@@ -228,9 +226,12 @@ export default class MeshRenderer extends React.Component {
 
 	@bind
 	buildImplantMesh(implant) {
-		const { radiusTop, radiusBottom, length, x, y, z } = implant;
+		// TODO: Redux refactor
+		const { radiusTop, radiusBottom, length, matrix } = implant;
 		const implantGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, DEFAULT_IMPLANT_RADIUS_SEGMENTS);
-		// const implantGeometry = new THREE.CylinderGeometry(1.9, 1.4, 11.99, 20);
+		// const implantGeometry = new THREE.SphereGeometry(radiusTop); // Test Object
+		implantGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+		implantGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-length / 2));
 		let implantMesh = new THREE.Mesh(
 			implantGeometry,
 			new THREE.MeshPhongMaterial({
@@ -238,19 +239,24 @@ export default class MeshRenderer extends React.Component {
 				shininess : 100
 			})
 		);
-		implantMesh.position.set(x, y, z);
+		const implantMatrix = new THREE.Matrix4();
+		implantMatrix.set(...matrix);
+		implantMesh.geometry.applyMatrix(implantMatrix);
 		return implantMesh;
 	}
 
 	@bind
 	loadMeshGroup() {
-		// const { subjectGeometry, implantGeometries } = this.state;
+		// TODO: Redux refactor
 		const { geometryData, implants } = this.props;
 		const meshGroup = new THREE.Group();
 
 		if (geometryData !== null) {
 			const subjectMesh = this.buildSubjectMesh(geometryData);
 			meshGroup.add(subjectMesh);
+			const center = this.getCenter(subjectMesh.geometry);
+			const translation = new THREE.Matrix4().makeTranslation(-center.x, -center.y, -center.z);
+			meshGroup.applyMatrix(translation);
 		}
 
 		for (const implant of implants) {
@@ -263,6 +269,7 @@ export default class MeshRenderer extends React.Component {
 
 	@bind
 	loadWireframeMeshes(meshes) {
+		// TODO: Redux refactor
 		let wireframes = [];
 		for (const mesh of meshes) {
 			let wireframeHelper = new THREE.WireframeHelper(mesh, 0x00AA00);
@@ -294,6 +301,17 @@ export default class MeshRenderer extends React.Component {
 			this.orbitControls.enabled = true;
 			this.controls = this.orbitControls;
 		}
+	}
+
+	@bind
+	getCenter(geometry) {
+		// TODO: Redux refactor
+		geometry.computeBoundingBox();
+		const center = new THREE.Vector3();
+		center.x = (geometry.boundingBox.min.x + geometry.boundingBox.max.x) / 2;
+		center.y = (geometry.boundingBox.min.y + geometry.boundingBox.max.y) / 2;
+		center.z = (geometry.boundingBox.min.z + geometry.boundingBox.max.z) / 2;
+		return center;
 	}
 
 }

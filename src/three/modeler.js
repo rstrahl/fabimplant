@@ -6,6 +6,7 @@ import { getAxisRange, resamplePixelArrays, flattenPixelArrays } from './utils';
 import Volume from './volume';
 import THREE from 'three';
 
+// TODO: DEPRECATED - Remove
 /** Generates a Mesh from a given Volume.
  *
  * @param  {Object} volume   a Volume object
@@ -14,37 +15,37 @@ import THREE from 'three';
  * @return {Object}          a THREE.Mesh object
  */
 export default function(volume, step, isolevel, subdivision) {
-	console.profile("marchingCubes");
-	let triangles = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, isolevel);
-	console.profileEnd();
-	if (triangles.length > 0) {
-		console.profile("buildGeometry");
-		// Build geometry
-		let geometry = buildGeometry(triangles);
-		console.profileEnd();
-
-		// Perform surface subdivision (optional)
-		// Also - can this be within the buildGeometry script???
-		if (subdivision !== undefined && subdivision > 0) {
-			let modifier = new SubdivisionModifier(subdivision);
-			modifier.modify(geometry);
-		}
-
-		console.profile("Mesh");
-		// Build mesh
-		let volumeMesh = new THREE.Mesh(
-			geometry,
-			new THREE.MeshLambertMaterial({
-				color : 0xF0F0F0,
-				side : THREE.DoubleSide
-			})
-		);
-		console.profileEnd();
-		return volumeMesh;
-	}
-
-	console.warn("No triangles generated from volume");
-	return undefined;
+	// console.profile("marchingCubes");
+	// let triangles = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, isolevel);
+	// console.profileEnd();
+	// if (triangles.length > 0) {
+	// 	console.profile("buildGeometry");
+	// 	// Build geometry
+	// 	let geometry = buildGeometry(triangles);
+	// 	console.profileEnd();
+	//
+	// 	// Perform surface subdivision (optional)
+	// 	// Also - can this be within the buildGeometry script???
+	// 	if (subdivision !== undefined && subdivision > 0) {
+	// 		let modifier = new SubdivisionModifier(subdivision);
+	// 		modifier.modify(geometry);
+	// 	}
+	//
+	// 	console.profile("Mesh");
+	// 	// Build mesh
+	// 	let volumeMesh = new THREE.Mesh(
+	// 		geometry,
+	// 		new THREE.MeshLambertMaterial({
+	// 			color : 0xF0F0F0,
+	// 			side : THREE.DoubleSide
+	// 		})
+	// 	);
+	// 	console.profileEnd();
+	// 	return volumeMesh;
+	// }
+	//
+	// console.warn("No triangles generated from volume");
+	// return undefined;
 }
 
 /** Creates a Volume object from a DicomFile.
@@ -78,10 +79,11 @@ export function dicomVolume(dicomFile, factor) {
 	let volume = flattenPixelArrays(resampledArrays.data, resampledArrays.width, resampledArrays.height);
 
 	// Downsampling also impacts image size - account for that by adjusting the step size
-	volume.step = factor;
+	// volume.step = factor;
 	return volume;
 }
 
+// TODO: Rename to functionVolume?
 /** Creates a Volume from a function.
  *
  * @param  {number}   width  the width of the volume in units
