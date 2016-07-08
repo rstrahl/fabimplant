@@ -11,9 +11,12 @@
 ### Progress
 
 1. Normalize coordinate space between Volume and Implants
-	- Update modeling to generate ranges that are not pre-translated and verify results
-	- Apply Matrix to Implant object instance and verify results
-	- Perform translation on mesh group to center of scene based on Volume center and verify results
+	- Scaling to restore subject to original sizing should happen at the geometry level
+	- Implant positions still appear to be off slightly - why???
+		- Carestream validation:
+			- What is the cartesian origin?
+			- Is the implant matrix based on the center of the implant geometry?
+	- Implant sizes still appear to be off significantly - why???
 
 ### Extra fixes:
 
