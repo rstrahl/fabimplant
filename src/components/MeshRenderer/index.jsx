@@ -231,7 +231,10 @@ export default class MeshRenderer extends React.Component {
 		const implantGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, DEFAULT_IMPLANT_RADIUS_SEGMENTS);
 		// const implantGeometry = new THREE.SphereGeometry(radiusTop); // Test Object
 		implantGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(Math.PI / 2));
-		implantGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-length / 2));
+		implantGeometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3(5, 5, 5))); // TODO: Hardcoded test values
+		const implantMatrix = new THREE.Matrix4();
+		implantMatrix.set(...matrix);
+		implantGeometry.applyMatrix(implantMatrix);
 		let implantMesh = new THREE.Mesh(
 			implantGeometry,
 			new THREE.MeshPhongMaterial({
@@ -239,9 +242,6 @@ export default class MeshRenderer extends React.Component {
 				shininess : 100
 			})
 		);
-		const implantMatrix = new THREE.Matrix4();
-		implantMatrix.set(...matrix);
-		implantMesh.geometry.applyMatrix(implantMatrix);
 		return implantMesh;
 	}
 
