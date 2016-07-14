@@ -8,9 +8,9 @@ import MeshControl from '../../three/meshControl';
 import { bind } from 'decko';
 import buildGeometry from '../../three/buildGeometry';
 
-const NEAR = -500;
-const FAR = 1000;
-const DEFAULT_CAMERA_POSITION = new THREE.Vector3(0, 25, 100);
+const NEAR = -5000;
+const FAR = 10000;
+const DEFAULT_CAMERA_POSITION = new THREE.Vector3(1, 1, 1);
 const DEFAULT_CAMERA_PROPS = {
 	left : 0,
 	right : 0,
@@ -21,6 +21,7 @@ const DEFAULT_CAMERA_PROPS = {
 	zoom : 1.0,
 	position : DEFAULT_CAMERA_POSITION
 };
+const DEFAULT_IMPLANT_RADIUS_SEGMENTS = 20;
 
 /**
  * Defines the possible modes for interactive manipulating the viewing perspective
@@ -53,8 +54,7 @@ export default class MeshRenderer extends React.Component {
 		let camera = new THREE.OrthographicCamera(left, right, top, bottom, near, far);
 		camera.position.set(position.x, position.y, position.z);
 		this.state = {
-			camera,
-			mesh : null
+			camera
 		};
 
 		this.scene = new THREE.Scene();
@@ -65,9 +65,9 @@ export default class MeshRenderer extends React.Component {
 		let OrbitControls = createOrbitControls(THREE);
 		this.orbitControls = new OrbitControls(camera, this.renderer.domElement);
 		this.meshControls = new MeshControl((transform) => {
-			let { mesh } = this.state;
-			mesh.rotation.x = Math.min(Math.max(mesh.rotation.x + transform.rotation.x, -Math.PI/2), Math.PI/2);
-			mesh.rotation.y = Math.min(Math.max(mesh.rotation.y + transform.rotation.y, -Math.PI), Math.PI);
+			let { meshGroup } = this.state;
+			meshGroup.rotation.x = Math.min(Math.max(meshGroup.rotation.x + transform.rotation.x, -Math.PI/2), Math.PI/2);
+			meshGroup.rotation.y = Math.min(Math.max(meshGroup.rotation.y + transform.rotation.y, -Math.PI), Math.PI);
 		});
 
 		this.stats = new Stats();
@@ -86,8 +86,8 @@ export default class MeshRenderer extends React.Component {
 		let { debugMode, controlsMode } = this.props;
 		findDOMNode(this).appendChild(this.renderer.domElement);
 		findDOMNode(this).appendChild(this.stats.domElement);
-		this.initScene(debugMode);
 		this.updateControls(controlsMode);
+		this.initScene(debugMode);
 		this.animate();
 	}
 
@@ -99,32 +99,29 @@ export default class MeshRenderer extends React.Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		let { width, height, debugMode, controlsMode, geometryData } = nextProps;
+		let { width, height, controlsMode } = nextProps;
 
 		if (width !== this.props.width || height !== this.props.height) {
 			this.cleanProjection(width, height);
 		}
 
-		if (debugMode !== this.props.debugMode) {
-			this.updateDebugging(debugMode);
-		}
-
 		if (controlsMode !== this.props.controlsMode) {
 			this.updateControls(controlsMode);
-		}
-
-		if (geometryData !== this.props.geometryData) {
-			let mesh = this.buildMesh(geometryData);
-			this.setState({ mesh });
 		}
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
-		if (nextState.mesh !== this.state.mesh) {
-			this.removeMesh();
-			this.loadMesh(nextState.mesh, nextProps.debugMode);
-		}
-		return false;
+		const { implants, geometryData, debugMode } = nextProps;
+		return (implants !== this.props.implants || geometryData !== this.props.geometryData || debugMode !== this.props.debugMode);
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		this.cancelAnimation();
+		this.clearScene();
+		findDOMNode(this).appendChild(this.renderer.domElement);
+		findDOMNode(this).appendChild(this.stats.domElement);
+		this.initScene(this.props.debugMode);
+		this.animate();
 	}
 
 	@bind
@@ -150,11 +147,12 @@ export default class MeshRenderer extends React.Component {
 		directionalLight.position.set(0,250,100);
 		this.scene.add(ambientLight);
 		this.scene.add(directionalLight);
+		const meshGroup = this.loadMeshGroup();
+		this.scene.add(meshGroup);
 		if (debugMode === true) {
 			this.initSceneDebug();
-		}
-		if (this.state.mesh !== null) {
-			this.loadMesh(this.state.mesh, debugMode);
+			const wireframes = this.loadWireframeMeshes(meshGroup.children);
+			this.scene.add(...wireframes);
 		}
 	}
 
@@ -162,7 +160,7 @@ export default class MeshRenderer extends React.Component {
 	initSceneDebug() {
 		let axisHelper = new THREE.AxisHelper(FAR/2);
 		this.scene.add(axisHelper);
-		let gridHelper = new THREE.GridHelper(100, 10);
+		let gridHelper = new THREE.GridHelper(500, 50);
 		this.scene.add(gridHelper);
 		this.stats.domElement.style.display = 'block';
 	}
@@ -189,34 +187,95 @@ export default class MeshRenderer extends React.Component {
 		this.stats.domElement.style.display = 'none';
 	}
 
+	// @bind
+	// buildImplantGeometries(implants) {
+	// 	let implantGeometries = [];
+	// 	for (const implant of implants) {
+	// 		const { radiusTop, radiusBottom, length, x, y, z } = implant;
+	// 		const implantGeometry = new THREE.CylinderGeometry(radiusTop*10, radiusBottom*10, length*10, DEFAULT_IMPLANT_RADIUS_SEGMENTS);
+	// 		let implantMesh = new THREE.Mesh(
+	// 			implantGeometry,
+	// 			new THREE.MeshPhongMaterial({
+	// 				color : 0x009B9B,
+	// 				shininess : 100
+	// 			})
+	// 		);
+	// 		implantMesh.position.set(x, y, z);
+	// 		implantGeometries.push(implantGeometry);
+	// 	}
+	// 	return implantGeometries;
+	// }
+
 	@bind
-	buildMesh(geometryData) {
-		let geometry = buildGeometry(geometryData);
-		let mesh = new THREE.Mesh(
-			geometry,
+	buildSubjectMesh(geometryData) {
+		// TODO: Redux refactor
+		const subjectGeometry = buildGeometry(geometryData);
+		const scale = 267/134; // TODO: Hardcoded test values
+		subjectGeometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3(scale, scale, scale)));
+		let subjectMesh = new THREE.Mesh(
+			subjectGeometry,
 			new THREE.MeshLambertMaterial({
 				color : 0xF0F0F0,
-				side : THREE.DoubleSide
+				side : THREE.DoubleSide,
+				transparent : true,
+				opacity : 0.6
 			})
 		);
-		return mesh;
+		return subjectMesh;
 	}
 
 	@bind
-	removeMesh() {
-		let { mesh } = this.state;
-		if (mesh !== null) {
-			this.scene.remove(mesh);
+	buildImplantMesh(implant) {
+		// TODO: Redux refactor
+		const { radiusTop, radiusBottom, length, matrix } = implant;
+		const implantGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, DEFAULT_IMPLANT_RADIUS_SEGMENTS);
+		// const implantGeometry = new THREE.SphereGeometry(radiusTop); // Test Object
+		implantGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+		implantGeometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3(5, 5, 5))); // TODO: Hardcoded test values
+		const implantMatrix = new THREE.Matrix4();
+		implantMatrix.set(...matrix);
+		implantGeometry.applyMatrix(implantMatrix);
+		let implantMesh = new THREE.Mesh(
+			implantGeometry,
+			new THREE.MeshPhongMaterial({
+				color : 0x009B9B,
+				shininess : 100
+			})
+		);
+		return implantMesh;
+	}
+
+	@bind
+	loadMeshGroup() {
+		// TODO: Redux refactor
+		const { geometryData, implants } = this.props;
+		const meshGroup = new THREE.Group();
+
+		if (geometryData !== null) {
+			const subjectMesh = this.buildSubjectMesh(geometryData);
+			meshGroup.add(subjectMesh);
+			const center = this.getCenter(subjectMesh.geometry);
+			const translation = new THREE.Matrix4().makeTranslation(-center.x, -center.y, -center.z);
+			meshGroup.applyMatrix(translation);
 		}
+
+		for (const implant of implants) {
+			const implantMesh = this.buildImplantMesh(implant);
+			meshGroup.add(implantMesh);
+		}
+
+		return meshGroup;
 	}
 
 	@bind
-	loadMesh(mesh, debugMode) {
-		this.scene.add(mesh);
-		if (debugMode === true) {
+	loadWireframeMeshes(meshes) {
+		// TODO: Redux refactor
+		let wireframes = [];
+		for (const mesh of meshes) {
 			let wireframeHelper = new THREE.WireframeHelper(mesh, 0x00AA00);
-			this.scene.add(wireframeHelper);
+			wireframes.push(wireframeHelper);
 		}
+		return wireframes;
 	}
 
 	@bind
@@ -245,9 +304,14 @@ export default class MeshRenderer extends React.Component {
 	}
 
 	@bind
-	updateDebugging(debugMode) {
-		this.clearScene();
-		this.initScene(debugMode);
+	getCenter(geometry) {
+		// TODO: Redux refactor
+		geometry.computeBoundingBox();
+		const center = new THREE.Vector3();
+		center.x = (geometry.boundingBox.min.x + geometry.boundingBox.max.x) / 2;
+		center.y = (geometry.boundingBox.min.y + geometry.boundingBox.max.y) / 2;
+		center.z = (geometry.boundingBox.min.z + geometry.boundingBox.max.z) / 2;
+		return center;
 	}
 
 }
@@ -260,12 +324,14 @@ MeshRenderer.propTypes = {
 	geometryData : React.PropTypes.oneOfType([
 		React.PropTypes.instanceOf(Float32Array),
 		React.PropTypes.instanceOf(Float64Array)
-	])
+	]),
+	implants : React.PropTypes.array
 };
 MeshRenderer.defaultProps = {
 	width : 0,
 	height : 0,
 	debugMode : false,
 	controlsMode : CAMERA_CONTROLS_MODE.ORBIT,
-	geometryData : null
+	geometryData : null,
+	implants : []
 };

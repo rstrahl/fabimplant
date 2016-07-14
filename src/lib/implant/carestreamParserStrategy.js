@@ -19,9 +19,24 @@ export function carestreamImplant(data, id) {
 	i.id = id;
 	i.manufacturerName = manufacturername;
 	i.modelName = modelname;
-	i.length = height;
-	i.topRadius = topradius;
-	i.bottomRadius = bottomradius;
-	i.matrix = [data.$.mat0, data.$.mat1, data.$.mat2, data.$.mat3, data.$.mat4, data.$.mat5, data.$.mat6, data.$.mat7, data.$.mat8, data.$.mat9, data.$.mat10, data.$.mat11, data.$.mat12, data.$.mat13, data.$.mat14, data.$.mat15];
+	i.length = parseFloat(height);
+	i.radiusTop = parseFloat(topradius);
+	i.radiusBottom = parseFloat(bottomradius);
+	i.matrix = [
+		parseFloat(data.$.mat0), parseFloat(data.$.mat1), parseFloat(data.$.mat2), parseFloat(data.$.mat3),
+		parseFloat(data.$.mat4), parseFloat(data.$.mat5), parseFloat(data.$.mat6), parseFloat(data.$.mat7),
+		parseFloat(data.$.mat8), parseFloat(data.$.mat9), parseFloat(data.$.mat10), parseFloat(data.$.mat11),
+		parseFloat(data.$.mat12), parseFloat(data.$.mat13), parseFloat(data.$.mat14), parseFloat(data.$.mat15)
+	];
+	let x = parseFloat(data.$.mat3),
+		y = parseFloat(data.$.mat7),
+		z = parseFloat(data.$.mat11);
+	// Normalize from 2d coordinate space into 3d
+	// i.x = x - (x / 2);
+	// i.y = y - (y / 2);
+	// i.z = z - (z / 2);
+	i.x = x;
+	i.y = y;
+	i.z = z;
 	return i;
 }

@@ -3,11 +3,16 @@
 ## Overview
 
 CT scanners ship with software for viewing their output imagery, and that software
-typically adds a bundling mechanism to the files.  
+typically adds a bundling mechanism to the files.  The initial prototype for
+FabImplant relies on a Kodak CT, which ships with a software package called
+CareStream.
 
-## Carestream
+## Implant Data
+
+CareStream appears to rely on two main files during a user's planning session.
 
 ### FilesManager.xml
+
 - Represents the file "manifest", containing the filenames of all associated data files
 ```xml
 <FilesManager Version="1.0" Uid="1.2.250.1.90.1.3734310698.20150820204921.1312.6419">
@@ -20,7 +25,7 @@ typically adds a bundling mechanism to the files.
 - All DICOM filenames associated with the Study are listed in the `Files` element.
 - The Analysis file itself is listed in the `Files` collection.
 
-Conclusions:
+**Notes:**
 - Browser cannot "open" files from directory but node can, and this would be a
 good way to find all Study collections on a given machine/network.
 	1. Search for all FilesManager.xml
@@ -54,3 +59,17 @@ good way to find all Study collections on a given machine/network.
 		<Point x="100.146" y="100.182" z="5.55611"/>
 	</Canal>
 	```
+
+**Notes:**
+- Within each `<Implant>` tag the following data elements can be used:
+    - `height` indicates the length/height of the implant in millimeters
+    - `topradius` indicates the radius of the top of the implant in millimeters
+    - `bottomradius` indicates the radius of the bottom of the implant in millimeters
+- The `<Implant>` entries within the analysis file contain a series of values that
+appear to be a serialized `Matrix4` data structure. After testing via changing
+the position of implants within Carestream, it was observed that indeed in the
+values in fields `mat3`, `mat7`, `mat11` are updated to correspond to changes
+along the x, y, z axis respectively.
+- It would be highly preferable if we could simply utilize the matrix values
+directly in a `Matrix4` data structure and applied directly to `THREE.Object3d`
+instances for each Implant.

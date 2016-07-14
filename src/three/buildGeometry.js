@@ -53,6 +53,7 @@ export default function(vCoords) {
 	console.time('mergeVertices');
 	console.log("Vertices merged: " + geometry.mergeVertices());
 	geometry.computeFaceNormals();
+	geometry.computeVertexNormals();
 	console.timeEnd('mergeVertices');
 	return geometry;
 }
