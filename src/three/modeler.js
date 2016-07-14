@@ -1,52 +1,6 @@
-import { default as marchingCubes } from './marchingCubes';
-import { default as buildGeometry } from './buildGeometry';
-import SubdivisionModifier from './LoopSubdivision';
-import { getThresholdPixelArray } from '../lib/dicom/processor';
-import { getAxisRange, resamplePixelArrays, flattenPixelArrays } from './utils';
+// import { getThresholdPixelArray } from '../lib/dicom/processor';
+import { getAxisRange, resamplePixelArrays, padPixelArrays, flattenPixelArrays } from './utils';
 import Volume from './volume';
-import THREE from 'three';
-
-// TODO: DEPRECATED - Remove
-/** Generates a Mesh from a given Volume.
- *
- * @param  {Object} volume   a Volume object
- * @param  {number} step     the distance between units scaffold used during surface extraction
- * @param  {number} isolevel the isolevel (threshold) used during surface extraction
- * @return {Object}          a THREE.Mesh object
- */
-export default function(volume, step, isolevel, subdivision) {
-	// console.profile("marchingCubes");
-	// let triangles = marchingCubes(volume.width, volume.height, volume.depth, step, volume.data, isolevel);
-	// console.profileEnd();
-	// if (triangles.length > 0) {
-	// 	console.profile("buildGeometry");
-	// 	// Build geometry
-	// 	let geometry = buildGeometry(triangles);
-	// 	console.profileEnd();
-	//
-	// 	// Perform surface subdivision (optional)
-	// 	// Also - can this be within the buildGeometry script???
-	// 	if (subdivision !== undefined && subdivision > 0) {
-	// 		let modifier = new SubdivisionModifier(subdivision);
-	// 		modifier.modify(geometry);
-	// 	}
-	//
-	// 	console.profile("Mesh");
-	// 	// Build mesh
-	// 	let volumeMesh = new THREE.Mesh(
-	// 		geometry,
-	// 		new THREE.MeshLambertMaterial({
-	// 			color : 0xF0F0F0,
-	// 			side : THREE.DoubleSide
-	// 		})
-	// 	);
-	// 	console.profileEnd();
-	// 	return volumeMesh;
-	// }
-	//
-	// console.warn("No triangles generated from volume");
-	// return undefined;
-}
 
 /** Creates a Volume object from a DicomFile.
  *
@@ -63,6 +17,7 @@ export function dicomVolume(dicomFile, factor) {
 
 	// Converts from TypedArray to Array
 	// We only do this because resampling impl requires Array not TypedArray
+	// TODO: PERFORMANCE OPTIMIZATION: use strictly TypedArrays
 	let pixelArrays = [];
 	dicomFile.pixelArrays.forEach( (value) => {
 		pixelArrays.push(Array.from(value));
@@ -75,8 +30,10 @@ export function dicomVolume(dicomFile, factor) {
 		? resamplePixelArrays(pixelArrays, width, height, factor)
 		: { data: pixelArrays, width, height };
 
+	let paddedResampledArrays = padPixelArrays(resampledArrays.data, resampledArrays.width, resampledArrays.height);
+
 	// Generate a "Volume" from the downsampled data set
-	let volume = flattenPixelArrays(resampledArrays.data, resampledArrays.width, resampledArrays.height);
+	let volume = flattenPixelArrays(paddedResampledArrays.data, paddedResampledArrays.width, paddedResampledArrays.height);
 
 	// Downsampling also impacts image size - account for that by adjusting the step size
 	// volume.step = factor;

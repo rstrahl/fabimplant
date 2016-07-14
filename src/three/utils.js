@@ -25,10 +25,66 @@ export function flattenPixelArrays(pixelArrays, width, height) {
 	let flatArray = [];
 
 	// TODO: Optimization required
+	console.time('flattenPixelArrays');
 	for (let pixelArray of pixelArrays) {
 		flatArray = flatArray.concat(...pixelArray);
 	}
+	console.timeEnd('flattenPixelArrays');
 	return new Volume(flatArray, width, height, pixelArrays.length);
+}
+
+/** Adds a single pixel to each side of the pixel array for a single image.
+ *
+ * @param  {Array}  pixelArrays An Array of pixel data arrays
+ * @param  {number} width       The expected width of each pixel data array
+ * @param  {number} height      The expected height of each pixel data array
+ * @return {Array}              An Array of pixel data arrays
+ */
+export function padPixelArrays(pixelArrays, width, height) {
+	console.time('padPixelArrays');
+	let paddedArrays = [],
+		paddedWidth = width + 2,
+		paddedHeight = height + 2;
+	paddedArrays.length = pixelArrays.length + 2;
+	for (let i = 0, j = 0; i < paddedArrays.length; i += 1) {
+		paddedArrays[i] = (i === 0 || i === paddedArrays.length - 1)
+			? emptyPixelArray(paddedWidth, paddedHeight)
+			: padPixelArray(pixelArrays[j++], width, height);
+	}
+	console.timeEnd('padPixelArrays');
+	return { data: paddedArrays, width: paddedWidth, height: paddedHeight };
+}
+
+/** Adds a single pixel to each side of the pixel array for a single image.
+ *
+ * @param  {Array}  pixelArray A pixel data array
+ * @param  {number} width      The expected width of the pixel data array
+ * @param  {number} height     The expected height of the pixel data array
+ * @return {Array}             A pixel data array
+ */
+export function padPixelArray(pixelArray, width, height) {
+	let paddedWidth = width+2,
+		paddedHeight = height+2,
+		paddedPixelArray = emptyPixelArray(paddedWidth, paddedHeight);
+	for (let i = 0, j = paddedWidth+1; i < pixelArray.length; j += 1) {
+		paddedPixelArray[j] =  (j % paddedWidth === 0 || j % paddedWidth === paddedWidth-1)
+			? 0
+			: pixelArray[i++];
+	}
+	return paddedPixelArray;
+}
+
+/** Creates a zero-filled Array from the given width and height.
+ *
+ * @param  {number} width  The width of the pixel array
+ * @param  {number} height The height of the pixel array
+ * @return {Array}         A zero-filled Array
+ */
+export function emptyPixelArray(width, height) {
+	let emptyArray = [];
+	emptyArray.length = width * height;
+	emptyArray.fill(0);
+	return emptyArray;
 }
 
 /** Resamples an array of pixel arrays down by a given factor.
@@ -42,6 +98,7 @@ export function flattenPixelArrays(pixelArrays, width, height) {
  * @return {Array}              an array of arrays
  */
 export function resamplePixelArrays(pixelArrays, width, height, factor) {
+	console.time('resamplePixelArrays');
 	let arrays = [],
 		newWidth,
 		newHeight;
@@ -51,6 +108,7 @@ export function resamplePixelArrays(pixelArrays, width, height, factor) {
 		if (newWidth === undefined) newWidth = array.width;
 		if (newHeight === undefined) newHeight = array.height;
 	}
+	console.timeEnd('resamplePixelArrays');
 	return { data: arrays, width: newWidth, height: newHeight };
 }
 

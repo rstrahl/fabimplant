@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { getAxisRange, flattenPixelArrays, resamplePixelArray,
+import { getAxisRange, flattenPixelArrays, padPixelArray, resamplePixelArray,
 	normalizeDownPixelArray, normalizeUpPixelArray } from '../src/three/utils';
 
 describe('utils.js', () => {
@@ -29,6 +29,28 @@ describe('utils.js', () => {
 		it('returns the correct min/max for length=4 step<1', () => {
 			let range = getAxisRange(4, 0.5);
 			expect(range[0]).to.equal(-0.75);
+		});
+	});
+
+	describe('padPixelArray', () => {
+		it('pads a 1x1 array with 0s', () => {
+			let paddedArray = padPixelArray([99], 1, 1);
+			expect(paddedArray).to.eql([0,0,0,0,99,0,0,0,0]);
+		});
+
+		it('pads a 1x2 array with 0s', () => {
+			let paddedArray = padPixelArray([99, 98], 2, 1);
+			expect(paddedArray).to.eql([0,0,0,0,0,99,98,0,0,0,0,0]);
+		});
+
+		it('pads a 2x1 array with 0s', () => {
+			let paddedArray = padPixelArray([99, 98], 1, 2);
+			expect(paddedArray).to.eql([0,0,0,0,99,0,0,98,0,0,0,0]);
+		});
+
+		it('pads a 2x2 array with 0s', () => {
+			let paddedArray = padPixelArray([99, 98, 1, 2], 2, 2);
+			expect(paddedArray).to.eql([0,0,0,0,0,99,98,0,0,1,2,0,0,0,0,0]);
 		});
 	});
 
