@@ -19,9 +19,10 @@ export function dicomVolume(dicomFile, factor) {
 	// We only do this because resampling impl requires Array not TypedArray
 	// TODO: PERFORMANCE OPTIMIZATION: use strictly TypedArrays
 	let pixelArrays = [];
-	dicomFile.pixelArrays.forEach( (value) => {
-		pixelArrays.push(Array.from(value));
-	});
+	pixelArrays.length = dicomFile.pixelArrays.length;
+	for (let i = 0; i < dicomFile.pixelArrays.length; i += 1) {
+		pixelArrays[i] = Array.from(dicomFile.pixelArrays[i]);
+	}
 
 	// Downsample the file if requested
 	// TODO: This is a huge performance loss section - we're modifying arrays
@@ -30,6 +31,7 @@ export function dicomVolume(dicomFile, factor) {
 		? resamplePixelArrays(pixelArrays, width, height, factor)
 		: { data: pixelArrays, width, height };
 
+	// Pad the pixel arrays to ensure a closed solid
 	let paddedResampledArrays = padPixelArrays(resampledArrays.data, resampledArrays.width, resampledArrays.height);
 
 	// Generate a "Volume" from the downsampled data set
