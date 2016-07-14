@@ -22,12 +22,14 @@ export function getAxisRange(dim, step) {
  * @return {Object}                a Volume object
  */
 export function flattenPixelArrays(pixelArrays, width, height) {
-	let flatArray = [];
-
-	// TODO: Optimization required
 	console.time('flattenPixelArrays');
-	for (let pixelArray of pixelArrays) {
-		flatArray = flatArray.concat(...pixelArray);
+	// Performance: using Array.concat() was 1100ms, this is now 10ms (!!)
+	let flatArray = [];
+	flatArray.length = pixelArrays.length * width * height;
+	for (let i = 0; i < pixelArrays.length; i += 1) {
+		for (let j = 0; j < pixelArrays[i].length; j += 1) {
+			flatArray[(i * pixelArrays[i].length) + j] = pixelArrays[i][j];
+		}
 	}
 	console.timeEnd('flattenPixelArrays');
 	return new Volume(flatArray, width, height, pixelArrays.length);
