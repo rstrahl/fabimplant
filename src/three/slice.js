@@ -1,4 +1,3 @@
-
 /** An object that describes a 2-dimensional plane of pixel data.
  *
  * @param  {Array}  data   an array

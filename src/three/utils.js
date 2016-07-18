@@ -1,11 +1,8 @@
-import Volume from './volume';
-import Slice from './slice';
-
 /** Returns the minimum and maximum values along an axis.
  *
- * @param  {number} dim the number of vertices
- * @param  {number} step the distance between vertices
- * @return {Array} An array in the format of [min, max]
+ * @param  {number} dim  The number of vertices
+ * @param  {number} step The distance between vertices
+ * @return {Array}       An array in the format of [min, max]
  */
 export function getAxisRange(dim, step) {
 	let max = ((dim-1)/2) * step;
@@ -15,11 +12,11 @@ export function getAxisRange(dim, step) {
 /** Collapses an array of pixel-data arrays down to into one contiguous array.
  * The colour channels will be flattened during this process down to one.
  *
- * @param  {Array}  pixelArrays    an array of arrays
- * @param  {number} width          the width of an individual array in pixelArrays
- * @param  {number} height         the height of an individual array in pixelArrays
- * @param  {number} colourChannels the number of colour channels used in the pixelArrays
- * @return {Object}                a Volume object
+ * @param  {Array}  pixelArrays    An Array of Arrays containing pixel data
+ * @param  {number} width          The width of an individual array in pixelArrays
+ * @param  {number} height         The height of an individual array in pixelArrays
+ * @param  {number} colourChannels The number of colour channels used in the pixelArrays
+ * @return {Object}                A contiguous (flattened) Array
  */
 export function flattenPixelArrays(pixelArrays, width, height) {
 	console.time('flattenPixelArrays');
@@ -32,15 +29,15 @@ export function flattenPixelArrays(pixelArrays, width, height) {
 		}
 	}
 	console.timeEnd('flattenPixelArrays');
-	return new Volume(flatArray, width, height, pixelArrays.length);
+	return flatArray;
 }
 
 /** Adds a single pixel to each side of the pixel array for a single image.
  *
- * @param  {Array}  pixelArrays An Array of pixel data arrays
+ * @param  {Array}  pixelArrays An Array of Arrays containing pixel data
  * @param  {number} width       The expected width of each pixel data array
  * @param  {number} height      The expected height of each pixel data array
- * @return {Array}              An Array of pixel data arrays
+ * @return {Object}             An Object containing the padded pixelArrays and new width/height
  */
 export function padPixelArrays(pixelArrays, width, height) {
 	console.time('padPixelArrays');
@@ -54,15 +51,15 @@ export function padPixelArrays(pixelArrays, width, height) {
 			: padPixelArray(pixelArrays[j++], width, height);
 	}
 	console.timeEnd('padPixelArrays');
-	return { data: paddedArrays, width: paddedWidth, height: paddedHeight };
+	return { pixelArrays: paddedArrays, width: paddedWidth, height: paddedHeight };
 }
 
 /** Adds a single pixel to each side of the pixel array for a single image.
  *
- * @param  {Array}  pixelArray A pixel data array
+ * @param  {Array}  pixelArray An Array containing pixel data
  * @param  {number} width      The expected width of the pixel data array
  * @param  {number} height     The expected height of the pixel data array
- * @return {Array}             A pixel data array
+ * @return {Array}             An Array containing the padded pixel data
  */
 export function padPixelArray(pixelArray, width, height) {
 	let paddedWidth = width+2,
@@ -78,8 +75,8 @@ export function padPixelArray(pixelArray, width, height) {
 
 /** Creates a zero-filled Array from the given width and height.
  *
- * @param  {number} width  The width of the pixel array
- * @param  {number} height The height of the pixel array
+ * @param  {number} width  The width of the Array
+ * @param  {number} height The height of the Array
  * @return {Array}         A zero-filled Array
  */
 export function emptyPixelArray(width, height) {
@@ -93,11 +90,11 @@ export function emptyPixelArray(width, height) {
  *
  * @see resamplePixelArray
  *
- * @param  {Array}  pixelArrays an Array of Arrays
- * @param  {number} width       the width of the array
- * @param  {number} height      the height of the array
- * @param  {number} factor      the resampling factor
- * @return {Array}              an array of arrays
+ * @param  {Array}  pixelArrays An Array of Arrays containing pixel data
+ * @param  {number} width       The width of the Array
+ * @param  {number} height      The height of the Array
+ * @param  {number} factor      The resampling factor
+ * @return {Object}             An Object containing the resampled pixel data arrays and new width/height
  */
 export function resamplePixelArrays(pixelArrays, width, height, factor) {
 	// Performance optimization: was 750ms using Array.splice, now 75ms
@@ -107,13 +104,13 @@ export function resamplePixelArrays(pixelArrays, width, height, factor) {
 		newHeight;
 	arrays.length = Math.floor(pixelArrays.length / factor);
 	for (let i = 0, j = 0; pixelArrays.length - i >= factor; i += factor, j += 1) {
-		let array = resamplePixelArray(pixelArrays[i], width, height, factor);
-		arrays[j] = array.data;
-		if (newWidth === undefined) newWidth = array.width;
-		if (newHeight === undefined) newHeight = array.height;
+		let slice = resamplePixelArray(pixelArrays[i], width, height, factor);
+		arrays[j] = slice.array;
+		if (newWidth === undefined) newWidth = slice.width;
+		if (newHeight === undefined) newHeight = slice.height;
 	}
 	console.timeEnd('resamplePixelArrays');
-	return { data: arrays, width: newWidth, height: newHeight };
+	return { pixelArrays: arrays, width: newWidth, height: newHeight };
 }
 
 /** Resamples a given pixel array down by a given factor.
@@ -122,11 +119,11 @@ export function resamplePixelArrays(pixelArrays, width, height, factor) {
  *
  * @see normalizeUpPixelArray
  *
- * @param  {Array}  pixelArray a normalized array
+ * @param  {Array}  pixelArray An Array containing pixel data
  * @param  {number} width      (optional) the width of the array
  * @param  {number} height     (optional) the height of the array
  * @param  {number} factor     (optional) the downsampling factor (2, 4, etc.)
- * @return {Object}            a Slice object containing the downsampled pixel array and new dimensions
+ * @return {Object}            An Object containing the resampled pixel data array and new width/height
  */
 export function resamplePixelArray(pixelArray, width, height, factor) {
 	width = (width === undefined) ? Math.sqrt(pixelArray.length) : width;
@@ -139,31 +136,34 @@ export function resamplePixelArray(pixelArray, width, height, factor) {
 	let dim = slice.width * slice.height,
 		newWidth = Math.floor(slice.width/factor),
 		newHeight = Math.floor(slice.height/factor),
-		array = new Uint16Array(newWidth * newHeight),
+		array = [],
 		n = 0;
+	array.length = newWidth * newHeight;
 	for (let i = 0; i < dim; i += factor, n += 1) {
 		if (i && i % slice.width === 0) {
 			i += (slice.width * (factor - 1));
 		}
 		if (i < dim) {
-			array[n] = slice.data[i];
+			array[n] = slice.pixelArray[i];
 		}
 	}
-	return new Slice(array, newWidth, newHeight);
+	return { pixelArray: array, width: newWidth, height: newHeight };
 }
 
 /** Normalizes an array representing x/y values up to support resampling at a given factor
  *
- * @param  {Array}  pixelArray an array
- * @param  {number} width      the width of the array
- * @param  {number} height     the height of the array
- * @param  {number} factor     the resampling factor to normalize to
- * @return {Object}            a Slice object containing the array data, and its width and height
+ * @param  {Array}  pixelArray An Array containing pixel data
+ * @param  {number} width      The width of the array
+ * @param  {number} height     The height of the array
+ * @param  {number} factor     The resampling factor to normalize to
+ * @return {Object}            An Object containing the normalized pixel data array and new width/height
  */
 export function normalizeUpPixelArray(pixelArray, width, height, factor) {
-	let heightDiff = height % factor,
+	let nextHeight = findNextHighestValueForFactor(height, factor),
+		heightDiff = nextHeight - height,
 		newHeight = height + heightDiff,
-		widthDiff = width % factor,
+		nextWidth = findNextHighestValueForFactor(width, factor),
+		widthDiff = nextWidth - width,
 		newWidth = width + widthDiff,
 		normalizedPixelArray = [];
 	normalizedPixelArray.length = newWidth * newHeight;
@@ -172,5 +172,21 @@ export function normalizeUpPixelArray(pixelArray, width, height, factor) {
 		j = (Math.floor(i / width) * newWidth) + (i % width);
 		normalizedPixelArray[j] = pixelArray[i];
 	}
-	return new Slice(normalizedPixelArray, newWidth, newHeight);
+	return { pixelArray: normalizedPixelArray, width: newWidth, height: newHeight };
+}
+
+/** Determines the next highest value that supports the given factor as a dividend.
+ *
+ * @param  {number} value  A numerator value
+ * @param  {number} factor A dividend value
+ * @return {number}        The next highest value that can be divided by the dividend parameter
+ */
+export function findNextHighestValueForFactor(value, factor) {
+	const upperBound = value * factor;
+	for (let i = value; i <= upperBound;i += 1) {
+		if (i % factor === 0) {
+			return i;
+		}
+	}
+	return value;
 }

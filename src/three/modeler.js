@@ -15,31 +15,24 @@ export function dicomVolume(dicomFile, factor) {
 	// TODO: Try to do all of this entirely with TypedArrays for maximum performance
 	// let pixelArrays = getThresholdPixelArray(dicomFile, 1500, 1);
 
-	// Converts from TypedArray to Array
-	// We only do this because resampling impl requires Array not TypedArray
-	// TODO: PERFORMANCE OPTIMIZATION: use strictly TypedArrays
+	// Converts from TypedArray to Array to abstract out the typing and simplify life
 	let pixelArrays = [];
 	pixelArrays.length = dicomFile.pixelArrays.length;
 	for (let i = 0; i < dicomFile.pixelArrays.length; i += 1) {
 		pixelArrays[i] = Array.from(dicomFile.pixelArrays[i]);
 	}
 
-	// Downsample the file if requested
-	// TODO: This is a huge performance loss section - we're modifying arrays
-	// AND moving to/from typedarray/array
+	// Optionally downsample the volume data by a given factor
 	let resampledArrays = (factor > 1)
 		? resamplePixelArrays(pixelArrays, width, height, factor)
-		: { data: pixelArrays, width, height };
+		: { pixelArrays: pixelArrays, width, height };
 
 	// Pad the pixel arrays to ensure a closed solid
-	let paddedResampledArrays = padPixelArrays(resampledArrays.data, resampledArrays.width, resampledArrays.height);
+	let paddedResampledArrays = padPixelArrays(resampledArrays.pixelArrays, resampledArrays.width, resampledArrays.height);
 
-	// Generate a "Volume" from the downsampled data set
-	let volume = flattenPixelArrays(paddedResampledArrays.data, paddedResampledArrays.width, paddedResampledArrays.height);
-
-	// Downsampling also impacts image size - account for that by adjusting the step size
-	// volume.step = factor;
-	return volume;
+	// Flatten all the pixels into a contiguous array of volume data
+	let flatArray = flattenPixelArrays(paddedResampledArrays.pixelArrays, paddedResampledArrays.width, paddedResampledArrays.height);
+	return new Volume(flatArray, paddedResampledArrays.width, paddedResampledArrays.height, pixelArrays.length);
 }
 
 // TODO: Rename to functionVolume?
