@@ -1,5 +1,6 @@
 // import { getThresholdPixelArray } from '../lib/dicom/processor';
 import { getAxisRange, resamplePixelArrays, padPixelArrays, flattenPixelArrays } from './utils';
+import { applyModalityLut } from '../lib/dicom/processor';
 import Volume from './volume';
 
 /** Creates a Volume object from a DicomFile.
@@ -12,23 +13,21 @@ export function dicomVolume(dicomFile, factor) {
 	let width = dicomFile.getImageWidth(),
 		height = dicomFile.getImageHeight();
 
-	// TODO: Try to do all of this entirely with TypedArrays for maximum performance
-	// let pixelArrays = getThresholdPixelArray(dicomFile, 1500, 1);
-
 	// Converts from TypedArray to Array to abstract out the typing and simplify life
 	let pixelArrays = [];
 	pixelArrays.length = dicomFile.pixelArrays.length;
 	for (let i = 0; i < dicomFile.pixelArrays.length; i += 1) {
-		pixelArrays[i] = Array.from(dicomFile.pixelArrays[i]);
+		pixelArrays[i] = applyModalityLut(dicomFile.pixelArrays[i], dicomFile.getImageSlope(), dicomFile.getImageIntercept());
+		// pixelArrays[i] = Array.from(dicomFile.pixelArrays[i]);
 	}
 
 	// Optionally downsample the volume data by a given factor
 	let resampledArrays = (factor > 1)
 		? resamplePixelArrays(pixelArrays, width, height, factor)
-		: { pixelArrays: pixelArrays, width, height };
+		: { pixelArrays, width, height };
 
 	// Pad the pixel arrays to ensure a closed solid
-	let paddedResampledArrays = padPixelArrays(resampledArrays.pixelArrays, resampledArrays.width, resampledArrays.height);
+	let paddedResampledArrays = padPixelArrays(resampledArrays.pixelArrays, resampledArrays.width, resampledArrays.height, dicomFile.getImageIntercept());
 
 	// Flatten all the pixels into a contiguous array of volume data
 	let flatArray = flattenPixelArrays(paddedResampledArrays.pixelArrays, paddedResampledArrays.width, paddedResampledArrays.height);

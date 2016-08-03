@@ -55,17 +55,20 @@ export function decodePixelData(byteArray, imageMetadata) {
  * @param  {Array}     pixelData    A TypedArray containing pixel data
  * @param  {number}    width        The width of the image
  * @param  {number}    height       The height of the image
- * @param  {number}    windowCenter The Window Center used when rendering the image
- * @param  {number}    windowWidth  The Window Width used when rendering the image
+ * @param  {number}    slope        The Rescale Slope to apply to the pixel data values
+ * @param  {number}    intercept    The Rescale Intercept to apply to the pixel data values
+ * @param  {number}    windowCenter The Window Center to apply to the pixel data values
+ * @param  {number}    windowWidth  The Window Width to apply to the pixel data values
  * @return {ImageData}              An ImageData object in RGBA interlaced format.
  */
-export function prepareImageData(pixelData, width, height, windowCenter, windowWidth) {
+export function prepareImageData(pixelData, width, height, slope, intercept, windowCenter, windowWidth) {
 	let image = new ImageData(width, height);
 	let data = image.data;
 	let i = 0,
 		j = 0;
 	while (i < pixelData.length) {
-		let val = rescalePixelValueByVoi(pixelData[i], windowCenter, windowWidth);
+		let modVal = rescalePixelValueByModality(pixelData[i], slope, intercept);
+		let val = rescalePixelValueByVoi(modVal, windowCenter, windowWidth);
 		j = i * 4;
 		data[j] = val; // r
 		data[j + 1] = val; // g
@@ -113,7 +116,7 @@ export function applyModalityLut(pixelData, slope, intercept) {
 	let rescaledPixelData = [];
 	rescaledPixelData.length = pixelData.length;
 	for (let i = 0; i < pixelData.length; i++) {
-		rescaledPixelData = rescalePixelValueByModality(pixelData[i], slope, intercept);
+		rescaledPixelData[i] = rescalePixelValueByModality(pixelData[i], slope, intercept);
 	}
 	return rescaledPixelData;
 }
@@ -130,7 +133,7 @@ export function applyVoiLut(pixelData, windowCenter, windowWidth) {
 	let rescaledPixelData = [];
 	rescaledPixelData.length = pixelData.length;
 	for (let i = 0; i < pixelData.length; i++) {
-		rescaledPixelData = rescalePixelValueByVoi(pixelData[i], windowCenter, windowWidth);
+		rescaledPixelData[i] = rescalePixelValueByVoi(pixelData[i], windowCenter, windowWidth);
 	}
 	return rescaledPixelData;
 }
@@ -185,6 +188,8 @@ function getImageMetadata(dataSet) {
 	let imageMetadata = {
 		rows: dataSet.uint16('x00280010'),
 		cols: dataSet.uint16('x00280011'),
+		rescaleIntercept: dataSet.int16('x00281052'),
+		rescaleSlope: dataSet.int16('x00281053'),
 		samplesPerPixel: dataSet.uint16('x00280002'),
 		pixelRepresentation: dataSet.uint16('x00280103'),
 		interpretation: dataSet.string('x00280004'),

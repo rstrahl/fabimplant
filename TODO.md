@@ -4,10 +4,10 @@
 	- [x] ~~Padding the image can result in a "closed" surface? (beneficial)~~
 	- [x] Optimize utils methods to use TypedArrays and eliminate castings
 		- Also consider moving methods to use a concrete data type for better readability
-	- [ ] Implement the thresholding based on HU value ranges?
+	- [x] Implement the thresholding based on HU value ranges?
 		- Use full spectrum of values, set isolevel to bone values??
 	- [ ] Remove extraneous/disconnected meshes?
-	- Likely a manual process, see: http://threejs.org/examples/#webgl_interactive_cubes
+		- Likely a manual process, see: http://threejs.org/examples/#webgl_interactive_cubes
 	- May be able to simplify the surfaces: https://github.com/mrdoob/three.js/pull/9159
 	- Move to alternate implementation
 		- Naive Surface Nets: https://www.npmjs.com/package/isosurface

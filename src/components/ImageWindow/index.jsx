@@ -43,12 +43,11 @@ export default class ImageWindow extends React.Component {
 
 		// TODO: Seems like this could be refactored out into somewhere cleaner
 		let pixelArray = dicomFile.pixelArrays[imageIndex],
-			height = dicomFile.getImageHeight(),
 			width = dicomFile.getImageWidth(),
-			imageData = prepareImageData(pixelArray, width, height, windowCenter, windowWidth);
-
-		// let interpretedCenter = pixelValueToInterpretedValue(windowCenter, dicomFile.getImageSlope(), dicomFile.getImageIntercept());
-		// let interpretedWidth =  pixelValueToInterpretedValue(windowWidth, dicomFile.getImageSlope(), dicomFile.getImageIntercept());
+			height = dicomFile.getImageHeight(),
+			slope = dicomFile.getImageSlope(),
+			intercept = dicomFile.getImageIntercept(),
+			imageData = prepareImageData(pixelArray, width, height, slope, intercept, windowCenter, windowWidth);
 
 		return (
 			<div className={styles.window}>

@@ -37,9 +37,10 @@ export function flattenPixelArrays(pixelArrays, width, height) {
  * @param  {Array}  pixelArrays An Array of Arrays containing pixel data
  * @param  {number} width       The expected width of each pixel data array
  * @param  {number} height      The expected height of each pixel data array
+ * @param  {number} value       The value to pad the pixel data array with
  * @return {Object}             An Object containing the padded pixelArrays and new width/height
  */
-export function padPixelArrays(pixelArrays, width, height) {
+export function padPixelArrays(pixelArrays, width, height, value) {
 	console.time('padPixelArrays');
 	let paddedArrays = [],
 		paddedWidth = width + 2,
@@ -47,8 +48,8 @@ export function padPixelArrays(pixelArrays, width, height) {
 	paddedArrays.length = pixelArrays.length + 2;
 	for (let i = 0, j = 0; i < paddedArrays.length; i += 1) {
 		paddedArrays[i] = (i === 0 || i === paddedArrays.length - 1)
-			? emptyPixelArray(paddedWidth, paddedHeight)
-			: padPixelArray(pixelArrays[j++], width, height);
+			? emptyPixelArray(paddedWidth, paddedHeight, value)
+			: padPixelArray(pixelArrays[j++], width, height, value);
 	}
 	console.timeEnd('padPixelArrays');
 	return { pixelArrays: paddedArrays, width: paddedWidth, height: paddedHeight };
@@ -59,12 +60,13 @@ export function padPixelArrays(pixelArrays, width, height) {
  * @param  {Array}  pixelArray An Array containing pixel data
  * @param  {number} width      The expected width of the pixel data array
  * @param  {number} height     The expected height of the pixel data array
+ * @param  {number} value      The value to pad the pixel data array with
  * @return {Array}             An Array containing the padded pixel data
  */
-export function padPixelArray(pixelArray, width, height) {
+export function padPixelArray(pixelArray, width, height, value) {
 	let paddedWidth = width+2,
 		paddedHeight = height+2,
-		paddedPixelArray = emptyPixelArray(paddedWidth, paddedHeight);
+		paddedPixelArray = emptyPixelArray(paddedWidth, paddedHeight, value);
 	for (let i = 0, j = paddedWidth+1; i < pixelArray.length; j += 1) {
 		paddedPixelArray[j] =  (j % paddedWidth === 0 || j % paddedWidth === paddedWidth-1)
 			? 0
@@ -73,16 +75,17 @@ export function padPixelArray(pixelArray, width, height) {
 	return paddedPixelArray;
 }
 
-/** Creates a zero-filled Array from the given width and height.
+/** Creates an Array from the given width and height filled with the given value.
  *
  * @param  {number} width  The width of the Array
  * @param  {number} height The height of the Array
- * @return {Array}         A zero-filled Array
+ * @param  {number} value  The value to fill the Array with
+ * @return {Array}         An Array of length (width*height) filled with (value)
  */
-export function emptyPixelArray(width, height) {
+export function emptyPixelArray(width, height, value) {
 	let emptyArray = [];
 	emptyArray.length = width * height;
-	emptyArray.fill(0);
+	emptyArray.fill(value);
 	return emptyArray;
 }
 
@@ -105,7 +108,7 @@ export function resamplePixelArrays(pixelArrays, width, height, factor) {
 	arrays.length = Math.floor(pixelArrays.length / factor);
 	for (let i = 0, j = 0; pixelArrays.length - i >= factor; i += factor, j += 1) {
 		let slice = resamplePixelArray(pixelArrays[i], width, height, factor);
-		arrays[j] = slice.array;
+		arrays[j] = slice.pixelArray;
 		if (newWidth === undefined) newWidth = slice.width;
 		if (newHeight === undefined) newHeight = slice.height;
 	}

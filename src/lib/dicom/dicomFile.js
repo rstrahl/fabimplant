@@ -63,7 +63,7 @@ export default class DicomFile {
 		return Number(this.dataSet.string('x00281051'));
 	}
 
-	getWindowHeight() {
+	getWindowCenter() {
 		return Number(this.dataSet.string('x00281050'));
 	}
 }

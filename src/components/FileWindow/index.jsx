@@ -30,6 +30,8 @@ export default class FileWindow extends React.Component {
 	handleDicomFileChanged(dicomFile) {
 		const { session } = this.props;
 		session.dicomFile = dicomFile;
+		session.windowCenter = dicomFile.getWindowCenter();
+		session.windowWidth = dicomFile.getWindowWidth();
 		this.props.handleSessionChanged(session);
 	}
 
