@@ -1,7 +1,7 @@
 import React from 'react';
 import { bind } from 'decko';
 import styles from './style.less';
-import { prepareImageData, pixelValueToInterpretedValue } from '../../lib/dicom/processor';
+import { prepareImageData } from '../../lib/dicom/processor';
 import ImageNavigationControl from '../ImageNavigationControl';
 import ImageCanvas from '../ImageCanvas';
 import DicomWindowLevelData from '../DicomWindowLevelData';

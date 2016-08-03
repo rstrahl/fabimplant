@@ -25,6 +25,8 @@
 - Optimize performance of Three rendering; remove animation calls?
 	- Shouldn't be required; with closed meshes perf should be excellent?
 
+- Move /test/* files into a mirrored structure to /src
+
 ## Future Considerations
 
 - Can we use LUT to eliminate the Window-Level modification steps?
