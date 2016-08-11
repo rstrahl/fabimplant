@@ -3,6 +3,8 @@
 For introductory reference, please review "The Clinician's Guide to CBCT Volumetric
 Imaging" at http://www.ineedce.com/courses/1413/PDF/A_Clin_Gde_ConeBeam.pdf
 
+Sources of Artifacts in CT Images: http://www.edboas.com/science/CT/0012.pdf
+
 ## DICOM Parsing
 
 Any DICOM file parsed with the `dicom-parser` library becomes a DataSet object;

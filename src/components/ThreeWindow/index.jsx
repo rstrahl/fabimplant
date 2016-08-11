@@ -84,7 +84,7 @@ export default class ThreeWindow extends React.Component {
 		let { dicomFile } = session;
 		if (dicomFile !== null) {
 			// let isolevel = session.windowCenter - Math.ceil(session.windowWidth / 2);
-			this.loadMeshForDicom(dicomFile, 700);
+			this.loadMeshForDicom(dicomFile, 600);
 		} else {
 			this.loadMeshForDefault();
 		}
