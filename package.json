@@ -6,7 +6,7 @@
   "scripts": {
     "help": "npm-run-help",
     "test": "mocha --compilers js:babel-core/register",
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --inline --hot",
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --inline --hot --progress --colors",
     "prebuild": "rm -rf build && mkdir build && cp src/style.css build",
     "build": "cross-env NODE_ENV=production webpack",
     "start": "http-server build --cors --port ${PORT:-8080}"
@@ -41,8 +41,6 @@
     "babel-preset-es2015-minimal": "^1.0.0",
     "babel-preset-react": "^6.3.13",
     "babel-preset-stage-0": "^6.3.13",
-    "babelify": "^7.0.0",
-    "browserify": "^13.0.0",
     "chai": "^3.5.0",
     "classnames": "^2.2.5",
     "cross-env": "^1.0.7",
