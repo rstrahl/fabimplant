@@ -5,8 +5,8 @@ export default class Session {
 	constructor() {
 		this.dicomFile = null;
 		this.implantFile = null;
-		this.windowWidth = 4096;
-		this.windowCenter = 2048;
+		this.windowWidth = 0;
+		this.windowCenter = 0;
 	}
 
 }
