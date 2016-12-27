@@ -94,20 +94,20 @@ export default class ThreeWindow extends React.Component {
 	handleExportSTL() {
 		// TODO: Redux refactor
 		// TODO: Fix after MeshRenderer implementation
-		// let { volumeMesh } = this.renderingStage;
-		// if (volumeMesh !== undefined) {
-		// 	let stl = Serializer(volumeMesh);
-		// 	let textFile = null,
-		// 		makeTextFile = function (text) {
-		// 			let data = new Blob([text], {type: '{type: "octet/stream"}'});
-		// 			if (textFile !== null) {
-		// 				window.URL.revokeObjectURL(textFile);
-		// 			}
-		// 			textFile = window.URL.createObjectURL(data);
-		// 			return textFile;
-		// 		  };
-		// 	window.open(makeTextFile(stl));
-		// }
+		let { volumeMesh } = this.renderingStage;
+		if (volumeMesh !== undefined) {
+			let stl = Serializer(volumeMesh);
+			let textFile = null,
+				makeTextFile = function (text) {
+					let data = new Blob([text], {type: '{type: "octet/stream"}'});
+					if (textFile !== null) {
+						window.URL.revokeObjectURL(textFile);
+					}
+					textFile = window.URL.createObjectURL(data);
+					return textFile;
+				  };
+			window.open(makeTextFile(stl));
+		}
 	}
 
 	@bind

@@ -5,8 +5,8 @@ import THREE from 'three';
 import Stats from 'stats.js';
 import createOrbitControls from 'three-orbit-controls';
 import MeshControl from '../../three/meshControl';
+import { loadMeshGroup } from '../../three/mesher';
 import { bind } from 'decko';
-import buildGeometry from '../../three/buildGeometry';
 
 const NEAR = -5000;
 const FAR = 10000;
@@ -21,7 +21,6 @@ const DEFAULT_CAMERA_PROPS = {
 	zoom : 1.0,
 	position : DEFAULT_CAMERA_POSITION
 };
-const DEFAULT_IMPLANT_RADIUS_SEGMENTS = 20;
 
 /**
  * Defines the possible modes for interactive manipulating the viewing perspective
@@ -147,7 +146,7 @@ export default class MeshRenderer extends React.Component {
 		directionalLight.position.set(0,250,100);
 		this.scene.add(ambientLight);
 		this.scene.add(directionalLight);
-		const meshGroup = this.loadMeshGroup();
+		const meshGroup = loadMeshGroup(this.props.geometryData, this.props.implants);
 		this.scene.add(meshGroup);
 		if (debugMode === true) {
 			this.initSceneDebug();
@@ -205,67 +204,6 @@ export default class MeshRenderer extends React.Component {
 	// 	}
 	// 	return implantGeometries;
 	// }
-
-	@bind
-	buildSubjectMesh(geometryData) {
-		// TODO: Redux refactor
-		const subjectGeometry = buildGeometry(geometryData);
-		const scale = 267/134; // TODO: Hardcoded test values
-		subjectGeometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3(scale, scale, scale)));
-		let subjectMesh = new THREE.Mesh(
-			subjectGeometry,
-			new THREE.MeshLambertMaterial({
-				color : 0xF0F0F0,
-				side : THREE.DoubleSide,
-				transparent : true,
-				opacity : 0.6
-			})
-		);
-		return subjectMesh;
-	}
-
-	@bind
-	buildImplantMesh(implant) {
-		// TODO: Redux refactor
-		const { radiusTop, radiusBottom, length, matrix } = implant;
-		const implantGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, DEFAULT_IMPLANT_RADIUS_SEGMENTS);
-		// const implantGeometry = new THREE.SphereGeometry(radiusTop); // Test Object
-		implantGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(Math.PI / 2));
-		implantGeometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3(5, 5, 5))); // TODO: Hardcoded test values
-		const implantMatrix = new THREE.Matrix4();
-		implantMatrix.set(...matrix);
-		implantGeometry.applyMatrix(implantMatrix);
-		let implantMesh = new THREE.Mesh(
-			implantGeometry,
-			new THREE.MeshPhongMaterial({
-				color : 0x009B9B,
-				shininess : 100
-			})
-		);
-		return implantMesh;
-	}
-
-	@bind
-	loadMeshGroup() {
-		// TODO: Redux refactor
-		const { geometryData, implants } = this.props;
-		const meshGroup = new THREE.Group();
-
-		if (geometryData !== null) {
-			const subjectMesh = this.buildSubjectMesh(geometryData);
-			meshGroup.add(subjectMesh);
-			const center = this.getCenter(subjectMesh.geometry);
-			const translation = new THREE.Matrix4().makeTranslation(-center.x, -center.y, -center.z);
-			meshGroup.applyMatrix(translation);
-		}
-
-		for (const implant of implants) {
-			const implantMesh = this.buildImplantMesh(implant);
-			meshGroup.add(implantMesh);
-		}
-
-		return meshGroup;
-	}
 
 	@bind
 	loadWireframeMeshes(meshes) {
