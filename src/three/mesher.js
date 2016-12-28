@@ -17,6 +17,9 @@ export function buildSubjectMesh(geometryData) {
 			opacity : 0.6
 		})
 	);
+	const center = getCenter(subjectMesh.geometry);
+	const translation = new THREE.Matrix4().makeTranslation(-center.x, -center.y, -center.z);
+	subjectMesh.applyMatrix(translation);
 	return subjectMesh;
 }
 
@@ -38,6 +41,16 @@ export function buildImplantMesh(implant) {
 		})
 	);
 	return implantMesh;
+}
+
+export function getCenter(geometry) {
+	// TODO: Redux refactor
+	geometry.computeBoundingBox();
+	const center = new THREE.Vector3();
+	center.x = (geometry.boundingBox.min.x + geometry.boundingBox.max.x) / 2;
+	center.y = (geometry.boundingBox.min.y + geometry.boundingBox.max.y) / 2;
+	center.z = (geometry.boundingBox.min.z + geometry.boundingBox.max.z) / 2;
+	return center;
 }
 
 export function loadMeshGroup(geometryData, implants) {

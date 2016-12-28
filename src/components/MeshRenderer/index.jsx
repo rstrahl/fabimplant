@@ -5,7 +5,6 @@ import THREE from 'three';
 import Stats from 'stats.js';
 import createOrbitControls from 'three-orbit-controls';
 import MeshControl from '../../three/meshControl';
-import { loadMeshGroup } from '../../three/mesher';
 import { bind } from 'decko';
 
 const NEAR = -5000;
@@ -110,8 +109,8 @@ export default class MeshRenderer extends React.Component {
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
-		const { implants, geometryData, debugMode } = nextProps;
-		return (implants !== this.props.implants || geometryData !== this.props.geometryData || debugMode !== this.props.debugMode);
+		const { meshes, debugMode } = nextProps;
+		return (meshes !== this.props.meshes || debugMode !== this.props.debugMode);
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -146,7 +145,7 @@ export default class MeshRenderer extends React.Component {
 		directionalLight.position.set(0,250,100);
 		this.scene.add(ambientLight);
 		this.scene.add(directionalLight);
-		const meshGroup = loadMeshGroup(this.props.geometryData, this.props.implants);
+		const meshGroup = this.loadMeshGroup(this.props.meshes);
 		this.scene.add(meshGroup);
 		if (debugMode === true) {
 			this.initSceneDebug();
@@ -206,6 +205,31 @@ export default class MeshRenderer extends React.Component {
 	// }
 
 	@bind
+	loadMeshGroup(meshes) {
+		// TODO: Redux refactor
+		const meshGroup = new THREE.Group();
+
+		for (let i = 0; i < meshes.length; i++) {
+			meshGroup.add(meshes[i]);
+		}
+
+		// if (geometryData !== null) {
+		// 	const subjectMesh = this.buildSubjectMesh(geometryData);
+		// 	meshGroup.add(subjectMesh);
+		// 	const center = this.getCenter(subjectMesh.geometry);
+		// 	const translation = new THREE.Matrix4().makeTranslation(-center.x, -center.y, -center.z);
+		// 	meshGroup.applyMatrix(translation);
+		// }
+
+		// for (const implant of implants) {
+		// 	const implantMesh = this.buildImplantMesh(implant);
+		// 	meshGroup.add(implantMesh);
+		// }
+
+		return meshGroup;
+	}
+
+	@bind
 	loadWireframeMeshes(meshes) {
 		// TODO: Redux refactor
 		let wireframes = [];
@@ -241,16 +265,16 @@ export default class MeshRenderer extends React.Component {
 		}
 	}
 
-	@bind
-	getCenter(geometry) {
-		// TODO: Redux refactor
-		geometry.computeBoundingBox();
-		const center = new THREE.Vector3();
-		center.x = (geometry.boundingBox.min.x + geometry.boundingBox.max.x) / 2;
-		center.y = (geometry.boundingBox.min.y + geometry.boundingBox.max.y) / 2;
-		center.z = (geometry.boundingBox.min.z + geometry.boundingBox.max.z) / 2;
-		return center;
-	}
+	// @bind
+	// getCenter(geometry) {
+	// 	// TODO: Redux refactor
+	// 	geometry.computeBoundingBox();
+	// 	const center = new THREE.Vector3();
+	// 	center.x = (geometry.boundingBox.min.x + geometry.boundingBox.max.x) / 2;
+	// 	center.y = (geometry.boundingBox.min.y + geometry.boundingBox.max.y) / 2;
+	// 	center.z = (geometry.boundingBox.min.z + geometry.boundingBox.max.z) / 2;
+	// 	return center;
+	// }
 
 }
 
@@ -259,17 +283,12 @@ MeshRenderer.propTypes = {
 	height : React.PropTypes.number,
 	debugMode : React.PropTypes.bool,
 	controlsMode : React.PropTypes.number,
-	geometryData : React.PropTypes.oneOfType([
-		React.PropTypes.instanceOf(Float32Array),
-		React.PropTypes.instanceOf(Float64Array)
-	]),
-	implants : React.PropTypes.array
+	meshes : React.PropTypes.array
 };
 MeshRenderer.defaultProps = {
 	width : 0,
 	height : 0,
 	debugMode : false,
 	controlsMode : CAMERA_CONTROLS_MODE.ORBIT,
-	geometryData : null,
-	implants : []
+	meshes : []
 };

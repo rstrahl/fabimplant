@@ -5,6 +5,7 @@ import styles from './style.less';
 import MeshRenderer, { CAMERA_CONTROLS_MODE } from '../MeshRenderer';
 import { dicomVolume, sphereVolume } from '../../three/modeler';
 import GeometryWorker from 'worker!../../three/geometryWorker';
+import { buildSubjectMesh } from '../../three/mesher';
 import Serializer from '../../three/STLSerializer';
 
 const DEFAULT_DOWNSAMPLE_FACTOR = 2;
@@ -19,7 +20,7 @@ export default class ThreeWindow extends React.Component {
 		this.state = {
 			width : 0,
 			height : 0,
-			geometryData : null,
+			meshes : [],
 			debugMode : false,
 			factor : DEFAULT_DOWNSAMPLE_FACTOR,
 			controlsMode: CAMERA_CONTROLS_MODE.ORBIT
@@ -39,14 +40,14 @@ export default class ThreeWindow extends React.Component {
 	}
 
 	render() {
-		let { width, height, debugMode, controlsMode, geometryData } = this.state;
+		let { width, height, debugMode, controlsMode, meshes } = this.state;
 		let { implantFile } = this.props.session;
 		let implants = implantFile !== null ? implantFile.implants : [];
 		let controlsModeString = (controlsMode === CAMERA_CONTROLS_MODE.ORBIT) ? 'Orbit' : 'Model';
 		let debugModeString = (debugMode === true) ? 'On' : 'Off';
 		return (
 			<div className={styles.window}>
-				<MeshRenderer width={width} height={height} debugMode={debugMode} controlsMode={controlsMode} geometryData={geometryData} implants={implants} />
+				<MeshRenderer width={width} height={height} debugMode={debugMode} controlsMode={controlsMode} meshes={meshes} />
 				<div className={styles.buttonPanel}>
 					<button className={styles.button} type="button"
 						onClick={this.handleExportSTL}>STL Export</button>
@@ -93,8 +94,7 @@ export default class ThreeWindow extends React.Component {
 	@bind
 	handleExportSTL() {
 		// TODO: Redux refactor
-		// TODO: Fix after MeshRenderer implementation
-		let { volumeMesh } = this.renderingStage;
+		const volumeMesh = this.subjectMesh;
 		if (volumeMesh !== undefined) {
 			let stl = Serializer(volumeMesh);
 			let textFile = null,
@@ -138,7 +138,8 @@ export default class ThreeWindow extends React.Component {
 		// TODO: Redux refactor
 		let handler = (e) => {
 			this.geometryWorker.removeEventListener('message', handler);
-			this.setState({ geometryData : e.data });
+			this.subjectMesh = buildSubjectMesh(e.data);
+			this.setState({ meshes : [this.subjectMesh] });
 		};
 		this.geometryWorker.addEventListener('message', handler);
 		this.geometryWorker.postMessage({ volume: volume.data, height: volume.height, width: volume.width, depth: volume.depth, step: volume.step || 1, isolevel});
