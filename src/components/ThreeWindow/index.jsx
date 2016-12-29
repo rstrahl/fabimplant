@@ -8,7 +8,7 @@ import GeometryWorker from 'worker!../../three/geometryWorker';
 import { buildSubjectMesh } from '../../three/mesher';
 import Serializer from '../../three/STLSerializer';
 
-const DEFAULT_DOWNSAMPLE_FACTOR = 2;
+const DEFAULT_DOWNSAMPLE_FACTOR = 1;
 
 /**
  * Displays a threejs scene inside a window component.
@@ -85,7 +85,7 @@ export default class ThreeWindow extends React.Component {
 		let { dicomFile } = session;
 		if (dicomFile !== null) {
 			// let isolevel = session.windowCenter - Math.ceil(session.windowWidth / 2);
-			this.loadMeshForDicom(dicomFile, 600);
+			this.loadMeshForDicom(dicomFile, 750);
 		} else {
 			this.loadMeshForDefault();
 		}
