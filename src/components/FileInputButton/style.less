@@ -1,0 +1,22 @@
+@buttonColor: rgba(255,255,255,0.65);
+.fileInputButton {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	cursor: pointer;
+	font-size: 1.25rem;
+	color: rgba(255, 255, 255, 0.65);
+	display: inline-block;
+	overflow: hidden;
+	padding: 0.5rem;
+	top: 50%;
+	position: relative;
+	transform: translateY(-50%);
+	svg {
+		width: 1.5rem;
+		height: 1.5rem;
+		fill: @buttonColor;
+		vertical-align: middle;
+		margin-top: -0.5rem;
+		margin-right: 0.75rem;
+	}
+}

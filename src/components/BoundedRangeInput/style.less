@@ -1,0 +1,139 @@
+@color_1: #FFF;
+
+.pretty-range {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	color: @color_1;
+	text-align: center;
+}
+.boundedRange {
+	position: relative;
+	overflow: visible;
+	width: 300px;
+	height: 60px;
+	background: rgba(49, 143, 237, 0.25);
+	border: 1px solid rgba(49, 143, 237, 0.9);
+	.inner {
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		overflow: visible;
+		border: 0px;
+	}
+	.min {
+		position: absolute;
+		left: -3px;
+		top: 0;
+		width: 10px;
+		height: 100%;
+		cursor: w-resize;
+		z-index: 5;
+		border: 0px;
+		&:after {
+			content: '';
+			display: block;
+			height: 100%;
+			width: 4px;
+			margin: 0 3px;
+			background: rgba(0, 0, 0, 0.5);
+		}
+		&:hover {
+			&:after {
+				background: rgba(49, 143, 237, 0.25);
+			}
+		}
+		&:active {
+			&:after {
+				background: rgba(49, 143, 237, 0.25);
+			}
+		}
+	}
+	.max {
+		position: absolute;
+		left: -3px;
+		top: 0;
+		width: 10px;
+		height: 100%;
+		cursor: w-resize;
+		z-index: 5;
+		border: 0px;
+		left: auto;
+		right: -3px;
+		cursor: e-resize;
+		&:after {
+			content: '';
+			display: block;
+			height: 100%;
+			width: 4px;
+			margin: 0 3px;
+			background: rgba(0, 0, 0, 0.5);
+		}
+		&:hover {
+			&:after {
+				background: rgba(49, 143, 237, 0.25);
+			}
+		}
+		&:active {
+			&:after {
+				background: rgba(49, 143, 237, 0.25);
+			}
+		}
+	}
+	.content {
+		position: relative;
+		box-sizing: border-box;
+		height: 100%;
+		width: 100%;
+		background: rgba(49, 143, 237, 0.05);
+		cursor: move;
+		border: 0px;
+		&:hover {
+			background: rgba(49, 143, 237, 0.25);
+		}
+		&:active {
+			background: rgba(49, 143, 237, 0.25);
+		}
+	}
+}
+.boundedRange[vertical] {
+	width: 60px;
+	height: 300px;
+	margin: auto;
+	.inner {
+		top: auto;
+		bottom: 0;
+	}
+	.min {
+		left: 0;
+		top: auto;
+		bottom: -3px;
+		width: 100%;
+		height: 10px;
+		cursor: s-resize;
+		&:after {
+			height: 4px;
+			width: 100%;
+			margin: 3px 0;
+		}
+	}
+	.max {
+		left: 0;
+		top: auto;
+		bottom: -3px;
+		width: 100%;
+		height: 10px;
+		cursor: s-resize;
+		bottom: auto;
+		top: -3px;
+		cursor: n-resize;
+		&:after {
+			height: 4px;
+			width: 100%;
+			margin: 3px 0;
+		}
+	}
+}

@@ -1,0 +1,497 @@
+/* === Element Styling === */
+
+body {
+  margin: 0;
+  top: 0;
+  left: 0;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue",
+                Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+}
+
+main {
+  position:absolute;
+  background: rgba(0, 0, 0, 1);
+  width: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+input[type=range]{
+    -webkit-appearance: none;
+    background: rgba(0,0,0,0);
+    width: 100%;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    height: 12px;
+    background: rgb(14, 45, 77);
+    border: 0px solid rgb(0, 0, 0);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+input[type=range]:hover::-webkit-slider-runnable-track {
+
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 10px;
+    width: 10px;
+    margin-top: 1px;
+    border-radius: 5px;
+    background: rgb(49, 143, 237);
+    cursor: pointer;
+}
+
+input[type=range]:hover::-webkit-slider-thumb {
+
+}
+
+input[type=range].vertical {
+    -webkit-transform:rotate(270deg);
+}
+
+/* === Bounded Range Input === */
+/*
+.pretty-range {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #FFF;
+  text-align: center;
+}
+
+.bounded-range {
+  position: relative;
+  overflow: visible;
+  width: 300px;
+  height: 60px;
+  background: rgba(49, 143, 237, 0.25);
+  border: 1px solid rgba(49, 143, 237, 0.9);
+}
+.bounded-range .inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  border: 0px;
+}
+.bounded-range .min,
+.bounded-range .max {
+  position: absolute;
+  left: -3px;
+  top: 0;
+  width: 10px;
+  height: 100%;
+  cursor: w-resize;
+  z-index: 5;
+  border: 0px;
+}
+.bounded-range .min:after,
+.bounded-range .max:after {
+  content: '';
+  display: block;
+  height: 100%;
+  width: 4px;
+  margin: 0 3px;
+  background: rgba(0, 0, 0, 0.5);
+}
+.bounded-range .min:hover:after,
+.bounded-range .max:hover:after,
+.bounded-range .min:active:after,
+.bounded-range .max:active:after {
+  background: rgba(49, 143, 237, 0.25);
+}
+.bounded-range .max {
+  left: auto;
+  right: -3px;
+  cursor: e-resize;
+}
+.bounded-range .content {
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+  background: rgba(49, 143, 237, 0.05);
+  cursor: move;
+  border: 0px;
+}
+.bounded-range .content:hover,
+.bounded-range .content:active {
+  background: rgba(49, 143, 237, 0.25);
+}
+.bounded-range[vertical] {
+  width: 60px;
+  height: 300px;
+  margin: auto;
+}
+.bounded-range[vertical] .inner {
+  top: auto;
+  bottom: 0;
+}
+.bounded-range[vertical] .min,
+.bounded-range[vertical] .max {
+  left: 0;
+  top: auto;
+  bottom: -3px;
+  width: 100%;
+  height: 10px;
+  cursor: s-resize;
+}
+.bounded-range[vertical] .min:after,
+.bounded-range[vertical] .max:after {
+  height: 4px;
+  width: 100%;
+  margin: 3px 0;
+}
+.bounded-range[vertical] .max {
+  bottom: auto;
+  top: -3px;
+  cursor: n-resize;
+}*/
+
+/* === Header === */
+/*
+.header {
+  background-color: rgb(255,255,255);
+  position: absolute;
+  line-height: 48px;
+  width: 100%;
+  height: 48px;
+  overflow: hidden;
+}
+
+.header-title {
+  padding: 0px 10px 0px 10px;
+  font-size: 1.3em;
+  font-weight: normal;
+  letter-spacing: .5em;
+}
+
+.header-button-container {
+  float:right;
+}
+
+.header-button {
+  padding: 0px 10px 0px 10px;
+}
+*/
+
+/* === DicomDebugWindow === */
+/*
+.dicom-debug-window {
+  position: relative;
+  background: rgba(255,255,255,.85);
+  color: rgba(0,0,0,1);
+  box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.25);
+  -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.25);
+  -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.25);
+  border: 0px hidden rgba(0,0,0,1);
+  float: left;
+  overflow: auto;
+  width: 400px;
+  height: 100%;
+}
+
+.dicom-debug-window-button {
+
+}
+
+#dicom-debug-window-button-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.dicom-debug-window-table {
+  width: 100%;
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+
+.dicom-debug-window-body {
+  font-size: .7em;
+}
+
+.dicom-debug-window-table-header {
+  font-size: .8em;
+}
+
+.dicom-debug-window-table-property {
+  font-weight: bold;
+  text-align: right;
+}
+
+.dicom-debug-window-table-value {
+  font-weight: normal;
+  text-align: left;
+}
+*/
+/* ImageWindow */
+/*
+#image-window {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: auto;
+  padding: 0;
+  background: rgba(0, 0, 0, 1);
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  color: rgba(255,255,255,0.75);
+}
+
+#image-window-canvascontainer {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+#image-window-canvas {
+  display: block;
+  margin: auto;
+  padding: 0;
+  background: rgba(0, 0, 0, 1);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+#image-window-button-debug {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.image-window-button {
+  display: inline-block;
+  background: rgba(0,0,0,0);
+  border: 0px;
+  padding: 2px;
+  color: rgba(255,255,255,0.75);
+  width: auto;
+}
+
+.image-window-centerwidth-display {
+    width: 180px;
+    height: 400px;
+    text-align :center;
+    font-size: 11px;
+    margin: auto;
+    padding: 16px 16px 16px 16px;
+    position: inherit;
+    right: 5%;
+    left: 60%;
+    bottom: 0;
+    top: 0;
+}
+
+.image-window-centerwidth-title {
+    font-size: 16px;
+    margin: 8px;
+}
+
+.image-window-centerwidth-control {
+    margin-top: 16px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.image-window-centerwidth-text {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+
+.image-window-centerwidth-value {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.image-window-centerwidth-input {
+    width: 100%;
+}
+
+.image-navigation-bar {
+  background: rgba(0,0,0,255);
+  text-align: center;
+  color: rgba(255,255,255,0.75);
+  width: 480px;
+  margin: auto;
+  padding: 16px 16px 16px 16px;
+}
+
+.image-navigation-control {
+}
+
+.image-navigation-title {
+    font-size: 16px;
+    margin: 8px;
+}
+
+.image-navigation-text {
+  display: inline-block;
+  margin-left: 5px;
+  margin-right: 5px;
+  font-size: 11px;
+}
+
+.image-navigation-button {
+  display: inline-block;
+  background: rgba(0,0,0,0);
+  border: 0px;
+  width: 12px;
+}
+
+.image-navigation-input {
+    display: inline-block;
+    width: 450px;
+}
+
+/* Navigation Footer */
+/*
+#navigation-footer {
+  width: 100%;
+  color: rgba(255,255,255,0.75);
+  background: rgb(0,0,0);
+  border: 0px;
+  text-align: center;
+}
+
+.navigation-footer-left {
+  display: inline-block;
+  float: left;
+  width: 100px;
+  text-align: left;
+}
+
+.navigation-footer-middle {
+  display: inline-block;
+  margin: 0 auto 0 auto;
+  text-align: center;
+}
+
+.navigation-footer-right {
+  display: inline-block;
+  float: right;
+  width: 100px;
+  text-align: right;
+}*/
+
+/* Main Window */
+/*
+.main-window {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.main-window-header {
+  width: 100%;
+  height: 48px;
+}
+
+.main-window-workspace {
+  position: absolute;
+  width: 100%;
+  background: rgb(32,32,32);
+  top: 48px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}*/
+
+/* Three Window */
+/*
+.three-window {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.three-window-debug-panel {
+    position: absolute;
+    bottom: 10%;
+    text-align: center;
+    color: rgba(255,255,255,0.75);
+    left: 0;
+    right: 0;
+    font-size: 11px;
+}
+
+.three-window-button-panel {
+    position: absolute;
+    width: 50px;
+    top: 0;
+    right: 0;
+    overflow: hidden;
+}
+
+.three-window-button {
+    width: 50px;
+    height: 50px;
+}
+
+.stats-render {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    display: none;
+}*/
+
+/* Workspace Window */
+
+/*.workspace-window {
+  width: 100%;
+  height: 100%;
+}
+
+.workspace-window-main {
+  width: 100%;
+  height: 100%;
+}
+
+.workspace-window-nav {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+}*/
+
+/* Test Window */
+
+/*.test-window {
+  position: absolute;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue",
+    Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: bold;
+  font-size: 2em;
+  text-align: center;
+  color: rgb(64,64,64);
+  height: 24px;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}*/

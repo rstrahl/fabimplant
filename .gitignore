@@ -1,5 +1,6 @@
 node_modules
-npm-debug.log
 bundle.js
+npm-debug.log
+build
 tags
 .DS_Store
